@@ -6,7 +6,8 @@
   "dependencies": {
     "browserify": "~4.1.5",
     "grunt": "~0.4.0",
-    "grunt-browserify": "~2.1.0",
-    "grunt-contrib-concat": "~0.1.3"
+    "grunt-browserify": "*",
+    "grunt-contrib-concat": "*",
+    "grunt-contrib-coffee": "*"
   }
 }

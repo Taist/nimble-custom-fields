@@ -2,16 +2,28 @@
 module.exports = (grunt) ->
   grunt.loadNpmTasks "grunt-contrib-concat"
   grunt.loadNpmTasks "grunt-browserify"
+  grunt.loadNpmTasks "grunt-contrib-coffee"
 
   grunt.initConfig
     pkg: grunt.file.readJSON("package.json")
 
+    coffee:
+      addon:
+        expand: true
+        cwd: 'src/js/',
+        src: ['**/*.coffee']
+        dest: 'build/js/'
+        ext: '.js'
+        options:
+          bare: true
+
     browserify:
       addon:
-        src: ["src/js/addon.js"]
+        cwd: "build/js/"
+        src: ["addon.js"]
         dest: "build/addon.js"
         options:
-          alias: ["./src/js/addon.js:addon"]
+          alias: ["./build/js/addon.js:addon"]
 
           # wrapp as Taist addon
           postBundleCB: (err, src, next) ->
@@ -23,11 +35,12 @@ module.exports = (grunt) ->
       addon:
         src: [
           "build/addon.js"
-          "src/lib/jquery-sortable.js"
+          "src/lib/sample.js"
         ]
         dest: "dist/addon.js"
 
   grunt.registerTask "default", [
+    "coffee:addon"
     "browserify:addon"
     "concat:addon"
   ]
