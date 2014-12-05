@@ -1,8 +1,10 @@
+api = require './globals/api'
+
 addonEntry =
   start: (_taistApi, entryPoint) ->
-    _taistApi.log 'Addon started'
+    $.extend api, _taistApi
 
-    require('./greetings/hello') _taistApi
-
+    onChangeHash = require './handlers/onChangeHash'
+    _taistApi.hash.onChange onChangeHash
 
 module.exports = addonEntry

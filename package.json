@@ -8,6 +8,7 @@
     "grunt": "~0.4.0",
     "grunt-browserify": "*",
     "grunt-contrib-concat": "*",
-    "grunt-contrib-coffee": "*"
+    "grunt-contrib-coffee": "*",
+    "grunt-contrib-watch": "*"
   }
 }
