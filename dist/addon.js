@@ -78,7 +78,16 @@ loadDeals = function(page) {
 
 processDeals = function(deals) {
   return deals.resources.forEach(function(deal) {
-    app.api.log(deal);
+    var category;
+    category = parseInt(deal.id[23], 16) % 2;
+    deal.industry = (function() {
+      switch (category) {
+        case 1:
+          return 'Food';
+        default:
+          return 'IT';
+      }
+    })();
     return app.data.deals[deal.id] = deal;
   });
 };

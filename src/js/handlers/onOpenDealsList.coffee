@@ -41,7 +41,12 @@ loadDeals = (page = 1) ->
 
 processDeals = (deals) ->
   deals.resources.forEach (deal) ->
-    app.api.log deal
+    category = parseInt( deal.id[23], 16 ) % 2
+
+    deal.industry = switch category
+      when 1 then 'Food'
+      else 'IT'
+
     app.data.deals[deal.id] = deal
 
 module.exports = (groupingCondition) ->
