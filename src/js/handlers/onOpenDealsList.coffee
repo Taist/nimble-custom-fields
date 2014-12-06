@@ -15,9 +15,96 @@ renderDealList = () ->
     container.insertBefore simpleList.parent()
 
   container.empty().show()
-  container.append require '../interface/dealListWithGroups'
 
-  # conatiner.append require '../interface/dealList'
+  React = require 'react'
+
+  {div, table, tbody} = React.DOM
+
+  GrouppedDealList = React.createFactory React.createClass
+    getInitialState: ->
+      deals: []
+    render: ->
+      div {}, [
+        GroupGlobalHeader {}
+        div {}, @props.deals.map((deal) -> GroupContent deal )
+      ]
+
+  GroupGlobalHeader = React.createFactory React.createClass
+    render: ->
+      div {
+        dangerouslySetInnerHTML:
+          __html: require('../interface/dealListGroupGlobalHeader').apply(@)
+      }
+
+  groupInitialState = ->
+    name: ''
+    group: []
+
+  GroupContent = React.createFactory React.createClass
+    getInitialState: ->
+      groupInitialState()
+    render: ->
+      div { className: 'GroupDealListWidget' }, [
+        GroupHeader @props
+        DealList @props
+      ]
+
+  GroupHeader = React.createFactory React.createClass
+    getInitialState: ->
+      groupInitialState()
+    render: ->
+      div {
+        dangerouslySetInnerHTML:
+          __html: require('../interface/dealListGroupHeader').apply(@)
+      }
+
+  DealList = React.createFactory React.createClass
+    getInitialState: ->
+      groupInitialState()
+    render: ->
+      div { className: 'dealList' }, [
+        DealListHeader {}
+        div { className: 'body' }, DealListBody @props
+      ]
+
+  DealListHeader = React.createFactory React.createClass
+    render: ->
+      div {
+        dangerouslySetInnerHTML:
+          __html: require('../interface/dealListHeader').apply(@)
+      }
+
+  DealListBody = React.createFactory React.createClass
+    getInitialState: ->
+      groupInitialState()
+    render: ->
+      table {}, [
+        tbody {}, [
+          @props.group.map (deal) -> DealListDeal deal
+        ]
+      ]
+
+  DealListDeal = React.createFactory React.createClass
+    render: ->
+      @expectedDate = new Date(@props.expected_close).toLocaleString(
+        'en-us', { day: "numeric", month: "short", year: "numeric" }
+      )
+      div {
+        dangerouslySetInnerHTML:
+          __html: require('../interface/dealListDeal').apply(@)
+      }
+
+  groups = {}
+  for id, deal of app.data.deals
+    industry = deal.industry
+    unless groups[industry]
+      groups[industry] = []
+    groups[industry].push deal
+
+  grouppedDeals = for name, group of groups
+    {name, group}
+
+  React.render ( GrouppedDealList { deals: grouppedDeals } ), container[0]
 
 loadDeals = (page = 1) ->
   $.ajax
@@ -41,8 +128,9 @@ loadDeals = (page = 1) ->
 
 processDeals = (deals) ->
   deals.resources.forEach (deal) ->
-    category = parseInt( deal.id[23], 16 ) % 2
 
+    #TODO Remove fake data
+    category = parseInt( deal.id[23], 16 ) % 2
     deal.industry = switch category
       when 1 then 'Food'
       else 'IT'

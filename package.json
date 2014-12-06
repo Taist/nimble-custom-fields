@@ -7,8 +7,9 @@
     "browserify": "~4.1.5",
     "grunt": "~0.4.0",
     "grunt-browserify": "*",
-    "grunt-contrib-concat": "*",
     "grunt-contrib-coffee": "*",
-    "grunt-contrib-watch": "*"
+    "grunt-contrib-concat": "*",
+    "grunt-contrib-watch": "*",
+    "react": "^0.12.1"
   }
 }
