@@ -1,10 +1,36 @@
-api = require '../globals/api'
+app = require '../app'
+
+isLoadingInProgress = false
+
+loadDeals = (page = 1) ->
+  $.ajax
+    url: '/api/deals'
+    dataType: "json"
+    headers:
+      Authorization: "Nimble token=\"#{app.options.nimbleToken}\""
+    data:
+      sort_by: 'age'
+      dir: 'asc'
+      page: page
+      per_page: app.options.dealsPerPage
+    success: (data) ->
+      processDeals data
+      meta = data.meta
+      if meta.has_more
+        loadDeals meta.page + 1
+      else
+        isLoadingInProgress = false
+
+processDeals = (deals) ->
+  deals.resources.forEach (deal) ->
+    app.api.log deal
+    app.data.deals[deal.id] = deal
 
 module.exports = (groupingCondition) ->
-  api.log 'Hello world ' + groupingCondition
+  app.api.log 'Hello world', groupingCondition
 
   selector = '.listHeader .gwt-ListBox'
-  api.wait.elementRender selector, (element) ->
+  app.api.wait.elementRender selector, (element) ->
     unless $('option[value="industry"]', element).size()
       groupingList = element[0]
 
@@ -13,4 +39,9 @@ module.exports = (groupingCondition) ->
         .appendTo groupingList
 
       groupingList.addEventListener 'change', ->
-        api.log this.value
+        app.api.log this.value
+
+    if groupingCondition is 'industry'
+      unless isLoadingInProgress
+        isLoadingInProgress = true
+        loadDeals()

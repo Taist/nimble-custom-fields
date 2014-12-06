@@ -1,5 +1,13 @@
 function init(){var require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-module.exports = {};
+module.exports = {
+  options: {
+    nimbleToken: '',
+    dealsPerPage: 2
+  },
+  data: {
+    deals: {}
+  }
+};
 
 },{}],2:[function(require,module,exports){
 module.exports = function(cur, old) {
@@ -16,35 +24,109 @@ module.exports = function(cur, old) {
 };
 
 },{"../handlers/onOpenDealsList":3}],3:[function(require,module,exports){
-var api;
+var app, isLoadingInProgress, loadDeals, processDeals;
 
-api = require('../globals/api');
+app = require('../app');
 
-module.exports = function(groupingCondition) {
-  var selector;
-  api.log('Hello world ' + groupingCondition);
-  selector = '.listHeader .gwt-ListBox';
-  return api.wait.elementRender(selector, function(element) {
-    var groupingList;
-    if (!$('option[value="industry"]', element).size()) {
-      groupingList = element[0];
-      $('<option value="industry">').text('Industry').appendTo(groupingList);
-      return groupingList.addEventListener('change', function() {
-        return api.log(this.value);
-      });
+isLoadingInProgress = false;
+
+loadDeals = function(page) {
+  if (page == null) {
+    page = 1;
+  }
+  return $.ajax({
+    url: '/api/deals',
+    dataType: "json",
+    headers: {
+      Authorization: "Nimble token=\"" + app.options.nimbleToken + "\""
+    },
+    data: {
+      sort_by: 'age',
+      dir: 'asc',
+      page: page,
+      per_page: app.options.dealsPerPage
+    },
+    success: function(data) {
+      var meta;
+      processDeals(data);
+      meta = data.meta;
+      if (meta.has_more) {
+        return loadDeals(meta.page + 1);
+      } else {
+        return isLoadingInProgress = false;
+      }
     }
   });
 };
 
-},{"../globals/api":1}],"addon":[function(require,module,exports){
-var addonEntry, api;
+processDeals = function(deals) {
+  return deals.resources.forEach(function(deal) {
+    app.api.log(deal);
+    return app.data.deals[deal.id] = deal;
+  });
+};
 
-api = require('./globals/api');
+module.exports = function(groupingCondition) {
+  var selector;
+  app.api.log('Hello world', groupingCondition);
+  selector = '.listHeader .gwt-ListBox';
+  return app.api.wait.elementRender(selector, function(element) {
+    var groupingList;
+    if (!$('option[value="industry"]', element).size()) {
+      groupingList = element[0];
+      $('<option value="industry">').text('Industry').appendTo(groupingList);
+      groupingList.addEventListener('change', function() {
+        return app.api.log(this.value);
+      });
+    }
+    if (groupingCondition === 'industry') {
+      if (!isLoadingInProgress) {
+        isLoadingInProgress = true;
+        return loadDeals();
+      }
+    }
+  });
+};
+
+},{"../app":1}],4:[function(require,module,exports){
+module.exports = {
+  registerHandler: function(responseHandler) {
+    var XMLHttpRequestSend;
+    XMLHttpRequestSend = XMLHttpRequest.prototype.send;
+    return XMLHttpRequest.prototype.send = function() {
+      var onReady, self;
+      onReady = this.onreadystatechange;
+      self = this;
+      this.onreadystatechange = function() {
+        if (self.readyState === 4) {
+          responseHandler(self);
+        }
+        onReady && onReady.apply(self, arguments);
+      };
+      XMLHttpRequestSend.apply(this, arguments);
+    };
+  }
+};
+
+},{}],"addon":[function(require,module,exports){
+var addonEntry, app;
+
+app = require('./app');
 
 addonEntry = {
   start: function(_taistApi, entryPoint) {
-    var onChangeHash;
-    $.extend(api, _taistApi);
+    var onChangeHash, proxy;
+    window.app = app;
+    app.api = _taistApi;
+    proxy = require('./tools/xmlHttpProxy');
+    proxy.registerHandler(function(request) {
+      var matches, url;
+      url = request.responseURL;
+      matches = url.match(/\/api\/sessions\/([0-9abcdef-]{36})\?/);
+      if (matches) {
+        return app.options.nimbleToken = matches[1];
+      }
+    });
     onChangeHash = require('./handlers/onChangeHash');
     return _taistApi.hash.onChange(onChangeHash);
   }
@@ -52,6 +134,6 @@ addonEntry = {
 
 module.exports = addonEntry;
 
-},{"./globals/api":1,"./handlers/onChangeHash":2}]},{},[]);
+},{"./app":1,"./handlers/onChangeHash":2,"./tools/xmlHttpProxy":4}]},{},[]);
 ;return require("addon")}
 //Just a sample of concat task
