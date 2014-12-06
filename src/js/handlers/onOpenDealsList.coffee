@@ -2,6 +2,23 @@ app = require '../app'
 
 isLoadingInProgress = false
 
+renderDealList = () ->
+  $('.groupGlobalHeader').parent().hide()
+  $('.emptyView').hide()
+
+  simpleList = $ '.dealList'
+  simpleList.parent().hide()
+
+  container = $ '.dealListByIndustry'
+  unless container.size()
+    container = $ '<div class="dealListByIndustry">'
+    container.insertBefore simpleList.parent()
+
+  container.empty().show()
+  container.append require '../interface/dealListWithGroups'
+
+  # conatiner.append require '../interface/dealList'
+
 loadDeals = (page = 1) ->
   $.ajax
     url: '/api/deals'
@@ -20,6 +37,7 @@ loadDeals = (page = 1) ->
         loadDeals meta.page + 1
       else
         isLoadingInProgress = false
+        renderDealList()
 
 processDeals = (deals) ->
   deals.resources.forEach (deal) ->
