@@ -75,6 +75,9 @@ module.exports = function(groupingCondition) {
     if (!$('option[value="industry"]', element).size()) {
       groupingList = element[0];
       $('<option value="industry">').text('Industry').appendTo(groupingList);
+      if (groupingCondition === 'industry') {
+        $(groupingList).val('industry');
+      }
       groupingList.addEventListener('change', function() {
         return app.api.log(this.value);
       });

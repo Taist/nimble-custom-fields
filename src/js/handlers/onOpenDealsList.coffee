@@ -38,6 +38,9 @@ module.exports = (groupingCondition) ->
         .text 'Industry'
         .appendTo groupingList
 
+      if groupingCondition is 'industry'
+        $(groupingList).val('industry')
+
       groupingList.addEventListener 'change', ->
         app.api.log this.value
 
