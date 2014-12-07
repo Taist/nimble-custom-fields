@@ -40,26 +40,35 @@ renderDealList = () ->
     amount:
       full: 0
       weighted: 0
+    expandClass: 'plus'
 
   GroupContent = React.createFactory React.createClass
     getInitialState: ->
       groupInitialState()
+
+    onClick: (event) ->
+      target = $(event.target)
+      if target.hasClass 'btnExpand'
+        newExpandClass = if @state.expandClass is 'plus' then 'minus' else 'plus'
+        target.removeClass(@state.expandClass).addClass(newExpandClass)
+        @setState expandClass: newExpandClass
+        @forceUpdate()
+
     render: ->
-      div { className: 'GroupDealListWidget' }, [
+      div {
+        onClick: @onClick
+        className: 'GroupDealListWidget'
+      }, [
         GroupHeader @props
-        DealList @props
+        DealList $.extend true, {}, @props, expandClass: @state.expandClass
       ]
 
   GroupHeader = React.createFactory React.createClass
     getInitialState: ->
       groupInitialState()
-    onClick: (event) ->
-       target = $(event.target)
-       if target.hasClass 'btnExpand'
-         app.api.log event.target
+
     render: ->
       div {
-        onClick: @onClick
         dangerouslySetInnerHTML:
           __html: require('../interface/dealListGroupHeader').apply(@)
       }
@@ -67,8 +76,16 @@ renderDealList = () ->
   DealList = React.createFactory React.createClass
     getInitialState: ->
       groupInitialState()
+
+    display: ->
+      if @props.expandClass is 'plus' then 'none' else 'block'
+
     render: ->
-      div { className: 'dealList' }, [
+      div {
+        className: 'dealList'
+        style:
+          display: @display()
+      }, [
         DealListHeader {}
         div { className: 'body' }, DealListBody @props
       ]
@@ -83,6 +100,7 @@ renderDealList = () ->
   DealListBody = React.createFactory React.createClass
     getInitialState: ->
       groupInitialState()
+
     render: ->
       table {}, [
         tbody {}, [

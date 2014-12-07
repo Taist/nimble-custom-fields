@@ -74,33 +74,43 @@ renderDealList = function() {
       amount: {
         full: 0,
         weighted: 0
-      }
+      },
+      expandClass: 'plus'
     };
   };
   GroupContent = React.createFactory(React.createClass({
     getInitialState: function() {
       return groupInitialState();
     },
+    onClick: function(event) {
+      var newExpandClass, target;
+      target = $(event.target);
+      if (target.hasClass('btnExpand')) {
+        newExpandClass = this.state.expandClass === 'plus' ? 'minus' : 'plus';
+        target.removeClass(this.state.expandClass).addClass(newExpandClass);
+        this.setState({
+          expandClass: newExpandClass
+        });
+        return this.forceUpdate();
+      }
+    },
     render: function() {
       return div({
+        onClick: this.onClick,
         className: 'GroupDealListWidget'
-      }, [GroupHeader(this.props), DealList(this.props)]);
+      }, [
+        GroupHeader(this.props), DealList($.extend(true, {}, this.props, {
+          expandClass: this.state.expandClass
+        }))
+      ]);
     }
   }));
   GroupHeader = React.createFactory(React.createClass({
     getInitialState: function() {
       return groupInitialState();
     },
-    onClick: function(event) {
-      var target;
-      target = $(event.target);
-      if (target.hasClass('btnExpand')) {
-        return app.api.log(event.target);
-      }
-    },
     render: function() {
       return div({
-        onClick: this.onClick,
         dangerouslySetInnerHTML: {
           __html: require('../interface/dealListGroupHeader').apply(this)
         }
@@ -111,9 +121,19 @@ renderDealList = function() {
     getInitialState: function() {
       return groupInitialState();
     },
+    display: function() {
+      if (this.props.expandClass === 'plus') {
+        return 'none';
+      } else {
+        return 'block';
+      }
+    },
     render: function() {
       return div({
-        className: 'dealList'
+        className: 'dealList',
+        style: {
+          display: this.display()
+        }
       }, [
         DealListHeader({}), div({
           className: 'body'
@@ -275,7 +295,7 @@ module.exports = function() {
 
 },{}],6:[function(require,module,exports){
 module.exports = function() {
-  return '<table class="groupHeader"> <colgroup> <col> </colgroup> <tbody> <tr class="total"> <td class="c0"><a class="btnExpand plus">' + this.props.name + '</a> </td> <td class="c1"> </td> <td class="c2">$ ' + this.props.amount.full + '</td> <td class="c3"> </td> <td class="c4"> </td> <td class="c5"> </td> <td class="c6"> </td> </tr> <tr class="weightedAmount"> <td class="c0"> <div class="gwt-HTML"></div> </td> <td class="c1">Weighted:</td> <td class="c2">$ ' + this.props.amount.weighted + '</td> <td class="c3"> </td> <td class="c4"> </td> <td class="c5"> </td> <td class="c6"> </td> </tr> </tbody> </table>';
+  return '<table class="groupHeader"> <colgroup> <col> </colgroup> <tbody> <tr class="total"> <td class="c0"><a class="btnExpand ' + this.state.expandClass + '">' + this.props.name + '</a> </td> <td class="c1"> </td> <td class="c2">$ ' + this.props.amount.full + '</td> <td class="c3"> </td> <td class="c4"> </td> <td class="c5"> </td> <td class="c6"> </td> </tr> <tr class="weightedAmount"> <td class="c0"> <div class="gwt-HTML"></div> </td> <td class="c1">Weighted:</td> <td class="c2">$ ' + this.props.amount.weighted + '</td> <td class="c3"> </td> <td class="c4"> </td> <td class="c5"> </td> <td class="c6"> </td> </tr> </tbody> </table>';
 };
 
 },{}],7:[function(require,module,exports){
