@@ -245,11 +245,13 @@ loadDeals = function(page) {
 processDeals = function(deals) {
   return deals.resources.forEach(function(deal) {
     var category;
-    category = parseInt(deal.id[23], 16) % 2;
+    category = parseInt(deal.id[23], 16) % 3;
     deal.industry = (function() {
       switch (category) {
         case 1:
           return 'Food';
+        case 2:
+          return 'Toys';
         default:
           return 'IT';
       }

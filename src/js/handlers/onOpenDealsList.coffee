@@ -166,9 +166,10 @@ processDeals = (deals) ->
   deals.resources.forEach (deal) ->
 
     #TODO Remove fake data
-    category = parseInt( deal.id[23], 16 ) % 2
+    category = parseInt( deal.id[23], 16 ) % 3
     deal.industry = switch category
       when 1 then 'Food'
+      when 2 then 'Toys'
       else 'IT'
 
     app.data.deals[deal.id] = deal
