@@ -32,7 +32,7 @@ app = require('../app');
 isLoadingInProgress = false;
 
 renderDealList = function() {
-  var DealList, DealListBody, DealListDeal, DealListHeader, GroupContent, GroupGlobalHeader, GroupHeader, GrouppedDealList, React, container, deal, div, group, groupInitialState, grouppedDeals, groups, id, industry, name, simpleList, table, tbody, _ref, _ref1;
+  var DealList, DealListBody, DealListDeal, DealListHeader, GroupContent, GroupGlobalHeader, GroupHeader, GrouppedDealList, React, amount, container, deal, div, group, groupInitialState, grouppedDeals, groups, id, industry, name, simpleList, table, tbody, _ref, _ref1;
   $('.groupGlobalHeader').parent().hide();
   $('.emptyView').hide();
   simpleList = $('.dealList');
@@ -71,7 +71,11 @@ renderDealList = function() {
   groupInitialState = function() {
     return {
       name: '',
-      group: []
+      group: [],
+      amount: {
+        full: 0,
+        weighted: 0
+      }
     };
   };
   GroupContent = React.createFactory(React.createClass({
@@ -157,18 +161,24 @@ renderDealList = function() {
     }
     groups[industry].push(deal);
   }
-  grouppedDeals = (function() {
-    var _results;
-    _results = [];
-    for (name in groups) {
-      group = groups[name];
-      _results.push({
-        name: name,
-        group: group
-      });
-    }
-    return _results;
-  })();
+  grouppedDeals = [];
+  for (name in groups) {
+    group = groups[name];
+    amount = {
+      full: 0,
+      weighted: 0
+    };
+    group.reduce(function(amount, deal) {
+      amount.full += deal.amount;
+      amount.weighted += deal.amount * deal.probability / 100;
+      return amount;
+    }, amount);
+    grouppedDeals.push({
+      name: name,
+      group: group,
+      amount: amount
+    });
+  }
   return React.render(GrouppedDealList({
     deals: grouppedDeals
   }), container[0]);
@@ -257,7 +267,7 @@ module.exports = function() {
 
 },{}],6:[function(require,module,exports){
 module.exports = function() {
-  return '<table class="groupHeader"> <colgroup> <col> </colgroup> <tbody> <tr class="total"> <td class="c0"><a class="btnExpand plus">' + this.props.name + '</a> </td> <td class="c1"> </td> <td class="c2">$ 500</td> <td class="c3"> </td> <td class="c4"> </td> <td class="c5"> </td> <td class="c6"> </td> </tr> <tr class="weightedAmount"> <td class="c0"> <div class="gwt-HTML"></div> </td> <td class="c1">Weighted:</td> <td class="c2">$ 300</td> <td class="c3"> </td> <td class="c4"> </td> <td class="c5"> </td> <td class="c6"> </td> </tr> </tbody> </table>';
+  return '<table class="groupHeader"> <colgroup> <col> </colgroup> <tbody> <tr class="total"> <td class="c0"><a class="btnExpand plus">' + this.props.name + '</a> </td> <td class="c1"> </td> <td class="c2">$ ' + this.props.amount.full + '</td> <td class="c3"> </td> <td class="c4"> </td> <td class="c5"> </td> <td class="c6"> </td> </tr> <tr class="weightedAmount"> <td class="c0"> <div class="gwt-HTML"></div> </td> <td class="c1">Weighted:</td> <td class="c2">$ ' + this.props.amount.weighted + '</td> <td class="c3"> </td> <td class="c4"> </td> <td class="c5"> </td> <td class="c6"> </td> </tr> </tbody> </table>';
 };
 
 },{}],7:[function(require,module,exports){

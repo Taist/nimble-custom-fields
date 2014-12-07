@@ -39,6 +39,9 @@ renderDealList = () ->
   groupInitialState = ->
     name: ''
     group: []
+    amount:
+      full: 0
+      weighted: 0
 
   GroupContent = React.createFactory React.createClass
     getInitialState: ->
@@ -101,8 +104,19 @@ renderDealList = () ->
       groups[industry] = []
     groups[industry].push deal
 
-  grouppedDeals = for name, group of groups
-    {name, group}
+  grouppedDeals = []
+  for name, group of groups
+    amount =
+      full: 0
+      weighted: 0
+
+    group.reduce (amount, deal) ->
+      amount.full += deal.amount
+      amount.weighted += deal.amount * deal.probability / 100
+      return amount
+    , amount
+
+    grouppedDeals.push { name, group, amount }
 
   React.render ( GrouppedDealList { deals: grouppedDeals } ), container[0]
 
