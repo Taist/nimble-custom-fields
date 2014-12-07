@@ -5,7 +5,7 @@ module.exports = () -> '
   </colgroup>
   <tbody>
     <tr class="total">
-      <td class="c0"><a class="btnExpand ' + @state.expandClass + '">' + @props.name + '</a>
+      <td class="c0"><a class="btnExpand plus">' + @props.name + '</a>
       </td>
       <td class="c1"> </td>
       <td class="c2">$ ' + @props.amount.full + '</td>

@@ -49,9 +49,18 @@ renderDealList = () ->
     onClick: (event) ->
       target = $(event.target)
       if target.hasClass 'btnExpand'
-        newExpandClass = if @state.expandClass is 'plus' then 'minus' else 'plus'
-        target.removeClass(@state.expandClass).addClass(newExpandClass)
-        @setState expandClass: newExpandClass
+
+        header = target.parents '.groupHeader:first'
+        if @state.expandClass is 'plus'
+          expandClass = 'minus'
+          $('.c1, .c2', header).hide()
+        else
+          expandClass = 'plus'
+          $('.c1, .c2', header).show()
+
+        target.removeClass(@state.expandClass).addClass(expandClass)
+
+        @setState { expandClass }
         @forceUpdate()
 
     render: ->
@@ -105,6 +114,10 @@ renderDealList = () ->
       table {}, [
         tbody {}, [
           @props.group.map (deal) -> DealListDeal deal
+          div {
+            dangerouslySetInnerHTML:
+              __html: require('../interface/dealListTotalBlock').apply(@)
+          }
         ]
       ]
 
