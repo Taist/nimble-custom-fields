@@ -2,7 +2,7 @@ function init(){var require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o
 module.exports = {
   options: {
     nimbleToken: '',
-    dealsPerPage: 2
+    dealsPerPage: 30
   },
   data: {
     deals: {}
@@ -35,14 +35,13 @@ renderDealList = function() {
   var DealList, DealListBody, DealListDeal, DealListHeader, GroupContent, GroupGlobalHeader, GroupHeader, GrouppedDealList, React, amount, container, deal, div, group, groupInitialState, grouppedDeals, groups, id, industry, name, simpleList, table, tbody, _ref, _ref1;
   $('.groupGlobalHeader').parent().hide();
   $('.emptyView').hide();
-  simpleList = $('.dealList');
+  simpleList = $('.mainContainer>div>.dealList');
   simpleList.parent().hide();
   container = $('.dealListByIndustry');
   if (!container.size()) {
     container = $('<div class="dealListByIndustry">');
     container.insertBefore(simpleList.parent());
   }
-  container.empty().show();
   React = require('react');
   _ref = React.DOM, div = _ref.div, table = _ref.table, tbody = _ref.tbody;
   GrouppedDealList = React.createFactory(React.createClass({
@@ -92,8 +91,16 @@ renderDealList = function() {
     getInitialState: function() {
       return groupInitialState();
     },
+    onClick: function(event) {
+      var target;
+      target = $(event.target);
+      if (target.hasClass('btnExpand')) {
+        return app.api.log(event.target);
+      }
+    },
     render: function() {
       return div({
+        onClick: this.onClick,
         dangerouslySetInnerHTML: {
           __html: require('../interface/dealListGroupHeader').apply(this)
         }
@@ -179,6 +186,7 @@ renderDealList = function() {
       amount: amount
     });
   }
+  container.show();
   return React.render(GrouppedDealList({
     deals: grouppedDeals
   }), container[0]);

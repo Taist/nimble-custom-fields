@@ -1,7 +1,7 @@
 module.exports =
   options:
     nimbleToken: ''
-    dealsPerPage: 2
+    dealsPerPage: 30
 
   data:
     deals: {}

@@ -6,15 +6,13 @@ renderDealList = () ->
   $('.groupGlobalHeader').parent().hide()
   $('.emptyView').hide()
 
-  simpleList = $ '.dealList'
+  simpleList = $ '.mainContainer>div>.dealList'
   simpleList.parent().hide()
 
   container = $ '.dealListByIndustry'
   unless container.size()
     container = $ '<div class="dealListByIndustry">'
     container.insertBefore simpleList.parent()
-
-  container.empty().show()
 
   React = require 'react'
 
@@ -55,8 +53,13 @@ renderDealList = () ->
   GroupHeader = React.createFactory React.createClass
     getInitialState: ->
       groupInitialState()
+    onClick: (event) ->
+       target = $(event.target)
+       if target.hasClass 'btnExpand'
+         app.api.log event.target
     render: ->
       div {
+        onClick: @onClick
         dangerouslySetInnerHTML:
           __html: require('../interface/dealListGroupHeader').apply(@)
       }
@@ -118,6 +121,7 @@ renderDealList = () ->
 
     grouppedDeals.push { name, group, amount }
 
+  container.show()
   React.render ( GrouppedDealList { deals: grouppedDeals } ), container[0]
 
 loadDeals = (page = 1) ->
