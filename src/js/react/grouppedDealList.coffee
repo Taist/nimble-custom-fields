@@ -12,24 +12,6 @@ formatAmount = (amount) ->
 
 { div, table, tbody } = React.DOM
 
-GrouppedDealList = React.createFactory React.createClass
-  render: ->
-    (div {}, [
-      GroupGlobalHeader {}
-      GrouppedDealListBody @props
-    ])
-
-GrouppedDealListBody = React.createFactory React.createClass
-  render: ->
-    div {}, @props.deals.map (group) -> GroupContent group
-
-GroupGlobalHeader = React.createFactory React.createClass
-  render: ->
-    div {
-      dangerouslySetInnerHTML:
-        __html: require('../interface/dealListGroupGlobalHeader').apply(@)
-    }
-
 groupInitialState = ->
   name: ''
   group: []
@@ -37,6 +19,17 @@ groupInitialState = ->
     full: 0
     weighted: 0
   expandClass: 'plus'
+
+GrouppedDealList = React.createFactory React.createClass
+  render: ->
+    div {}, [
+      div {
+        key: 'dealListGroupGlobalHeader'
+        dangerouslySetInnerHTML:
+          __html: require('../interface/dealListGroupGlobalHeader').apply(@)
+      }
+      div { key: 'grouppedDealList' }, @props.deals.map (group) -> { groupContent: GroupContent group }
+    ]
 
 GroupContent = React.createFactory React.createClass
   getInitialState: ->
@@ -66,8 +59,8 @@ GroupContent = React.createFactory React.createClass
       onClick: @onClick
       className: 'GroupDealListWidget'
     }, [
-      GroupHeader @props
-      DealList @props
+      { groupHeader: GroupHeader @props }
+      { dealList: DealList @props }
     ]
 
 
@@ -83,6 +76,7 @@ GroupHeader = React.createFactory React.createClass
 
   render: ->
     div {
+      key: @props.name
       dangerouslySetInnerHTML:
         __html: require('../interface/dealListGroupHeader').apply(@)
     }
@@ -97,16 +91,8 @@ DealList = React.createFactory React.createClass
       style:
         display: 'none'
     }, [
-      DealListHeader {}
-      div { className: 'body' }, DealListBody @props
+      div { key: 'dealListBody', className: 'body' }, DealListBody @props
     ]
-
-DealListHeader = React.createFactory React.createClass
-  render: ->
-    div {
-      dangerouslySetInnerHTML:
-        __html: require('../interface/dealListHeader').apply(@)
-    }
 
 DealListBody = React.createFactory React.createClass
   getFullAmount: ->
@@ -117,12 +103,13 @@ DealListBody = React.createFactory React.createClass
 
   render: ->
     div {}, [
-      table {}, [
-        tbody {}, [
-          @props.group.map (deal) -> DealListDeal deal
-        ]
+      table { key: 'dealTable'}, tbody {}, [
+        @props.group.map (deal) ->
+          { deal: DealListDeal deal }
       ]
+
       div {
+        key: 'dealListTotal'
         dangerouslySetInnerHTML:
           __html: require('../interface/dealListTotalBlock').apply(@)
       }
