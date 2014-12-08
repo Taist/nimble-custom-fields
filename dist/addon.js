@@ -319,16 +319,18 @@ DealListBody = React.createFactory(React.createClass({
     return formatAmount(this.props.amount.weighted);
   },
   render: function() {
-    return table({}, [
-      tbody({}, [
-        this.props.group.map(function(deal) {
-          return DealListDeal(deal);
-        }), div({
-          dangerouslySetInnerHTML: {
-            __html: require('../interface/dealListTotalBlock').apply(this)
-          }
-        })
-      ])
+    return div({}, [
+      table({}, [
+        tbody({}, [
+          this.props.group.map(function(deal) {
+            return DealListDeal(deal);
+          })
+        ])
+      ]), div({
+        dangerouslySetInnerHTML: {
+          __html: require('../interface/dealListTotalBlock').apply(this)
+        }
+      })
     ]);
   }
 }));

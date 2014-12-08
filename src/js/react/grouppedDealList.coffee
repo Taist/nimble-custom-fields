@@ -116,14 +116,16 @@ DealListBody = React.createFactory React.createClass
     formatAmount @props.amount.weighted
 
   render: ->
-    table {}, [
-      tbody {}, [
-        @props.group.map (deal) -> DealListDeal deal
-        div {
-          dangerouslySetInnerHTML:
-            __html: require('../interface/dealListTotalBlock').apply(@)
-        }
+    div {}, [
+      table {}, [
+        tbody {}, [
+          @props.group.map (deal) -> DealListDeal deal
+        ]
       ]
+      div {
+        dangerouslySetInnerHTML:
+          __html: require('../interface/dealListTotalBlock').apply(@)
+      }
     ]
 
 DealListDeal = React.createFactory React.createClass
