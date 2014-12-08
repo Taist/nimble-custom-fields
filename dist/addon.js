@@ -171,7 +171,7 @@ module.exports = function() {
 };
 
 },{}],8:[function(require,module,exports){
-var DealList, DealListBody, DealListDeal, GroupContent, GroupHeader, GrouppedDealList, React, div, formatAmount, groupInitialState, table, tbody, _ref;
+var DealList, DealListBody, DealListDeal, GroupContent, GroupHeader, GrouppedDealList, React, div, formatAmount, table, tbody, _ref;
 
 React = require('react');
 
@@ -190,31 +190,19 @@ formatAmount = function(amount) {
 
 _ref = React.DOM, div = _ref.div, table = _ref.table, tbody = _ref.tbody;
 
-groupInitialState = function() {
-  return {
-    name: '',
-    group: [],
-    amount: {
-      full: 0,
-      weighted: 0
-    },
-    expandClass: 'plus'
-  };
-};
-
 GrouppedDealList = React.createFactory(React.createClass({
   render: function() {
     return div({}, [
       div({
-        key: 'dealListGroupGlobalHeader',
+        key: 'globalHeader',
         dangerouslySetInnerHTML: {
           __html: require('../interface/dealListGroupGlobalHeader').apply(this)
         }
       }), div({
-        key: 'grouppedDealList'
+        key: 'dealList'
       }, this.props.deals.map(function(group) {
         return {
-          groupContent: GroupContent(group)
+          group: GroupContent(group)
         };
       }))
     ]);
@@ -223,7 +211,9 @@ GrouppedDealList = React.createFactory(React.createClass({
 
 GroupContent = React.createFactory(React.createClass({
   getInitialState: function() {
-    return groupInitialState();
+    return {
+      expandClass: 'plus'
+    };
   },
   onClick: function(event) {
     var expandClass, target, widget;
@@ -240,10 +230,9 @@ GroupContent = React.createFactory(React.createClass({
         $('.dealList', widget).hide();
       }
       target.removeClass(this.state.expandClass).addClass(expandClass);
-      this.setState({
+      return this.setState({
         expandClass: expandClass
       });
-      return this.forceUpdate();
     }
   },
   render: function() {
@@ -252,18 +241,15 @@ GroupContent = React.createFactory(React.createClass({
       className: 'GroupDealListWidget'
     }, [
       {
-        groupHeader: GroupHeader(this.props)
+        header: GroupHeader(this.props)
       }, {
-        dealList: DealList(this.props)
+        list: DealList(this.props)
       }
     ]);
   }
 }));
 
 GroupHeader = React.createFactory(React.createClass({
-  getInitialState: function() {
-    return groupInitialState();
-  },
   getFullAmount: function() {
     return formatAmount(this.props.amount.full);
   },
@@ -272,7 +258,6 @@ GroupHeader = React.createFactory(React.createClass({
   },
   render: function() {
     return div({
-      key: this.props.name,
       dangerouslySetInnerHTML: {
         __html: require('../interface/dealListGroupHeader').apply(this)
       }
@@ -281,21 +266,15 @@ GroupHeader = React.createFactory(React.createClass({
 }));
 
 DealList = React.createFactory(React.createClass({
-  getInitialState: function() {
-    return groupInitialState();
-  },
   render: function() {
     return div({
       className: 'dealList',
       style: {
         display: 'none'
       }
-    }, [
-      div({
-        key: 'dealListBody',
-        className: 'body'
-      }, DealListBody(this.props))
-    ]);
+    }, div({
+      className: 'body'
+    }, DealListBody(this.props)));
   }
 }));
 
@@ -309,7 +288,7 @@ DealListBody = React.createFactory(React.createClass({
   render: function() {
     return div({}, [
       table({
-        key: 'dealTable'
+        key: 'table'
       }, tbody({}, [
         this.props.group.map(function(deal) {
           return {
@@ -317,7 +296,7 @@ DealListBody = React.createFactory(React.createClass({
           };
         })
       ])), div({
-        key: 'dealListTotal',
+        key: 'total',
         dangerouslySetInnerHTML: {
           __html: require('../interface/dealListTotalBlock').apply(this)
         }
