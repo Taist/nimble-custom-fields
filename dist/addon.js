@@ -204,6 +204,13 @@ renderDealList = function() {
     getAmount: function() {
       return formatAmount(this.props.amount);
     },
+    getContactLink: function() {
+      var _ref1;
+      if (!((_ref1 = this.props.related_primary) != null ? _ref1[1] : void 0)) {
+        return '-';
+      }
+      return '<a href="#app/contacts/view?id=' + this.props.related_primary[0] + '">' + this.props.related_primary[1] + '</a>';
+    },
     render: function() {
       this.expectedDate = new Date(this.props.expected_close).toLocaleString('en-us', {
         day: "numeric",
@@ -326,7 +333,7 @@ module.exports = function(groupingCondition) {
 
 },{"../app":1,"../interface/dealListDeal":4,"../interface/dealListGroupGlobalHeader":5,"../interface/dealListGroupHeader":6,"../interface/dealListHeader":7,"../interface/dealListTotalBlock":8,"react":156}],4:[function(require,module,exports){
 module.exports = function() {
-  return '<tr class="row_' + this.props.id + '" groupname="Qualification"> <td class="cell c0"> <a href="#app/deals/view?id=' + this.props.id + '" target="_blank" class="deal_subject">' + this.props.subject + '</a> </td> <td class="cell c1"> <a href="#app/contacts/view?id=' + this.props.related_primary[0] + '">' + this.props.related_primary[1] + '</a> </td> <td class="cell c2">' + this.getAmount() + '</td> <td class="cell c3"> <span class="name">' + this.props.stage.name + '</span> <span class="days_in_stage">' + this.props.days_in_stage + 'day' + (this.props.days_in_stage > 1 ? 's' : '') + '</span> </td> <td class="cell c4">' + this.props.probability + '%</td> <td class="cell c5">' + this.expectedDate + '</td> <td class="cell c6">' + this.props.age + '</td> </tr>';
+  return '<tr class="row_' + this.props.id + '" groupname="Qualification"> <td class="cell c0"> <a href="#app/deals/view?id=' + this.props.id + '" target="_blank" class="deal_subject">' + this.props.subject + '</a> </td> <td class="cell c1">' + this.getContactLink() + '</td> <td class="cell c2">' + this.getAmount() + '</td> <td class="cell c3"> <span class="name">' + this.props.stage.name + '</span> <span class="days_in_stage">' + this.props.days_in_stage + 'day' + (this.props.days_in_stage > 1 ? 's' : '') + '</span> </td> <td class="cell c4">' + this.props.probability + '%</td> <td class="cell c5">' + this.expectedDate + '</td> <td class="cell c6">' + this.props.age + '</td> </tr>';
 };
 
 },{}],5:[function(require,module,exports){

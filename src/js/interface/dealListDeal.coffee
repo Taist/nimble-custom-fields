@@ -5,11 +5,7 @@ module.exports = () -> '
       ' + @props.subject + '
     </a>
   </td>
-  <td class="cell c1">
-    <a href="#app/contacts/view?id=' + @props.related_primary[0] + '">
-      ' + @props.related_primary[1] + '
-    </a>
-  </td>
+  <td class="cell c1">' + @getContactLink() + '</td>
   <td class="cell c2">' + @getAmount() + '</td>
   <td class="cell c3">
     <span class="name">' + @props.stage.name + '</span>
