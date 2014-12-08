@@ -13,13 +13,15 @@ formatAmount = (amount) ->
 { div, table, tbody } = React.DOM
 
 GrouppedDealList = React.createFactory React.createClass
-  getInitialState: ->
-    deals: []
   render: ->
-    div {}, [
+    (div {}, [
       GroupGlobalHeader {}
-      div {}, @props.deals.map((deal) -> GroupContent deal )
-    ]
+      GrouppedDealListBody @props
+    ])
+
+GrouppedDealListBody = React.createFactory React.createClass
+  render: ->
+    div {}, @props.deals.map (group) -> GroupContent group
 
 GroupGlobalHeader = React.createFactory React.createClass
   render: ->
@@ -44,13 +46,15 @@ GroupContent = React.createFactory React.createClass
     target = $(event.target)
     if target.hasClass 'btnExpand'
 
-      header = target.parents '.groupHeader:first'
+      widget = target.parents '.GroupDealListWidget:first'
       if @state.expandClass is 'plus'
         expandClass = 'minus'
-        $('.c1, .c2', header).hide()
+        $('.groupHeader .c1, .groupHeader .c2', widget).hide()
+        $('.dealList', widget).show()
       else
         expandClass = 'plus'
-        $('.c1, .c2', header).show()
+        $('.groupHeader .c1, .groupHeader .c2', widget).show()
+        $('.dealList', widget).hide()
 
       target.removeClass(@state.expandClass).addClass(expandClass)
 
@@ -63,8 +67,9 @@ GroupContent = React.createFactory React.createClass
       className: 'GroupDealListWidget'
     }, [
       GroupHeader @props
-      DealList $.extend true, {}, @props, expandClass: @state.expandClass
+      DealList @props
     ]
+
 
 GroupHeader = React.createFactory React.createClass
   getInitialState: ->
@@ -86,14 +91,11 @@ DealList = React.createFactory React.createClass
   getInitialState: ->
     groupInitialState()
 
-  display: ->
-    if @props.expandClass is 'plus' then 'none' else 'block'
-
   render: ->
     div {
       className: 'dealList'
       style:
-        display: @display()
+        display: 'none'
     }, [
       DealListHeader {}
       div { className: 'body' }, DealListBody @props
@@ -112,9 +114,6 @@ DealListBody = React.createFactory React.createClass
 
   getWeightedAmount: ->
     formatAmount @props.amount.weighted
-
-  getInitialState: ->
-    groupInitialState()
 
   render: ->
     table {}, [

@@ -1,5 +1,5 @@
 module.exports = () -> '
-<tr class="row_' + @props.id + '" groupname="Qualification">
+<tr class="row_' + @props.id + '">
   <td class="cell c0">
     <a href="#app/deals/view?id=' + @props.id + '" target="_blank" class="deal_subject">
       ' + @props.subject + '

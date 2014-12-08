@@ -152,7 +152,7 @@ module.exports = function(groupingCondition) {
 
 },{"../app":1,"../react/grouppedDealList":9,"react":157}],4:[function(require,module,exports){
 module.exports = function() {
-  return '<tr class="row_' + this.props.id + '" groupname="Qualification"> <td class="cell c0"> <a href="#app/deals/view?id=' + this.props.id + '" target="_blank" class="deal_subject">' + this.props.subject + '</a> </td> <td class="cell c1">' + this.getContactLink() + '</td> <td class="cell c2">' + this.getAmount() + '</td> <td class="cell c3"> <span class="name">' + this.props.stage.name + '</span> <span class="days_in_stage">' + this.props.days_in_stage + 'day' + (this.props.days_in_stage > 1 ? 's' : '') + '</span> </td> <td class="cell c4">' + this.props.probability + '%</td> <td class="cell c5">' + this.expectedDate + '</td> <td class="cell c6">' + this.props.age + '</td> </tr>';
+  return '<tr class="row_' + this.props.id + '"> <td class="cell c0"> <a href="#app/deals/view?id=' + this.props.id + '" target="_blank" class="deal_subject">' + this.props.subject + '</a> </td> <td class="cell c1">' + this.getContactLink() + '</td> <td class="cell c2">' + this.getAmount() + '</td> <td class="cell c3"> <span class="name">' + this.props.stage.name + '</span> <span class="days_in_stage">' + this.props.days_in_stage + 'day' + (this.props.days_in_stage > 1 ? 's' : '') + '</span> </td> <td class="cell c4">' + this.props.probability + '%</td> <td class="cell c5">' + this.expectedDate + '</td> <td class="cell c6">' + this.props.age + '</td> </tr>';
 };
 
 },{}],5:[function(require,module,exports){
@@ -176,7 +176,7 @@ module.exports = function() {
 };
 
 },{}],9:[function(require,module,exports){
-var DealList, DealListBody, DealListDeal, DealListHeader, GroupContent, GroupGlobalHeader, GroupHeader, GrouppedDealList, React, div, formatAmount, groupInitialState, table, tbody, _ref;
+var DealList, DealListBody, DealListDeal, DealListHeader, GroupContent, GroupGlobalHeader, GroupHeader, GrouppedDealList, GrouppedDealListBody, React, div, formatAmount, groupInitialState, table, tbody, _ref;
 
 React = require('react');
 
@@ -196,17 +196,16 @@ formatAmount = function(amount) {
 _ref = React.DOM, div = _ref.div, table = _ref.table, tbody = _ref.tbody;
 
 GrouppedDealList = React.createFactory(React.createClass({
-  getInitialState: function() {
-    return {
-      deals: []
-    };
-  },
   render: function() {
-    return div({}, [
-      GroupGlobalHeader({}), div({}, this.props.deals.map(function(deal) {
-        return GroupContent(deal);
-      }))
-    ]);
+    return div({}, [GroupGlobalHeader({}), GrouppedDealListBody(this.props)]);
+  }
+}));
+
+GrouppedDealListBody = React.createFactory(React.createClass({
+  render: function() {
+    return div({}, this.props.deals.map(function(group) {
+      return GroupContent(group);
+    }));
   }
 }));
 
@@ -237,16 +236,18 @@ GroupContent = React.createFactory(React.createClass({
     return groupInitialState();
   },
   onClick: function(event) {
-    var expandClass, header, target;
+    var expandClass, target, widget;
     target = $(event.target);
     if (target.hasClass('btnExpand')) {
-      header = target.parents('.groupHeader:first');
+      widget = target.parents('.GroupDealListWidget:first');
       if (this.state.expandClass === 'plus') {
         expandClass = 'minus';
-        $('.c1, .c2', header).hide();
+        $('.groupHeader .c1, .groupHeader .c2', widget).hide();
+        $('.dealList', widget).show();
       } else {
         expandClass = 'plus';
-        $('.c1, .c2', header).show();
+        $('.groupHeader .c1, .groupHeader .c2', widget).show();
+        $('.dealList', widget).hide();
       }
       target.removeClass(this.state.expandClass).addClass(expandClass);
       this.setState({
@@ -259,11 +260,7 @@ GroupContent = React.createFactory(React.createClass({
     return div({
       onClick: this.onClick,
       className: 'GroupDealListWidget'
-    }, [
-      GroupHeader(this.props), DealList($.extend(true, {}, this.props, {
-        expandClass: this.state.expandClass
-      }))
-    ]);
+    }, [GroupHeader(this.props), DealList(this.props)]);
   }
 }));
 
@@ -290,18 +287,11 @@ DealList = React.createFactory(React.createClass({
   getInitialState: function() {
     return groupInitialState();
   },
-  display: function() {
-    if (this.props.expandClass === 'plus') {
-      return 'none';
-    } else {
-      return 'block';
-    }
-  },
   render: function() {
     return div({
       className: 'dealList',
       style: {
-        display: this.display()
+        display: 'none'
       }
     }, [
       DealListHeader({}), div({
@@ -327,9 +317,6 @@ DealListBody = React.createFactory(React.createClass({
   },
   getWeightedAmount: function() {
     return formatAmount(this.props.amount.weighted);
-  },
-  getInitialState: function() {
-    return groupInitialState();
   },
   render: function() {
     return table({}, [
