@@ -8,7 +8,7 @@ module.exports = () -> '
       <td class="c0"><a class="btnExpand plus">' + @props.name + '</a>
       </td>
       <td class="c1"> </td>
-      <td class="c2">$ ' + @props.amount.full + '</td>
+      <td class="c2">' + @getFullAmount() + '</td>
       <td class="c3"> </td>
       <td class="c4"> </td>
       <td class="c5"> </td>
@@ -19,7 +19,7 @@ module.exports = () -> '
         <div class="gwt-HTML"></div>
       </td>
       <td class="c1">Weighted:</td>
-      <td class="c2">$ ' + @props.amount.weighted + '</td>
+      <td class="c2">' + @getWeightedAmount() + '</td>
       <td class="c3"> </td>
       <td class="c4"> </td>
       <td class="c5"> </td>

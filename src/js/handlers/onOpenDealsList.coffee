@@ -2,6 +2,16 @@ app = require '../app'
 
 isLoadingInProgress = false
 
+formatAmount = (amount) ->
+  unless amount
+    return '-'
+
+  digits = amount.toString().split('')
+  groups = []
+  while digits.length
+    groups.unshift digits.splice(-3).join('')
+  '$ ' + groups.join()
+
 renderDealList = () ->
   $('.groupGlobalHeader').parent().hide()
   $('.emptyView').hide()
@@ -76,6 +86,12 @@ renderDealList = () ->
     getInitialState: ->
       groupInitialState()
 
+    getFullAmount: ->
+      formatAmount @props.amount.full
+
+    getWeightedAmount: ->
+      formatAmount @props.amount.weighted
+
     render: ->
       div {
         dangerouslySetInnerHTML:
@@ -107,6 +123,12 @@ renderDealList = () ->
       }
 
   DealListBody = React.createFactory React.createClass
+    getFullAmount: ->
+      formatAmount @props.amount.full
+
+    getWeightedAmount: ->
+      formatAmount @props.amount.weighted
+
     getInitialState: ->
       groupInitialState()
 
@@ -122,6 +144,9 @@ renderDealList = () ->
       ]
 
   DealListDeal = React.createFactory React.createClass
+    getAmount: ->
+      formatAmount @props.amount
+
     render: ->
       @expectedDate = new Date(@props.expected_close).toLocaleString(
         'en-us', { day: "numeric", month: "short", year: "numeric" }

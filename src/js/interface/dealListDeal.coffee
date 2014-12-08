@@ -10,7 +10,7 @@ module.exports = () -> '
       ' + @props.related_primary[1] + '
     </a>
   </td>
-  <td class="cell c2">$ ' + @props.amount + '</td>
+  <td class="cell c2">' + @getAmount() + '</td>
   <td class="cell c3">
     <span class="name">' + @props.stage.name + '</span>
     <span class="days_in_stage">
