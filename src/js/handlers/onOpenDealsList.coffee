@@ -75,21 +75,24 @@ processDeals = (deals) ->
 
 module.exports = (groupingCondition) ->
   selector = '.listHeader .gwt-ListBox'
+
+  customFieldName = 'industry'
+
   app.api.wait.elementRender selector, (element) ->
-    unless $('option[value="industry"]', element).size()
+    unless $("option[value=\"#{customFieldName}\"]", element).size()
       groupingList = element[0]
 
-      $ '<option value="industry">'
-        .text 'Industry'
+      $ "<option value=\"#{customFieldName}\">"
+        .text customFieldName.replace /^(\w)/, (a, b) -> b.toUpperCase()
         .appendTo groupingList
 
-      if groupingCondition is 'industry'
-        $(groupingList).val('industry')
+      if groupingCondition is customFieldName
+        $(groupingList).val(customFieldName)
 
       groupingList.addEventListener 'change', ->
         app.api.log this.value
 
-    if groupingCondition is 'industry'
+    if groupingCondition is customFieldName
       unless isLoadingInProgress
         isLoadingInProgress = true
         loadDeals()

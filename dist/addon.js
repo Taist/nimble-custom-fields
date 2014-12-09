@@ -127,21 +127,24 @@ processDeals = function(deals) {
 };
 
 module.exports = function(groupingCondition) {
-  var selector;
+  var customFieldName, selector;
   selector = '.listHeader .gwt-ListBox';
+  customFieldName = 'industry';
   return app.api.wait.elementRender(selector, function(element) {
     var groupingList;
-    if (!$('option[value="industry"]', element).size()) {
+    if (!$("option[value=\"" + customFieldName + "\"]", element).size()) {
       groupingList = element[0];
-      $('<option value="industry">').text('Industry').appendTo(groupingList);
-      if (groupingCondition === 'industry') {
-        $(groupingList).val('industry');
+      $("<option value=\"" + customFieldName + "\">").text(customFieldName.replace(/^(\w)/, function(a, b) {
+        return b.toUpperCase();
+      })).appendTo(groupingList);
+      if (groupingCondition === customFieldName) {
+        $(groupingList).val(customFieldName);
       }
       groupingList.addEventListener('change', function() {
         return app.api.log(this.value);
       });
     }
-    if (groupingCondition === 'industry') {
+    if (groupingCondition === customFieldName) {
       if (!isLoadingInProgress) {
         isLoadingInProgress = true;
         return loadDeals();
