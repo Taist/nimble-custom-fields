@@ -38,7 +38,7 @@ renderDealList = () ->
   container.show()
 
   React = require 'react'
-  GrouppedDealList = require('../react/grouppedDealList')
+  GrouppedDealList = require('../react/grouppedDealList/grouppedDealList')
   React.render ( GrouppedDealList { deals: grouppedDeals } ), container[0]
 
 loadDeals = (page = 1) ->

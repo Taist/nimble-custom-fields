@@ -2,7 +2,7 @@ React = require 'react'
 
 { div } = React.DOM
 
-GroupContent = require('./grouppedDealList/groupContent')
+GroupContent = require('./groupContent')
 
 GrouppedDealList = React.createFactory React.createClass
   render: ->
@@ -10,7 +10,7 @@ GrouppedDealList = React.createFactory React.createClass
       div {
         key: 'globalHeader'
         dangerouslySetInnerHTML:
-          __html: require('../interface/dealListGroupGlobalHeader').apply(@)
+          __html: require('./interface/globalHeader').apply(@)
       }
       div { key: 'dealList' }, @props.deals.map (group) -> { group: GroupContent group }
     ]

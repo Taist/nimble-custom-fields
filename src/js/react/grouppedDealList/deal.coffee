@@ -21,7 +21,7 @@ Deal = React.createFactory React.createClass
     )
     div {
       dangerouslySetInnerHTML:
-        __html: require('../../interface/dealListDeal').apply(@)
+        __html: require('./interface/deal').apply(@)
     }
 
 module.exports = Deal

@@ -13,7 +13,7 @@ GroupHeader = React.createFactory React.createClass
   render: ->
     div {
       dangerouslySetInnerHTML:
-        __html: require('../../interface/dealListGroupHeader').apply(@)
+        __html: require('./interface/groupHeader').apply(@)
     }
 
 module.exports = GroupHeader

@@ -72,7 +72,7 @@ renderDealList = function() {
   }
   container.show();
   React = require('react');
-  GrouppedDealList = require('../react/grouppedDealList');
+  GrouppedDealList = require('../react/grouppedDealList/grouppedDealList');
   return React.render(GrouppedDealList({
     deals: grouppedDeals
   }), container[0]);
@@ -150,57 +150,7 @@ module.exports = function(groupingCondition) {
   });
 };
 
-},{"../app":1,"../react/grouppedDealList":8,"react":161}],4:[function(require,module,exports){
-module.exports = function() {
-  return '<tr class="row_' + this.props.id + '"> <td class="cell c0"> <a href="#app/deals/view?id=' + this.props.id + '" target="_blank" class="deal_subject">' + this.props.subject + '</a> </td> <td class="cell c1">' + this.getContactLink() + '</td> <td class="cell c2">' + this.getAmount() + '</td> <td class="cell c3"> <span class="name">' + this.props.stage.name + '</span> <span class="days_in_stage">' + this.props.days_in_stage + 'day' + (this.props.days_in_stage > 1 ? 's' : '') + '</span> </td> <td class="cell c4">' + this.props.probability + '%</td> <td class="cell c5">' + this.expectedDate + '</td> <td class="cell c6">' + this.props.age + '</td> </tr>';
-};
-
-},{}],5:[function(require,module,exports){
-module.exports = function() {
-  return '<table class="groupGlobalHeader"> <colgroup> <col> </colgroup> <tbody> <tr> <td class="headerTD c0 subject" sorting_param="subject">Deal name</td> <td class="headerTD c1 related_primary" sorting_param="related_primary">Company or Person</td> <td class="headerTD c2 amount" sorting_param="amount">Amount</td> <td class="headerTD c3 stage" sorting_param="stage">Stage</td> <td class="headerTD c4 probability" sorting_param="probability">Probability</td> <td class="headerTD c5 expected_close" sorting_param="expected_close">Expected</td> <td class="headerTD c6 age" sorting_param="age">Age (days)</td> </tr> </tbody> </table>';
-};
-
-},{}],6:[function(require,module,exports){
-module.exports = function() {
-  return '<table class="groupHeader"> <colgroup> <col> </colgroup> <tbody> <tr class="total"> <td class="c0"><a class="btnExpand plus">' + this.props.name + '</a> </td> <td class="c1"> </td> <td class="c2">' + this.getFullAmount() + '</td> <td class="c3"> </td> <td class="c4"> </td> <td class="c5"> </td> <td class="c6"> </td> </tr> <tr class="weightedAmount"> <td class="c0"> <div class="gwt-HTML"></div> </td> <td class="c1">Weighted:</td> <td class="c2">' + this.getWeightedAmount() + '</td> <td class="c3"> </td> <td class="c4"> </td> <td class="c5"> </td> <td class="c6"> </td> </tr> </tbody> </table>';
-};
-
-},{}],7:[function(require,module,exports){
-module.exports = function() {
-  return '<div class="totalBlock"> <table class="totalTable"> <tbody> <tr class="totalRow"> <td class="total c0">' + this.props.name + ' Total:</td> <td class="total c1"></td> <td class="total c2">' + this.getFullAmount() + '</td> <td class="total c3"></td> <td class="total c4"></td> <td class="total c5"></td> <td class="total c6"></td> </tr> <tr class="weightedRow"> <td class="total c0"></td> <td class="total c1">Weighted:</td> <td class="total c2 weighted">' + this.getWeightedAmount() + '</td> <td class="total c3"></td> <td class="total c4"></td> <td class="total c5"></td> <td class="total c6"></td> </tr> </tbody> </table> </div>';
-};
-
-},{}],8:[function(require,module,exports){
-var GroupContent, GrouppedDealList, React, div;
-
-React = require('react');
-
-div = React.DOM.div;
-
-GroupContent = require('./grouppedDealList/groupContent');
-
-GrouppedDealList = React.createFactory(React.createClass({
-  render: function() {
-    return div({}, [
-      div({
-        key: 'globalHeader',
-        dangerouslySetInnerHTML: {
-          __html: require('../interface/dealListGroupGlobalHeader').apply(this)
-        }
-      }), div({
-        key: 'dealList'
-      }, this.props.deals.map(function(group) {
-        return {
-          group: GroupContent(group)
-        };
-      }))
-    ]);
-  }
-}));
-
-module.exports = GrouppedDealList;
-
-},{"../interface/dealListGroupGlobalHeader":5,"./grouppedDealList/groupContent":12,"react":161}],9:[function(require,module,exports){
+},{"../app":1,"../react/grouppedDealList/grouppedDealList":9,"react":161}],4:[function(require,module,exports){
 var Deal, React, div, formatAmount;
 
 React = require('react');
@@ -228,7 +178,7 @@ Deal = React.createFactory(React.createClass({
     });
     return div({
       dangerouslySetInnerHTML: {
-        __html: require('../../interface/dealListDeal').apply(this)
+        __html: require('./interface/deal').apply(this)
       }
     });
   }
@@ -236,7 +186,7 @@ Deal = React.createFactory(React.createClass({
 
 module.exports = Deal;
 
-},{"../../interface/dealListDeal":4,"./formatAmount":11,"react":161}],10:[function(require,module,exports){
+},{"./formatAmount":6,"./interface/deal":10,"react":161}],5:[function(require,module,exports){
 var Deal, DealList, React, div, formatAmount, table, tbody, _ref;
 
 React = require('react');
@@ -274,7 +224,7 @@ DealList = React.createFactory(React.createClass({
       ])), div({
         key: 'total',
         dangerouslySetInnerHTML: {
-          __html: require('../../interface/dealListTotalBlock').apply(this)
+          __html: require('./interface/totalBlock').apply(this)
         }
       })
     ]));
@@ -283,7 +233,7 @@ DealList = React.createFactory(React.createClass({
 
 module.exports = DealList;
 
-},{"../../interface/dealListTotalBlock":7,"./deal":9,"./formatAmount":11,"react":161}],11:[function(require,module,exports){
+},{"./deal":4,"./formatAmount":6,"./interface/totalBlock":13,"react":161}],6:[function(require,module,exports){
 module.exports = function(amount) {
   var digits, groups;
   if (!amount) {
@@ -297,7 +247,7 @@ module.exports = function(amount) {
   return '$ ' + groups.join();
 };
 
-},{}],12:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 var DealList, GroupContent, GroupHeader, React, div;
 
 React = require('react');
@@ -350,7 +300,7 @@ GroupContent = React.createFactory(React.createClass({
 
 module.exports = GroupContent;
 
-},{"./dealList":10,"./groupHeader":13,"react":161}],13:[function(require,module,exports){
+},{"./dealList":5,"./groupHeader":8,"react":161}],8:[function(require,module,exports){
 var GroupHeader, React, div, formatAmount;
 
 React = require('react');
@@ -369,7 +319,7 @@ GroupHeader = React.createFactory(React.createClass({
   render: function() {
     return div({
       dangerouslySetInnerHTML: {
-        __html: require('../../interface/dealListGroupHeader').apply(this)
+        __html: require('./interface/groupHeader').apply(this)
       }
     });
   }
@@ -377,7 +327,57 @@ GroupHeader = React.createFactory(React.createClass({
 
 module.exports = GroupHeader;
 
-},{"../../interface/dealListGroupHeader":6,"./formatAmount":11,"react":161}],14:[function(require,module,exports){
+},{"./formatAmount":6,"./interface/groupHeader":12,"react":161}],9:[function(require,module,exports){
+var GroupContent, GrouppedDealList, React, div;
+
+React = require('react');
+
+div = React.DOM.div;
+
+GroupContent = require('./groupContent');
+
+GrouppedDealList = React.createFactory(React.createClass({
+  render: function() {
+    return div({}, [
+      div({
+        key: 'globalHeader',
+        dangerouslySetInnerHTML: {
+          __html: require('./interface/globalHeader').apply(this)
+        }
+      }), div({
+        key: 'dealList'
+      }, this.props.deals.map(function(group) {
+        return {
+          group: GroupContent(group)
+        };
+      }))
+    ]);
+  }
+}));
+
+module.exports = GrouppedDealList;
+
+},{"./groupContent":7,"./interface/globalHeader":11,"react":161}],10:[function(require,module,exports){
+module.exports = function() {
+  return '<tr class="row_' + this.props.id + '"> <td class="cell c0"> <a href="#app/deals/view?id=' + this.props.id + '" target="_blank" class="deal_subject">' + this.props.subject + '</a> </td> <td class="cell c1">' + this.getContactLink() + '</td> <td class="cell c2">' + this.getAmount() + '</td> <td class="cell c3"> <span class="name">' + this.props.stage.name + '</span> <span class="days_in_stage">' + this.props.days_in_stage + 'day' + (this.props.days_in_stage > 1 ? 's' : '') + '</span> </td> <td class="cell c4">' + this.props.probability + '%</td> <td class="cell c5">' + this.expectedDate + '</td> <td class="cell c6">' + this.props.age + '</td> </tr>';
+};
+
+},{}],11:[function(require,module,exports){
+module.exports = function() {
+  return '<table class="groupGlobalHeader"> <colgroup> <col> </colgroup> <tbody> <tr> <td class="headerTD c0 subject" sorting_param="subject">Deal name</td> <td class="headerTD c1 related_primary" sorting_param="related_primary">Company or Person</td> <td class="headerTD c2 amount" sorting_param="amount">Amount</td> <td class="headerTD c3 stage" sorting_param="stage">Stage</td> <td class="headerTD c4 probability" sorting_param="probability">Probability</td> <td class="headerTD c5 expected_close" sorting_param="expected_close">Expected</td> <td class="headerTD c6 age" sorting_param="age">Age (days)</td> </tr> </tbody> </table>';
+};
+
+},{}],12:[function(require,module,exports){
+module.exports = function() {
+  return '<table class="groupHeader"> <colgroup> <col> </colgroup> <tbody> <tr class="total"> <td class="c0"><a class="btnExpand plus">' + this.props.name + '</a> </td> <td class="c1"> </td> <td class="c2">' + this.getFullAmount() + '</td> <td class="c3"> </td> <td class="c4"> </td> <td class="c5"> </td> <td class="c6"> </td> </tr> <tr class="weightedAmount"> <td class="c0"> <div class="gwt-HTML"></div> </td> <td class="c1">Weighted:</td> <td class="c2">' + this.getWeightedAmount() + '</td> <td class="c3"> </td> <td class="c4"> </td> <td class="c5"> </td> <td class="c6"> </td> </tr> </tbody> </table>';
+};
+
+},{}],13:[function(require,module,exports){
+module.exports = function() {
+  return '<div class="totalBlock"> <table class="totalTable"> <tbody> <tr class="totalRow"> <td class="total c0">' + this.props.name + ' Total:</td> <td class="total c1"></td> <td class="total c2">' + this.getFullAmount() + '</td> <td class="total c3"></td> <td class="total c4"></td> <td class="total c5"></td> <td class="total c6"></td> </tr> <tr class="weightedRow"> <td class="total c0"></td> <td class="total c1">Weighted:</td> <td class="total c2 weighted">' + this.getWeightedAmount() + '</td> <td class="total c3"></td> <td class="total c4"></td> <td class="total c5"></td> <td class="total c6"></td> </tr> </tbody> </table> </div>';
+};
+
+},{}],14:[function(require,module,exports){
 module.exports = {
   registerHandler: function(responseHandler) {
     var XMLHttpRequestSend;

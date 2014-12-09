@@ -27,7 +27,7 @@ DealList = React.createFactory React.createClass
         div {
           key: 'total'
           dangerouslySetInnerHTML:
-            __html: require('../../interface/dealListTotalBlock').apply(@)
+            __html: require('./interface/totalBlock').apply(@)
         }
       ])
     )
