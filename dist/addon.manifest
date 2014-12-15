@@ -1,5 +1,8 @@
 {
   "id": "taist-nimble-deal-custom-fields",
   "js": "addon.js",
-  "siteRegexp": "*.nimble.com"
+  "siteRegexp": "*.nimble.com",
+  "siteName":"Nimble",
+  "title":"Custom field 'Industry' for a deal",
+  "shortDescription":""
 }
