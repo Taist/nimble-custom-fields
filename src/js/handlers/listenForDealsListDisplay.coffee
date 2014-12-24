@@ -1,5 +1,4 @@
 module.exports = (cur, old) ->
-  hash = location.hash
 
   dealListPattern = /app\/deals\/list/
 
