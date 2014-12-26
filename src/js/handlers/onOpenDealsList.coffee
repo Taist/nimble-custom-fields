@@ -1,8 +1,9 @@
 app = require '../app'
+industryField = require '../industryField'
 
 isLoadingInProgress = false
 
-renderDealList = () ->
+renderDealList = ->
   $('.groupGlobalHeader').parent().hide()
   $('.emptyView').hide()
 
@@ -16,12 +17,11 @@ renderDealList = () ->
 
   groups = {}
   for id, deal of app.data.deals
-    industry = deal.industry || 'Unknown'
-    unless groups[industry]
-      groups[industry] = []
+    industry = deal.industry
+    groups[industry] ?= []
     groups[industry].push deal
 
-  grouppedDeals = []
+  groupedDeals = []
   for name, group of groups
     amount =
       full: 0
@@ -33,20 +33,20 @@ renderDealList = () ->
       return amount
     , amount
 
-    grouppedDeals.push { name, group, amount }
+    groupedDeals.push {name, group, amount}
 
   container.show()
 
   React = require 'react'
-  GrouppedDealList = require('../react/grouppedDealList/grouppedDealList')
-  React.render ( GrouppedDealList { deals: grouppedDeals } ), container[0]
+  GrouppedDealList = require '../react/grouppedDealList/grouppedDealList'
+  React.render (GrouppedDealList {deals: groupedDeals}), container[0]
 
 loadDeals = (page = 1) ->
   $.ajax
     url: '/api/deals'
     dataType: "json"
     headers:
-      Authorization: "Nimble token=\"#{app.options.nimbleToken}\""
+      Authorization: """Nimble token="#{app.options.nimbleToken}\""""
     data:
       sort_by: 'age'
       dir: 'asc'
@@ -63,14 +63,7 @@ loadDeals = (page = 1) ->
 
 processDeals = (deals) ->
   deals.resources.forEach (deal) ->
-
-    #TODO Remove fake data
-    category = parseInt( deal.id[23], 16 ) % 4
-    deal.industry = switch category
-      when 1 then 'Food'
-      when 2 then 'Toys'
-      when 3 then 'IT'
-
+    deal.industry = industryField.getValueToDisplay deal.id
     app.data.deals[deal.id] = deal
 
 module.exports = (groupingCondition) ->
@@ -79,18 +72,15 @@ module.exports = (groupingCondition) ->
   customFieldName = 'industry'
 
   app.api.wait.elementRender selector, (element) ->
-    unless $("option[value=\"#{customFieldName}\"]", element).size()
+    unless $("""option[value="#{customFieldName}"]""", element).size()
       groupingList = element[0]
 
-      $ "<option value=\"#{customFieldName}\">"
-        .text customFieldName.replace /^(\w)/, (a, b) -> b.toUpperCase()
-        .appendTo groupingList
+      $ """<option value="#{customFieldName}">"""
+      .text customFieldName.replace /^(\w)/, (a, b) -> b.toUpperCase()
+      .appendTo groupingList
 
       if groupingCondition is customFieldName
         $(groupingList).val(customFieldName)
-
-      groupingList.addEventListener 'change', ->
-        app.api.log this.value
 
     if groupingCondition is customFieldName
       unless isLoadingInProgress

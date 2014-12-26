@@ -1,44 +1,53 @@
 app = require './../app'
 
-module.exports =
-  class SelectField
-    _fieldName: null
-    _unsetOptionText: null
-    _options: null
-    _data: null
+module.exports = class SelectField
+  _name: null
 
-    constructor: (@_fieldName, @_unsetOptionText) ->
+  _entity: null
 
-    init: ->
-      #TODO: load from db here
-      @_options =
-        0: 'Toys'
-        1: 'IT'
-        2: 'Retail'
-        3: 'Finance'
+  _options: null
 
-      @_data = {}
+  _settings: null
 
-    getValue: (recordId) ->
-      @_data[recordId]
+  constructor: (@_entity, @_name, @_options, @_settings) ->
 
-    getDisplayedValue: (recordId) ->
-      @_options[@getValue recordId]
+  _getSelectOptions: ->
+    orderedOptionNames = (@_settings.selectOptions ? "").split '\n'
+    selectOptions = {}
+    for option, index in orderedOptionNames
+      selectOptions[index] = option
 
-    setValue: (recordId, newValue) ->
-      @_data[recordId] = newValue
-      #TODO: persist here
+    return selectOptions
 
-    createEditUI: (recordId) ->
-      select = $ "<select></select>"
-      defaultOption = $ """<option >#{@_unsetOptionText}</option>"""
+  getDisplayedValue: -> @_getSelectOptions()[@_getRawValue()] ? @_options.unsetValueDisplayedText
 
-      select.append defaultOption
-      for optionId, optionName of @_options
-        select.append $ """<option value="#{optionId}">#{optionName}</option>"""
+  _getRawValue: -> @_entity.getFieldValue @_name
 
-      select.val (@getValue recordId)
+  _setValue: (newValue) ->
+    @_entity.setFieldValue @_name, newValue
+    @_entity.save ->
+
+  createValueEditor: ->
+    select = $ "<select></select>"
+    defaultOption = $ "<option >" + @_options.unsetValueDisplayedText + "</option>"
+    select.append defaultOption
+
+    for optionId, optionName of @_getSelectOptions()
+      select.append($("<option value=\"" + optionId + "\">" + optionName + "</option>"))
+
+      select.val @_getRawValue()
       select.change =>
-        #saving value immediately without user confirmation
-        @setValue recordId, select.val()
+        @_setValue select.val()
+
+    return select
+
+  @createSettingsEditor: (currentSettings, settingsUpdateCallback) ->
+    textArea = $ "<textarea></textarea>"
+    optionLines = currentSettings.selectOptions
+    textArea.val optionLines
+    textArea.change =>
+      currentSettings.selectOptions = textArea.val()
+      settingsUpdateCallback currentSettings
+
+    return textArea
 
