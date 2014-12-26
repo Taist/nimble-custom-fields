@@ -1,17 +1,27 @@
+_responseHandlers = []
+_listening = false
+
 module.exports =
-  registerHandler: (responseHandler) ->
+  onRequestFinish: (responseHandler) ->
+    _responseHandlers.push responseHandler
+    if not _listening
+      _listenToRequests()
 
-    XMLHttpRequestSend = XMLHttpRequest::send
-    XMLHttpRequest::send = ->
-      onReady = @onreadystatechange
-      self = this
+_listenToRequests = ->
+  originalSend = XMLHttpRequest.prototype.send
+  XMLHttpRequest.prototype.send = ->
+    _listenForRequestFinish @
+    originalSend.apply @, arguments
 
-      @onreadystatechange = () ->
-        if self.readyState is 4
-          responseHandler self
+_listenForRequestFinish = (request) ->
+  originalOnReadyStateChange = request.onreadystatechange
+  request.onreadystatechange = ->
+    finished = request.readyState is 4
+    if finished
+      for handler in _responseHandlers
+        handler request
 
-        onReady and onReady.apply(self, arguments)
-        return
+    originalOnReadyStateChange?.apply request, arguments
 
-      XMLHttpRequestSend.apply this, arguments
-      return
+
+
