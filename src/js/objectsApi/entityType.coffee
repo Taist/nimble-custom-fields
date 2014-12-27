@@ -12,7 +12,6 @@ module.exports = class EntityType
   _getFieldSettingsDataObjectName: ->
     return "type." + @_name + ".fieldSettings"
 
-
   constructor: (@_taistApi, @_name, @_schema) ->
 
   load: (callback) ->

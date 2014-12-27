@@ -2,32 +2,21 @@ app = require './app'
 industryField = require './industryField'
 
 module.exports =
-  waitToRender: ->
-    renderersByHashes =
-      '^app/deals/view\\\?id=': @_renderInDealViewer,
-      '^app/deals/edit\\\?id=': @_renderInDealEditor,
-      'app/settings/deals': @_renderInSettings
-
-    for hashRegexp, renderer of renderersByHashes
-      do (hashRegexp, renderer) =>
-        app.api.hash.when hashRegexp, =>
-          renderer.apply @
-
-  _renderInDealViewer: ->
+  renderInDealViewer: ->
     app.api.wait.elementRender '.DealView .generalInfo', (parentCell) =>
-        ($ '#taist-industryViewer').remove()
-        parentCell.append """<div id=\"taist-industryViewer\" class=\"dealMainField\">Industry:&nbsp<div >#{industryField.getValueToDisplay @_getDealIdFromUrl()}</div> </div>"""
+      ($ '#taist-industryViewer').remove()
+      parentCell.append """<div id=\"taist-industryViewer\" class=\"dealMainField\">Industry:&nbsp<div >#{industryField.getValueToDisplay @_getDealIdFromUrl()}</div> </div>"""
 
-  _renderInDealEditor: ->
+  renderInDealEditor: ->
     app.api.wait.elementRender '.dealInfoTab .leftColumn', (parentColumn) =>
-        ($ '#taist-industryEditor').remove()
-        industrySelectUI = $ @_industrySelectTemplate
-        (industrySelectUI.find '.taist-selectWrapper').append(industryField.createValueEditor @_getDealIdFromUrl())
-        parentColumn.append industrySelectUI
+      ($ '#taist-industryEditor').remove()
+      industrySelectUI = $ @_industrySelectTemplate
+      (industrySelectUI.find '.taist-selectWrapper').append(industryField.createValueEditor @_getDealIdFromUrl())
+      parentColumn.append industrySelectUI
 
   _getDealIdFromUrl: -> location.hash.substring((location.hash.indexOf '?id=') + 4)
 
-  _renderInSettings: ->
+  renderInSettings: ->
     app.api.wait.elementRender '.SettingsDealsView', (parentEl) =>
       $('.taistSettingsContainer').remove()
       settingsWrapperEl = $ """<div class="taistSettingsContainer"><div class="subHeader">Industries</div><br/><br/></div>"""

@@ -1,7 +1,7 @@
 app = require './app'
 objectsApi = require './objectsApi/objectsApi'
-
-listenForDealsListDisplay = require './handlers/listenForDealsListDisplay'
+industryUI = null
+addIndustryGroupingToDealsList = null
 
 addonEntry =
   start: (_taistApi, entryPoint) ->
@@ -12,13 +12,24 @@ addonEntry =
     #have to set api.objects before requiring industryField
     industryField = require './industryField'
     industryUI = require './industryUI'
+    addIndustryGroupingToDealsList = require './handlers/addIndustryGroupingToDealsList'
 
     setCompanyKey()
     extractNimbleAuthTokenFromRequest()
 
     industryField.load ->
-      listenForDealsListDisplay()
-      industryUI.waitToRender()
+      setRoutes()
+
+setRoutes = ->
+  routesByHashes =
+    'app\/deals\/list': -> addIndustryGroupingToDealsList()
+    '^app/deals/view': -> industryUI.renderInDealViewer(),
+    '^app/deals/edit': -> industryUI.renderInDealEditor(),
+    'app/settings/deals': -> industryUI.renderInSettings()
+
+  for hashRegexp, routeProcessor of routesByHashes
+    do (hashRegexp, routeProcessor) =>
+      app.api.hash.when hashRegexp, routeProcessor
 
 setCompanyKey = ->
   companySubDomain = location.host.substring 0, (location.host.indexOf '.')
