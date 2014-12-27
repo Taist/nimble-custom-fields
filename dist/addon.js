@@ -212,8 +212,8 @@ module.exports = {
   _renderInDealViewer: function() {
     return app.api.wait.elementRender('.DealView .generalInfo', (function(_this) {
       return function(parentCell) {
-        $('#taist-industryViewer').remove();
-        return parentCell.append("<div id=\"taist-industryViewer\" class=\"dealMainField\">Industry:&nbsp;<div >" + (industryField.getValueToDisplay(_this._getDealIdFromUrl())) + "</div> </div>");
+        ($('#taist-industryViewer')).remove();
+        return parentCell.append("<div id=\"taist-industryViewer\" class=\"dealMainField\">Industry:&nbsp<div >" + (industryField.getValueToDisplay(_this._getDealIdFromUrl())) + "</div> </div>");
       };
     })(this));
   },
@@ -221,7 +221,7 @@ module.exports = {
     return app.api.wait.elementRender('.dealInfoTab .leftColumn', (function(_this) {
       return function(parentColumn) {
         var industrySelectUI;
-        $('#taist-industryEditor').remove();
+        ($('#taist-industryEditor')).remove();
         industrySelectUI = $(_this._industrySelectTemplate);
         (industrySelectUI.find('.taist-selectWrapper')).append(industryField.createValueEditor(_this._getDealIdFromUrl()));
         return parentColumn.append(industrySelectUI);
@@ -232,17 +232,18 @@ module.exports = {
     return location.hash.substring((location.hash.indexOf('?id=')) + 4);
   },
   _renderInSettings: function() {
-    return app.api.wait.elementRender('.SettingsDealsView', function(parentEl) {
-      var industrySettingsUI, settingsWrapperEl;
-      $('.taistSettingsContainer').remove();
-      settingsWrapperEl = $('<div class="taistSettingsContainer"><div class="subHeader">Industries</div><br/><br/></div>');
-      parentEl.append(settingsWrapperEl);
-      industrySettingsUI = industryField.createSettingsEditor();
-      console.log("settings ui: ", industrySettingsUI);
-      return settingsWrapperEl.append(industrySettingsUI);
-    });
+    return app.api.wait.elementRender('.SettingsDealsView', (function(_this) {
+      return function(parentEl) {
+        var industrySettingsUI, settingsWrapperEl;
+        $('.taistSettingsContainer').remove();
+        settingsWrapperEl = $("<div class=\"taistSettingsContainer\"><div class=\"subHeader\">Industries</div><br/><br/></div>");
+        parentEl.append(settingsWrapperEl);
+        industrySettingsUI = industryField.createSettingsEditor();
+        return settingsWrapperEl.append(industrySettingsUI);
+      };
+    })(this));
   },
-  _industrySelectTemplate: "<div id=\"taist-industryEditor\">\n  <div class=\"ContactFieldWidget\">\n    <div class=\"label\">industry:</div>\n    <div class=\"inputField taist-selectWrapper\">\n    </div>\n    <img class=\"btnDelete\" src=\"./application/resources/hovericons/ico_delete_large_sub.png\" style=\"display:none;\">\n\n    <div style=\"clear:both;\"></div>\n  </div>\n  <a class=\"addField\" href=\"javascript:;\" style=\"display: none;\">assigned to</a></div>"
+  _industrySelectTemplate: "<div id=\"taist-industryEditor\">\n  <div class=\"ContactFieldWidget\">\n    <div class=\"label\">industry:</div>\n    <div class=\"inputField taist-selectWrapper\">\n    </div>\n    <img class=\"btnDelete\" src=\"./application/resources/hovericons/ico_delete_large_sub.png\" style=\"display:none\">\n\n    <div style=\"clear:both\"></div>\n  </div>\n  <a class=\"addField\" href=\"javascript:\" style=\"display: none\">assigned to</a></div>"
 };
 
 },{"./app":1,"./industryField":4}],6:[function(require,module,exports){
@@ -19068,17 +19069,17 @@ listenForDealsListDisplay = require('./handlers/listenForDealsListDisplay');
 
 addonEntry = {
   start: function(_taistApi, entryPoint) {
-    var industryField, industryFieldUI;
+    var industryField, industryUI;
     _taistApi.objects = objectsApi;
     objectsApi._taistApi = _taistApi;
     app.api = _taistApi;
     industryField = require('./industryField');
-    industryFieldUI = require('./industryFieldUI');
+    industryUI = require('./industryUI');
     setCompanyKey();
     extractNimbleAuthTokenFromRequest();
     return industryField.load(function() {
       listenForDealsListDisplay();
-      return industryFieldUI.waitToRender();
+      return industryUI.waitToRender();
     });
   }
 };
@@ -19104,6 +19105,6 @@ extractNimbleAuthTokenFromRequest = function() {
 
 module.exports = addonEntry;
 
-},{"./app":1,"./handlers/listenForDealsListDisplay":2,"./industryField":4,"./industryFieldUI":5,"./objectsApi/objectsApi":8,"./tools/xmlHttpProxy":20}]},{},[]);
+},{"./app":1,"./handlers/listenForDealsListDisplay":2,"./industryField":4,"./industryUI":5,"./objectsApi/objectsApi":8,"./tools/xmlHttpProxy":20}]},{},[]);
 ;return require("addon")}
 //Just a sample of concat task

@@ -11,14 +11,14 @@ addonEntry =
 
     #have to set api.objects before requiring industryField
     industryField = require './industryField'
-    industryFieldUI = require './industryFieldUI'
+    industryUI = require './industryUI'
 
     setCompanyKey()
     extractNimbleAuthTokenFromRequest()
 
     industryField.load ->
       listenForDealsListDisplay()
-      industryFieldUI.waitToRender()
+      industryUI.waitToRender()
 
 setCompanyKey = ->
   companySubDomain = location.host.substring 0, (location.host.indexOf '.')
