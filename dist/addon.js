@@ -7,72 +7,82 @@ module.exports = {
 };
 
 },{}],2:[function(require,module,exports){
-var addGroupingByIndustry, addIndustryToDeals, app, industryField, industryFieldName, isLoadingInProgress, loadDeals, renderDealsList;
+var addCustomFieldToDeals, addGroupingByIndustry, app, customDealsListClass, customFieldName, findCustomDealsList, groupDealsByCustomField, industryField, loadDealsData, renderCustomDealsList, replaceOriginalListWithCustom;
 
 app = require('../app');
 
 industryField = require('../industryField');
 
-industryFieldName = 'industry';
+customFieldName = 'industry';
 
 module.exports = function() {
-  var groupMatches, groupingCondition, _ref;
+  var fieldToGroup, groupMatches, _ref;
   groupMatches = location.hash.match(/grouped_by=([^&]+)/);
-  groupingCondition = (_ref = groupMatches != null ? groupMatches[1] : void 0) != null ? _ref : 'none';
-  ($('.dealListByIndustry')).hide();
-  if (groupingCondition === 'industry') {
-    return addGroupingByIndustry(groupingCondition);
+  fieldToGroup = (_ref = groupMatches != null ? groupMatches[1] : void 0) != null ? _ref : 'none';
+  findCustomDealsList().remove();
+  addGroupingByIndustry(fieldToGroup);
+  if (fieldToGroup === customFieldName) {
+    return loadDealsData(function(deals) {
+      addCustomFieldToDeals(deals);
+      return renderCustomDealsList(deals);
+    });
   }
 };
 
-addGroupingByIndustry = function(groupingCondition) {
+customDealsListClass = 'taist-dealsListWithCustomGrouping';
+
+findCustomDealsList = function() {
+  return $('.' + customDealsListClass);
+};
+
+addGroupingByIndustry = function(fieldToGroup) {
   var selector;
   selector = '.listHeader .gwt-ListBox';
-  return app.api.wait.elementRender(selector, function(groupingListBox) {
-    var groupingList, isLoadingInProgress;
-    if (!$("option[value=\"" + industryFieldName + "\"]", groupingListBox).size()) {
-      groupingList = groupingListBox[0];
-      $("<option value=\"" + industryFieldName + "\">").text(industryFieldName.replace(/^(\w)/, function(a, b) {
-        return b.toUpperCase();
-      })).appendTo(groupingList);
-      if (groupingCondition === industryFieldName) {
-        $(groupingList).val(industryFieldName);
-      }
+  return app.api.wait.elementRender(selector, function(groupingSelect) {
+    var capitalizedFieldName;
+    if (!$("option[value=\"" + customFieldName + "\"]", groupingSelect).size()) {
+      capitalizedFieldName = customFieldName[0] + (customFieldName.slice(1));
+      groupingSelect.append($("<option value=\"" + customFieldName + "\">" + capitalizedFieldName + "</option>"));
     }
-    if (groupingCondition === industryFieldName) {
-      if (!isLoadingInProgress) {
-        isLoadingInProgress = true;
-        return loadDeals(function(deals) {
-          addIndustryToDeals(deals);
-          renderDealsList(deals);
-          return isLoadingInProgress = false;
-        });
-      }
+    if (fieldToGroup === customFieldName) {
+      return groupingSelect.val(customFieldName);
     }
   });
 };
 
-isLoadingInProgress = false;
+renderCustomDealsList = function(deals) {
+  var GroupedDealList, React, customDealsList, groupedDeals;
+  customDealsList = replaceOriginalListWithCustom();
+  customDealsList.show();
+  groupedDeals = groupDealsByCustomField(deals);
+  React = require('react');
+  GroupedDealList = require('../react/groupedDealList/groupedDealList');
+  return React.render(GroupedDealList({
+    deals: groupedDeals
+  }), customDealsList[0]);
+};
 
-renderDealsList = function(deals) {
-  var GrouppedDealList, React, amount, container, deal, group, groupedDeals, groups, industry, name, simpleList, _i, _len;
+replaceOriginalListWithCustom = function() {
+  var customDealsList, originalDealsList;
   $('.groupGlobalHeader').parent().hide();
   $('.emptyView').hide();
-  simpleList = $('.mainContainer>div>.dealList');
-  simpleList.parent().hide();
-  container = $('.dealListByIndustry');
-  if (!container.size()) {
-    container = $('<div class="dealListByIndustry">');
-    container.insertBefore(simpleList.parent());
-  }
+  originalDealsList = $('.mainContainer>div>.dealList');
+  originalDealsList.parent().hide();
+  customDealsList = $("<div class=\"" + customDealsListClass + "\">");
+  customDealsList.insertBefore(originalDealsList.parent());
+  return customDealsList;
+};
+
+groupDealsByCustomField = function(deals) {
+  var amount, customFieldValue, deal, group, groupedDeals, groups, name, _i, _j, _len, _len1;
   groups = {};
   for (_i = 0, _len = deals.length; _i < _len; _i++) {
     deal = deals[_i];
-    industry = deal.industry;
-    if (groups[industry] == null) {
-      groups[industry] = [];
+    customFieldValue = deal[customFieldName];
+    if (groups[customFieldValue] == null) {
+      groups[customFieldValue] = [];
     }
-    groups[industry].push(deal);
+    groups[customFieldValue].push(deal);
   }
   groupedDeals = [];
   for (name in groups) {
@@ -81,26 +91,21 @@ renderDealsList = function(deals) {
       full: 0,
       weighted: 0
     };
-    group.reduce(function(amount, deal) {
+    for (_j = 0, _len1 = group.length; _j < _len1; _j++) {
+      deal = group[_j];
       amount.full += deal.amount;
       amount.weighted += deal.amount * deal.probability / 100;
-      return amount;
-    }, amount);
+    }
     groupedDeals.push({
       name: name,
       group: group,
       amount: amount
     });
   }
-  container.show();
-  React = require('react');
-  GrouppedDealList = require('../react/grouppedDealList/grouppedDealList');
-  return React.render(GrouppedDealList({
-    deals: groupedDeals
-  }), container[0]);
+  return groupedDeals;
 };
 
-loadDeals = function(callback, loadedDeals, page) {
+loadDealsData = function(callback, loadedDeals, page) {
   if (loadedDeals == null) {
     loadedDeals = [];
   }
@@ -126,7 +131,7 @@ loadDeals = function(callback, loadedDeals, page) {
       });
       meta = data.meta;
       if (meta.has_more) {
-        return loadDeals(callback, loadedDeals, meta.page + 1);
+        return loadDealsData(callback, loadedDeals, meta.page + 1);
       } else {
         return callback(loadedDeals);
       }
@@ -134,7 +139,7 @@ loadDeals = function(callback, loadedDeals, page) {
   });
 };
 
-addIndustryToDeals = function(deals) {
+addCustomFieldToDeals = function(deals) {
   var deal, _i, _len, _results;
   _results = [];
   for (_i = 0, _len = deals.length; _i < _len; _i++) {
@@ -144,7 +149,7 @@ addIndustryToDeals = function(deals) {
   return _results;
 };
 
-},{"../app":1,"../industryField":3,"../react/grouppedDealList/grouppedDealList":14,"react":166}],3:[function(require,module,exports){
+},{"../app":1,"../industryField":3,"../react/groupedDealList/groupedDealList":14,"react":166}],3:[function(require,module,exports){
 var app, deals;
 
 app = require('./app');
@@ -652,7 +657,7 @@ GroupHeader = React.createFactory(React.createClass({
 module.exports = GroupHeader;
 
 },{"./formatAmount":11,"./interface/groupHeader":17,"react":166}],14:[function(require,module,exports){
-var GroupContent, GrouppedDealList, React, div;
+var GroupContent, GroupedDealList, React, div;
 
 React = require('react');
 
@@ -660,7 +665,7 @@ div = React.DOM.div;
 
 GroupContent = require('./groupContent');
 
-GrouppedDealList = React.createFactory(React.createClass({
+GroupedDealList = React.createFactory(React.createClass({
   render: function() {
     return div({}, [
       div({
@@ -679,7 +684,7 @@ GrouppedDealList = React.createFactory(React.createClass({
   }
 }));
 
-module.exports = GrouppedDealList;
+module.exports = GroupedDealList;
 
 },{"./groupContent":12,"./interface/globalHeader":16,"react":166}],15:[function(require,module,exports){
 module.exports = function() {
@@ -19046,7 +19051,7 @@ industryUI = null;
 
 addIndustryGroupingToDealsList = null;
 
-addonEntry = {
+module.exports = addonEntry = {
   start: function(_taistApi, entryPoint) {
     var industryField;
     _taistApi.objects = objectsApi;
@@ -19109,8 +19114,6 @@ extractNimbleAuthTokenFromRequest = function() {
     }
   });
 };
-
-module.exports = addonEntry;
 
 },{"./app":1,"./handlers/addIndustryGroupingToDealsList":2,"./industryField":3,"./industryUI":4,"./objectsApi/objectsApi":7,"./tools/xmlHttpProxy":19}]},{},[]);
 ;return require("addon")}

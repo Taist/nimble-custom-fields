@@ -4,7 +4,7 @@ React = require 'react'
 
 GroupContent = require('./groupContent')
 
-GrouppedDealList = React.createFactory React.createClass
+GroupedDealList = React.createFactory React.createClass
   render: ->
     div {}, [
       div {
@@ -15,4 +15,4 @@ GrouppedDealList = React.createFactory React.createClass
       div { key: 'dealList' }, @props.deals.map (group) -> { group: GroupContent group }
     ]
 
-module.exports = GrouppedDealList
+module.exports = GroupedDealList

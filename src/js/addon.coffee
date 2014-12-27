@@ -3,7 +3,7 @@ objectsApi = require './objectsApi/objectsApi'
 industryUI = null
 addIndustryGroupingToDealsList = null
 
-addonEntry =
+module.exports = addonEntry =
   start: (_taistApi, entryPoint) ->
     _taistApi.objects = objectsApi
     objectsApi._taistApi = _taistApi
@@ -42,6 +42,3 @@ extractNimbleAuthTokenFromRequest = ->
     tokenMatches = url.match /\/api\/sessions\/([0-9abcdef-]{36})\?/
     if tokenMatches?
       app.options.nimbleToken = tokenMatches[1]
-
-module.exports = addonEntry
-
