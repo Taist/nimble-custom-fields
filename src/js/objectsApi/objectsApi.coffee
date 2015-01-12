@@ -1,4 +1,4 @@
-EntityType = require './entityType'
+EntityType = require './entityRepository'
 
 module.exports =
   _typeSchemas: {}

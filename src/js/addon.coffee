@@ -1,24 +1,26 @@
 app = require './app'
-objectsApi = require './objectsApi/objectsApi'
-industryUI = null
-addIndustryGroupingToDealsList = null
+industryField = require './industryField'
+industryUI = require './industryUI'
+addIndustryGroupingToDealsList = require './handlers/addIndustryGroupingToDealsList'
 
 module.exports = addonEntry =
   start: (_taistApi, entryPoint) ->
-    _taistApi.objects = objectsApi
-    objectsApi._taistApi = _taistApi
+    extendTaistApi _taistApi
     app.api = _taistApi
 
-    #have to set api.objects before requiring industryField
-    industryField = require './industryField'
-    industryUI = require './industryUI'
-    addIndustryGroupingToDealsList = require './handlers/addIndustryGroupingToDealsList'
+    #have to set api.objects to init industryField
+    industryField.init()
 
     setCompanyKey()
     extractNimbleAuthTokenFromRequest()
 
     industryField.load ->
       setRoutes()
+
+extendTaistApi = (taistApi) ->
+  objectsApi = require './objectsApi/objectsApi'
+  taistApi.objects = objectsApi
+  objectsApi._taistApi = taistApi
 
 setRoutes = ->
   routesByHashes =

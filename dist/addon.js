@@ -150,27 +150,22 @@ addCustomFieldToDeals = function(deals) {
 };
 
 },{"../app":1,"../industryField":3,"../react/groupedDealList/groupedDealList":14,"react":166}],3:[function(require,module,exports){
-var app, deals;
+var app, dealsDescription, _deals;
 
 app = require('./app');
 
-app.api.objects.registerType("deals", {
-  fields: {
-    industry: {
-      type: 'select',
-      unsetValueDisplayedText: "Not specified"
-    }
-  }
-});
-
-deals = app.api.objects.getType("deals");
+_deals = null;
 
 module.exports = {
+  init: function() {
+    app.api.objects.registerType("deals", dealsDescription);
+    return _deals = app.api.objects.getType("deals");
+  },
   load: function(callback) {
-    return deals.load(callback);
+    return _deals.load(callback);
   },
   _getFieldEditor: function(dealId) {
-    return deals.getFieldValueEditor("industry", deals.getEntity(dealId));
+    return _deals.getFieldValueEditor("industry", _deals.getEntity(dealId));
   },
   getValueToDisplay: function(dealId) {
     return (this._getFieldEditor(dealId)).getDisplayedValue();
@@ -179,7 +174,16 @@ module.exports = {
     return (this._getFieldEditor(dealId)).createValueEditor();
   },
   createSettingsEditor: function() {
-    return deals.createFieldSettingsEditor("industry");
+    return _deals.createFieldSettingsEditor("industry");
+  }
+};
+
+dealsDescription = {
+  fields: {
+    industry: {
+      type: 'select',
+      unsetValueDisplayedText: "Not specified"
+    }
   }
 };
 
@@ -261,36 +265,36 @@ module.exports = Entity = (function() {
 })();
 
 },{}],6:[function(require,module,exports){
-var Entity, EntityType;
+var Entity, EntityRepository;
 
 Entity = require('./entity');
 
-module.exports = EntityType = (function() {
-  EntityType.prototype._entities = null;
+module.exports = EntityRepository = (function() {
+  EntityRepository.prototype._entities = null;
 
-  EntityType.prototype._taistApi = null;
+  EntityRepository.prototype._taistApi = null;
 
-  EntityType.prototype._schema = null;
+  EntityRepository.prototype._schema = null;
 
-  EntityType.prototype._name = null;
+  EntityRepository.prototype._entityTypeName = null;
 
-  EntityType.prototype._fieldSettings = null;
+  EntityRepository.prototype._fieldSettings = null;
 
-  EntityType.prototype._getEntityDataObjectName = function() {
-    return "type.#@_name.entities";
+  EntityRepository.prototype._getEntityDataObjectName = function() {
+    return "type." + this._name + ".entities";
   };
 
-  EntityType.prototype._getFieldSettingsDataObjectName = function() {
-    return "type." + this._name + ".fieldSettings";
+  EntityRepository.prototype._getFieldSettingsDataObjectName = function() {
+    return "type." + this._entityTypeName + ".fieldSettings";
   };
 
-  function EntityType(_taistApi, _name, _schema) {
+  function EntityRepository(_taistApi, _entityTypeName, _schema) {
     this._taistApi = _taistApi;
-    this._name = _name;
+    this._entityTypeName = _entityTypeName;
     this._schema = _schema;
   }
 
-  EntityType.prototype.load = function(callback) {
+  EntityRepository.prototype.load = function(callback) {
     return this._loadEntityData((function(_this) {
       return function() {
         return _this._loadFieldSettings(function() {
@@ -300,7 +304,7 @@ module.exports = EntityType = (function() {
     })(this));
   };
 
-  EntityType.prototype._loadEntityData = function(callback) {
+  EntityRepository.prototype._loadEntityData = function(callback) {
     return this._taistApi.companyData.get(this._getEntityDataObjectName(), (function(_this) {
       return function(err, allEntitiesData) {
         var entityData, entityId;
@@ -316,7 +320,7 @@ module.exports = EntityType = (function() {
     })(this));
   };
 
-  EntityType.prototype._loadFieldSettings = function(callback) {
+  EntityRepository.prototype._loadFieldSettings = function(callback) {
     return this._taistApi.companyData.get(this._getFieldSettingsDataObjectName(), (function(_this) {
       return function(err, res) {
         _this._fieldSettings = res != null ? res : {};
@@ -325,20 +329,20 @@ module.exports = EntityType = (function() {
     })(this));
   };
 
-  EntityType.prototype._createEntity = function(id, data) {
+  EntityRepository.prototype._createEntity = function(id, data) {
     return new Entity(this, id, data);
   };
 
-  EntityType.prototype._saveEntity = function(entity, callback) {
+  EntityRepository.prototype._saveEntity = function(entity, callback) {
     return this._taistApi.companyData.setPart(this._getEntityDataObjectName(), entity._id, entity._data, callback);
   };
 
-  EntityType.prototype.getEntity = function(entityId) {
+  EntityRepository.prototype.getEntity = function(entityId) {
     var _base;
     return (_base = this._entities)[entityId] != null ? _base[entityId] : _base[entityId] = this._createEntity(entityId, {});
   };
 
-  EntityType.prototype.getFieldValueEditor = function(fieldName, entity) {
+  EntityRepository.prototype.getFieldValueEditor = function(fieldName, entity) {
     var fieldOptions, fieldUI, fieldUIConstructor;
     fieldOptions = this._schema.fields[fieldName];
     fieldUIConstructor = this._taistApi.objects.fieldEditors[fieldOptions.type];
@@ -346,12 +350,12 @@ module.exports = EntityType = (function() {
     return fieldUI;
   };
 
-  EntityType.prototype._getFieldSettings = function(fieldName) {
+  EntityRepository.prototype._getFieldSettings = function(fieldName) {
     var _base;
     return (_base = this._fieldSettings)[fieldName] != null ? _base[fieldName] : _base[fieldName] = {};
   };
 
-  EntityType.prototype.createFieldSettingsEditor = function(fieldName) {
+  EntityRepository.prototype.createFieldSettingsEditor = function(fieldName) {
     var fieldOptions, fieldUIConstructor, settingsUpdateCallback;
     fieldOptions = this._schema.fields[fieldName];
     fieldUIConstructor = this._taistApi.objects.fieldEditors[fieldOptions.type];
@@ -364,18 +368,18 @@ module.exports = EntityType = (function() {
     return fieldUIConstructor.createSettingsEditor(this._getFieldSettings(fieldName), settingsUpdateCallback);
   };
 
-  EntityType.prototype._saveFieldSettings = function() {
+  EntityRepository.prototype._saveFieldSettings = function() {
     return this._taistApi.companyData.set(this._getFieldSettingsDataObjectName(), this._fieldSettings, function() {});
   };
 
-  return EntityType;
+  return EntityRepository;
 
 })();
 
 },{"./entity":5}],7:[function(require,module,exports){
 var EntityType;
 
-EntityType = require('./entityType');
+EntityType = require('./entityRepository');
 
 module.exports = {
   _typeSchemas: {},
@@ -396,7 +400,7 @@ module.exports = {
   }
 };
 
-},{"./entityType":6,"./selectField":8}],8:[function(require,module,exports){
+},{"./entityRepository":6,"./selectField":8}],8:[function(require,module,exports){
 var SelectField, app;
 
 app = require('./../app');
@@ -19041,31 +19045,34 @@ module.exports = warning;
 module.exports = require('./lib/React');
 
 },{"./lib/React":48}],"addon":[function(require,module,exports){
-var addIndustryGroupingToDealsList, addonEntry, app, extractNimbleAuthTokenFromRequest, industryUI, objectsApi, setCompanyKey, setRoutes;
+var addIndustryGroupingToDealsList, addonEntry, app, extendTaistApi, extractNimbleAuthTokenFromRequest, industryField, industryUI, setCompanyKey, setRoutes;
 
 app = require('./app');
 
-objectsApi = require('./objectsApi/objectsApi');
+industryField = require('./industryField');
 
-industryUI = null;
+industryUI = require('./industryUI');
 
-addIndustryGroupingToDealsList = null;
+addIndustryGroupingToDealsList = require('./handlers/addIndustryGroupingToDealsList');
 
 module.exports = addonEntry = {
   start: function(_taistApi, entryPoint) {
-    var industryField;
-    _taistApi.objects = objectsApi;
-    objectsApi._taistApi = _taistApi;
+    extendTaistApi(_taistApi);
     app.api = _taistApi;
-    industryField = require('./industryField');
-    industryUI = require('./industryUI');
-    addIndustryGroupingToDealsList = require('./handlers/addIndustryGroupingToDealsList');
+    industryField.init();
     setCompanyKey();
     extractNimbleAuthTokenFromRequest();
     return industryField.load(function() {
       return setRoutes();
     });
   }
+};
+
+extendTaistApi = function(taistApi) {
+  var objectsApi;
+  objectsApi = require('./objectsApi/objectsApi');
+  taistApi.objects = objectsApi;
+  return objectsApi._taistApi = taistApi;
 };
 
 setRoutes = function() {

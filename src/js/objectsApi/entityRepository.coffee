@@ -1,18 +1,18 @@
 Entity = require './entity'
 
-module.exports = class EntityType
+module.exports = class EntityRepository
   _entities: null
   _taistApi: null
   _schema: null
-  _name: null
+  _entityTypeName: null
   _fieldSettings: null
 
-  _getEntityDataObjectName: -> """type.#@_name.entities"""
+  _getEntityDataObjectName: -> """type.#{@_name}.entities"""
 
   _getFieldSettingsDataObjectName: ->
-    return "type." + @_name + ".fieldSettings"
+    return """type.#{@_entityTypeName}.fieldSettings"""
 
-  constructor: (@_taistApi, @_name, @_schema) ->
+  constructor: (@_taistApi, @_entityTypeName, @_schema) ->
 
   load: (callback) ->
     @_loadEntityData =>
@@ -40,13 +40,11 @@ module.exports = class EntityType
   getEntity: (entityId) ->
     @_entities[entityId] ?= @_createEntity entityId, {}
 
-
   getFieldValueEditor: (fieldName, entity) ->
     fieldOptions = @_schema.fields[fieldName]
     fieldUIConstructor = @_taistApi.objects.fieldEditors[fieldOptions.type]
     fieldUI = new fieldUIConstructor entity, fieldName, fieldOptions, @_getFieldSettings fieldName
     return fieldUI
-
 
   _getFieldSettings: (fieldName) -> @_fieldSettings[fieldName] ?= {}
 
@@ -58,7 +56,6 @@ module.exports = class EntityType
       @_saveFieldSettings()
 
     return fieldUIConstructor.createSettingsEditor @_getFieldSettings(fieldName), settingsUpdateCallback
-
 
   _saveFieldSettings: -> @_taistApi.companyData.set @_getFieldSettingsDataObjectName(), @_fieldSettings, ->
 
