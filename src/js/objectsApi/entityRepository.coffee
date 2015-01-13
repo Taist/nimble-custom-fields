@@ -43,7 +43,9 @@ module.exports = class EntityRepository
   getFieldValueEditor: (fieldName, entity) ->
     fieldOptions = @_schema.fields[fieldName]
     fieldUIConstructor = @_taistApi.objects.fieldEditors[fieldOptions.type]
-    fieldUI = new fieldUIConstructor entity, fieldName, fieldOptions, @_getFieldSettings fieldName
+    fieldUI = new fieldUIConstructor (entity.getFieldValue fieldName), fieldOptions, (@_getFieldSettings fieldName), (newValue) ->
+      entity.setFieldValue fieldName, newValue
+      entity.save ->
     return fieldUI
 
   _getFieldSettings: (fieldName) -> @_fieldSettings[fieldName] ?= {}

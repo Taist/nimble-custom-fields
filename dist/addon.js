@@ -144,7 +144,7 @@ addCustomFieldToDeals = function(deals) {
   _results = [];
   for (_i = 0, _len = deals.length; _i < _len; _i++) {
     deal = deals[_i];
-    _results.push(deal.industry = industryField.getValueToDisplay(deal.id));
+    _results.push(deal.industry = industryField.getIndustryName(deal.id));
   }
   return _results;
 };
@@ -159,22 +159,38 @@ _deals = null;
 module.exports = {
   init: function() {
     app.api.objects.registerType("deals", dealsDescription);
-    return _deals = app.api.objects.getType("deals");
+    return _deals = app.api.objects.getTypeRepository("deals");
   },
   load: function(callback) {
     return _deals.load(callback);
   },
-  _getFieldEditor: function(dealId) {
-    return _deals.getFieldValueEditor("industry", _deals.getEntity(dealId));
-  },
-  getValueToDisplay: function(dealId) {
-    return (this._getFieldEditor(dealId)).getDisplayedValue();
+  _getFieldEditor: function(dealId, customOnValueChange) {
+    return _deals.getFieldValueEditor("industry", _deals.getEntity(dealId), customOnValueChange);
   },
   createValueEditor: function(dealId) {
     return (this._getFieldEditor(dealId)).createValueEditor();
   },
+  getIndustryName: function(dealId) {
+    return (this._getFieldEditor(dealId)).getDisplayedValue();
+  },
   createSettingsEditor: function() {
     return _deals.createFieldSettingsEditor("industry");
+  },
+  createValueEditorForNewDeal: function(onValueChange) {
+    var fieldOptions, fieldUI, fieldUIConstructor;
+    fieldOptions = _deals._schema.fields["industry"];
+    fieldUIConstructor = app.api.objects.fieldEditors[fieldOptions.type];
+    fieldUI = new fieldUIConstructor(null, fieldOptions, _deals._getFieldSettings("industry"), function(newValue) {
+      return onValueChange(newValue);
+    });
+    window.fieldUI = fieldUI;
+    return fieldUI.createValueEditor();
+  },
+  setIndustryInDeal: function(dealId, industryId, callback) {
+    var deal;
+    deal = _deals.getEntity(dealId);
+    deal.setFieldValue("industry", industryId);
+    return deal.save(callback);
   }
 };
 
@@ -195,20 +211,54 @@ app = require('./app');
 industryField = require('./industryField');
 
 module.exports = {
+  _industryForNewDeal: null,
+  renderInNewDealDialog: function() {
+    return app.api.wait.elementRender('.DealCreateForm tbody', (function(_this) {
+      return function(dealCreateFormTable) {
+        var industryEditor, industrySelectUI, previousRow;
+        industrySelectUI = $(_this._industrySelectInDealCreationTemplate);
+        industryEditor = industryField.createValueEditorForNewDeal(function(selectedIndustry) {
+          _this._industryForNewDeal = selectedIndustry;
+          return app.api.log("industry for new deal: ", _this._industryForNewDeal);
+        });
+        (industrySelectUI.find('.taist-selectWrapper')).append(industryEditor);
+        previousRow = (dealCreateFormTable.find('.fieldCell.stage')).parent();
+        console.log("rendering: ", industrySelectUI, dealCreateFormTable);
+        return previousRow.after(industrySelectUI);
+      };
+    })(this));
+  },
   renderInDealViewer: function() {
     return app.api.wait.elementRender('.DealView .generalInfo', (function(_this) {
       return function(parentCell) {
-        ($('#taist-industryViewer')).remove();
-        return parentCell.append("<div id=\"taist-industryViewer\" class=\"dealMainField\">Industry:&nbsp<div >" + (industryField.getValueToDisplay(_this._getDealIdFromUrl())) + "</div> </div>");
+        return _this._saveIndustryForFreshlyCreatedDeal(function() {
+          return _this._displayIndustryInDealViewer(parentCell);
+        });
       };
     })(this));
+  },
+  _saveIndustryForFreshlyCreatedDeal: function(callback) {
+    if (this._industryForNewDeal != null) {
+      return industryField.setIndustryInDeal(this._getDealIdFromUrl(), this._industryForNewDeal, (function(_this) {
+        return function() {
+          _this._industryForNewDeal = null;
+          return callback();
+        };
+      })(this));
+    } else {
+      return callback();
+    }
+  },
+  _displayIndustryInDealViewer: function(parentCell) {
+    ($('#taist-industryViewer')).remove();
+    return parentCell.append("<div id=\"taist-industryViewer\" class=\"dealMainField\">Industry:&nbsp<div >" + (industryField.getIndustryName(this._getDealIdFromUrl())) + "</div> </div>");
   },
   renderInDealEditor: function() {
     return app.api.wait.elementRender('.dealInfoTab .leftColumn', (function(_this) {
       return function(parentColumn) {
         var industrySelectUI;
         ($('#taist-industryEditor')).remove();
-        industrySelectUI = $(_this._industrySelectTemplate);
+        industrySelectUI = $(_this._industrySelectInDealEditTemplate);
         (industrySelectUI.find('.taist-selectWrapper')).append(industryField.createValueEditor(_this._getDealIdFromUrl()));
         return parentColumn.append(industrySelectUI);
       };
@@ -229,7 +279,8 @@ module.exports = {
       };
     })(this));
   },
-  _industrySelectTemplate: "<div id=\"taist-industryEditor\">\n  <div class=\"ContactFieldWidget\">\n    <div class=\"label\">industry:</div>\n    <div class=\"inputField taist-selectWrapper\">\n    </div>\n    <img class=\"btnDelete\" src=\"./application/resources/hovericons/ico_delete_large_sub.png\" style=\"display:none\">\n\n    <div style=\"clear:both\"></div>\n  </div>\n  <a class=\"addField\" href=\"javascript:\" style=\"display: none\">assigned to</a></div>"
+  _industrySelectInDealEditTemplate: "<div id=\"taist-industryEditor\">\n  <div class=\"ContactFieldWidget\">\n    <div class=\"label\">industry:</div>\n    <div class=\"inputField taist-selectWrapper\"></div>\n\n    <div style=\"clear:both\"></div>\n  </div>\n</div>",
+  _industrySelectInDealCreationTemplate: "<tr>\n  <td class=\"labelCell\">Industry:</td>\n</tr>\n<tr>\n  <td class=\'fieldCell\'>\n    <div class=\'nmbl-FormListBox\'>\n      <div class=\"taist-selectWrapper\">\n    </div>\n  </td>\n</tr>\n"
 };
 
 },{"./app":1,"./industryField":3}],5:[function(require,module,exports){
@@ -346,7 +397,10 @@ module.exports = EntityRepository = (function() {
     var fieldOptions, fieldUI, fieldUIConstructor;
     fieldOptions = this._schema.fields[fieldName];
     fieldUIConstructor = this._taistApi.objects.fieldEditors[fieldOptions.type];
-    fieldUI = new fieldUIConstructor(entity, fieldName, fieldOptions, this._getFieldSettings(fieldName));
+    fieldUI = new fieldUIConstructor(entity.getFieldValue(fieldName), fieldOptions, this._getFieldSettings(fieldName), function(newValue) {
+      entity.setFieldValue(fieldName, newValue);
+      return entity.save(function() {});
+    });
     return fieldUI;
   };
 
@@ -377,20 +431,20 @@ module.exports = EntityRepository = (function() {
 })();
 
 },{"./entity":5}],7:[function(require,module,exports){
-var EntityType;
+var EntityRepository;
 
-EntityType = require('./entityRepository');
+EntityRepository = require('./entityRepository');
 
 module.exports = {
   _typeSchemas: {},
   _taistApi: null,
-  getType: function(name) {
+  getTypeRepository: function(name) {
     var schema;
     schema = this._typeSchemas[name];
     if (schema == null) {
-      throw new Exception("Attempt to get type " + name + " that is not set yet");
+      throw new Exception("Attempt to get type " + name + " that is not registered yet");
     }
-    return new EntityType(this._taistApi, name, schema);
+    return new EntityRepository(this._taistApi, name, schema);
   },
   registerType: function(name, schema) {
     return this._typeSchemas[name] = schema;
@@ -406,19 +460,19 @@ var SelectField, app;
 app = require('./../app');
 
 module.exports = SelectField = (function() {
-  SelectField.prototype._name = null;
-
-  SelectField.prototype._entity = null;
+  SelectField.prototype._value = null;
 
   SelectField.prototype._options = null;
 
   SelectField.prototype._settings = null;
 
-  function SelectField(_entity, _name, _options, _settings) {
-    this._entity = _entity;
-    this._name = _name;
+  SelectField.prototype._onValueChange = null;
+
+  function SelectField(_value, _options, _settings, _onValueChange) {
+    this._value = _value;
     this._options = _options;
     this._settings = _settings;
+    this._onValueChange = _onValueChange;
   }
 
   SelectField.prototype._getSelectOptions = function() {
@@ -434,16 +488,14 @@ module.exports = SelectField = (function() {
 
   SelectField.prototype.getDisplayedValue = function() {
     var _ref;
-    return (_ref = this._getSelectOptions()[this._getRawValue()]) != null ? _ref : this._options.unsetValueDisplayedText;
-  };
-
-  SelectField.prototype._getRawValue = function() {
-    return this._entity.getFieldValue(this._name);
+    return (_ref = this._getSelectOptions()[this._value]) != null ? _ref : this._options.unsetValueDisplayedText;
   };
 
   SelectField.prototype._setValue = function(newValue) {
-    this._entity.setFieldValue(this._name, newValue);
-    return this._entity.save(function() {});
+    if (typeof this._onValueChange === "function") {
+      this._onValueChange(newValue);
+    }
+    return this._value = newValue;
   };
 
   SelectField.prototype.createValueEditor = function() {
@@ -455,7 +507,7 @@ module.exports = SelectField = (function() {
     for (optionId in _ref) {
       optionName = _ref[optionId];
       select.append($("<option value=\"" + optionId + "\">" + optionName + "</option>"));
-      select.val(this._getRawValue());
+      select.val(this._value);
       select.change((function(_this) {
         return function() {
           return _this._setValue(select.val());
@@ -19063,7 +19115,21 @@ module.exports = addonEntry = {
     setCompanyKey();
     extractNimbleAuthTokenFromRequest();
     return industryField.load(function() {
-      return setRoutes();
+      setRoutes({
+        'app\/deals\/list': function() {
+          return addIndustryGroupingToDealsList();
+        },
+        '^app/deals/view': function() {
+          return industryUI.renderInDealViewer();
+        },
+        '^app/deals/edit': function() {
+          return industryUI.renderInDealEditor();
+        },
+        'app/settings/deals': function() {
+          return industryUI.renderInSettings();
+        }
+      });
+      return industryUI.renderInNewDealDialog();
     });
   }
 };
@@ -19075,22 +19141,8 @@ extendTaistApi = function(taistApi) {
   return objectsApi._taistApi = taistApi;
 };
 
-setRoutes = function() {
-  var hashRegexp, routeProcessor, routesByHashes, _results;
-  routesByHashes = {
-    'app\/deals\/list': function() {
-      return addIndustryGroupingToDealsList();
-    },
-    '^app/deals/view': function() {
-      return industryUI.renderInDealViewer();
-    },
-    '^app/deals/edit': function() {
-      return industryUI.renderInDealEditor();
-    },
-    'app/settings/deals': function() {
-      return industryUI.renderInSettings();
-    }
-  };
+setRoutes = function(routesByHashes) {
+  var hashRegexp, routeProcessor, _results;
   _results = [];
   for (hashRegexp in routesByHashes) {
     routeProcessor = routesByHashes[hashRegexp];

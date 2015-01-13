@@ -15,20 +15,21 @@ module.exports = addonEntry =
     extractNimbleAuthTokenFromRequest()
 
     industryField.load ->
-      setRoutes()
+      setRoutes {
+        'app\/deals\/list': -> addIndustryGroupingToDealsList()
+        '^app/deals/view': -> industryUI.renderInDealViewer(),
+        '^app/deals/edit': -> industryUI.renderInDealEditor(),
+        'app/settings/deals': -> industryUI.renderInSettings()
+      }
+
+      industryUI.renderInNewDealDialog()
 
 extendTaistApi = (taistApi) ->
   objectsApi = require './objectsApi/objectsApi'
   taistApi.objects = objectsApi
   objectsApi._taistApi = taistApi
 
-setRoutes = ->
-  routesByHashes =
-    'app\/deals\/list': -> addIndustryGroupingToDealsList()
-    '^app/deals/view': -> industryUI.renderInDealViewer(),
-    '^app/deals/edit': -> industryUI.renderInDealEditor(),
-    'app/settings/deals': -> industryUI.renderInSettings()
-
+setRoutes = (routesByHashes) ->
   for hashRegexp, routeProcessor of routesByHashes
     do (hashRegexp, routeProcessor) =>
       app.api.hash.when hashRegexp, routeProcessor

@@ -94,4 +94,4 @@ loadDealsData = (callback, loadedDeals = [], page = 1) ->
 
 addCustomFieldToDeals = (deals) ->
   for deal in deals
-    deal.industry = industryField.getValueToDisplay deal.id
+    deal.industry = industryField.getIndustryName deal.id

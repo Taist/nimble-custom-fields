@@ -1,19 +1,18 @@
-EntityType = require './entityRepository'
+EntityRepository = require './entityRepository'
 
 module.exports =
   _typeSchemas: {}
   _taistApi: null
-  getType: (name) ->
+  getTypeRepository: (name) ->
     schema = @_typeSchemas[name]
     if not schema?
-      throw new Exception "Attempt to get type " + name + " that is not set yet"
+      throw new Exception """Attempt to get type #{name} that is not registered yet"""
 
-    return new EntityType @_taistApi, name, schema
+    return new EntityRepository @_taistApi, name, schema
 
   registerType: (name, schema) -> @_typeSchemas[name] = schema
 
   fieldEditors:
     select: require './selectField'
-  
 
 

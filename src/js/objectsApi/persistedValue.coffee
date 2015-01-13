@@ -11,5 +11,5 @@ module.exports = class PersistedValue
 
   get: -> @_value
 
-  set: (newValue, callback)
+  set: (newValue, callback) ->
 

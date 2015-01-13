@@ -1,15 +1,15 @@
 app = require './../app'
 
 module.exports = class SelectField
-  _name: null
-
-  _entity: null
+  _value: null
 
   _options: null
 
   _settings: null
 
-  constructor: (@_entity, @_name, @_options, @_settings) ->
+  _onValueChange: null
+
+  constructor: (@_value, @_options, @_settings, @_onValueChange) ->
 
   _getSelectOptions: ->
     orderedOptionNames = (@_settings.selectOptions ? "").split '\n'
@@ -19,13 +19,11 @@ module.exports = class SelectField
 
     return selectOptions
 
-  getDisplayedValue: -> @_getSelectOptions()[@_getRawValue()] ? @_options.unsetValueDisplayedText
-
-  _getRawValue: -> @_entity.getFieldValue @_name
+  getDisplayedValue: -> @_getSelectOptions()[@_value] ? @_options.unsetValueDisplayedText
 
   _setValue: (newValue) ->
-    @_entity.setFieldValue @_name, newValue
-    @_entity.save ->
+    @_onValueChange? newValue
+    @_value = newValue
 
   createValueEditor: ->
     select = $ "<select></select>"
@@ -35,7 +33,7 @@ module.exports = class SelectField
     for optionId, optionName of @_getSelectOptions()
       select.append($("<option value=\"" + optionId + "\">" + optionName + "</option>"))
 
-      select.val @_getRawValue()
+      select.val @_value
       select.change =>
         @_setValue select.val()
 
