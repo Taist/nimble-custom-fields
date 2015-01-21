@@ -7,7 +7,7 @@ module.exports = class EntityRepository
   _entityTypeName: null
   _fieldSettings: null
 
-  _getEntityDataObjectName: -> """type.#{@_name}.entities"""
+  _getEntityDataObjectName: -> """type.#{@_entityTypeName}.entities"""
 
   _getFieldSettingsDataObjectName: ->
     return """type.#{@_entityTypeName}.fieldSettings"""

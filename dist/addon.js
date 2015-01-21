@@ -332,7 +332,7 @@ module.exports = EntityRepository = (function() {
   EntityRepository.prototype._fieldSettings = null;
 
   EntityRepository.prototype._getEntityDataObjectName = function() {
-    return "type." + this._name + ".entities";
+    return "type." + this._entityTypeName + ".entities";
   };
 
   EntityRepository.prototype._getFieldSettingsDataObjectName = function() {
