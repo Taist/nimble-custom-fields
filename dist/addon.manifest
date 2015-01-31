@@ -4,5 +4,6 @@
   "siteRegexp": "*.nimble.com",
   "siteName":"Nimble",
   "title":"Custom field 'Industry' for a deal",
-  "shortDescription":""
+  "shortDescription":"Adds 'Industry' field to a deal",
+  "description": "./addon_description.md"
 }
