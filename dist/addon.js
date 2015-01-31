@@ -150,60 +150,147 @@ addCustomFieldToDeals = function(deals) {
 };
 
 },{"../app":1,"../industryField":3,"../react/groupedDealList/groupedDealList":14,"react":166}],3:[function(require,module,exports){
-var app, dealsDescription, _deals;
+var app, checkedMethod, industryField, industryNameField, notSpecifiedCaption, selectField, _deals, _industries;
 
 app = require('./app');
 
+selectField = require('./objectsApi/selectField');
+
 _deals = null;
+
+_industries = null;
+
+industryField = "industry";
+
+industryNameField = "name";
+
+notSpecifiedCaption = "Not specified";
 
 module.exports = {
   init: function() {
-    app.api.objects.registerType("deals", dealsDescription);
-    return _deals = app.api.objects.getTypeRepository("deals");
+    app.api.objects.registerType("deals", {
+      fields: [industryField]
+    });
+    app.api.objects.registerType(industryField, {
+      fields: [industryNameField]
+    });
+    _deals = app.api.objects.getTypeRepository("deals");
+    return _industries = app.api.objects.getTypeRepository(industryField);
   },
   load: function(callback) {
-    return _deals.load(callback);
-  },
-  _getFieldEditor: function(dealId, customOnValueChange) {
-    return _deals.getFieldValueEditor("industry", _deals.getEntity(dealId), customOnValueChange);
+    return _deals.load(function() {
+      return _industries.load(function() {
+        _industries.entities = {
+          1: {
+            name: "IT"
+          },
+          2: {
+            name: "Health"
+          },
+          3: {
+            name: "Transportation"
+          },
+          4: {
+            name: "Finance"
+          }
+        };
+        return callback();
+      });
+    });
   },
   createValueEditor: function(dealId) {
-    return (this._getFieldEditor(dealId)).createValueEditor();
+    var entity;
+    entity = _deals.getEntity(dealId);
+    return this._createIndustryEditor(entity.getFieldValue(industryField), function(newValue) {
+      entity.setFieldValue(industryField, newValue);
+      return entity.save(function() {});
+    });
   },
   getIndustryName: function(dealId) {
-    return (this._getFieldEditor(dealId)).getDisplayedValue();
+    var deal, industryId, industryName;
+    deal = _deals.getEntity(dealId);
+    industryId = deal.getFieldValue(industryField);
+    if (industryId != null) {
+      industryName = (_industries.getEntity(industryId)).getFieldValue(industryNameField);
+    }
+    return industryName != null ? industryName : industryName = notSpecifiedCaption;
   },
-  createSettingsEditor: function() {
-    return _deals.createFieldSettingsEditor("industry");
+  createIndustriesListEditor: function() {
+    var industriesTable, industry, listEditorDiv, _i, _len, _ref;
+    listEditorDiv = $("<div class=\"stagesContainer\">\n  <div class=\"tableHeaders\">\n    <div class=\"name\">Name</div>\n  </div>\n  <div style=\"position: relative; overflow: hidden;\">\n    <table cellspacing=\"0\" cellpadding=\"0\" class=\"industriesList stageList\">\n      <tbody>\n      </tbody>\n    </table>\n  </div>\n</div>");
+    industriesTable = listEditorDiv.find('.industriesList tbody');
+    _ref = this._getOrderedIndustriesList();
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      industry = _ref[_i];
+      console.log('rendering industry: ', industry);
+      industriesTable.append($("<tr>\n  <td align=\"left\" style=\"vertical-align: top;\">\n    <div class=\"StageWidget \">\n      <div class=\"viewContainer\">\n        <div class=\"hoverContainer\"><a class=\"delete\" aria-hidden=\"true\"\n                                       style=\"display: none;\">Delete</a> <a >Edit</a>\n\n          <div style=\"clear:both\"></div>\n        </div>\n        <div class=\"stageName\">" + (industry.getFieldValue("name")) + "</div>\n      </div>\n\n    </div>\n  </td>\n</tr>\n"));
+    }
+    return listEditorDiv;
+  },
+  _createIndustryEditor: function(currentIndustryId, onValueChange) {
+    var fieldUI, industry, industryListValues;
+    industryListValues = (function() {
+      var _i, _len, _ref, _results;
+      _ref = this._getOrderedIndustriesList();
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        industry = _ref[_i];
+        _results.push({
+          id: industry._id,
+          value: industry.name
+        });
+      }
+      return _results;
+    }).call(this);
+    fieldUI = new selectField(currentIndustryId, industryListValues, onValueChange);
+    return fieldUI.createValueEditor();
+  },
+  _getOrderedIndustriesList: function() {
+    return _industries.getAllEntities().sort(function(i1, i2) {
+      var name1, name2;
+      name1 = i1.getFieldValue(industryNameField);
+      name2 = i2.getFieldValue(industryNameField);
+      if (name1 > name2) {
+        return 1;
+      } else if (name1 < name2) {
+        return -1;
+      } else {
+        return 0;
+      }
+    });
   },
   createValueEditorForNewDeal: function(onValueChange) {
-    var fieldOptions, fieldUI, fieldUIConstructor;
-    fieldOptions = _deals._schema.fields["industry"];
-    fieldUIConstructor = app.api.objects.fieldEditors[fieldOptions.type];
-    fieldUI = new fieldUIConstructor(null, fieldOptions, _deals._getFieldSettings("industry"), function(newValue) {
-      return onValueChange(newValue);
-    });
-    window.fieldUI = fieldUI;
-    return fieldUI.createValueEditor();
+    return this._createIndustryEditor(null, onValueChange);
   },
   setIndustryInDeal: function(dealId, industryId, callback) {
     var deal;
     deal = _deals.getEntity(dealId);
-    deal.setFieldValue("industry", industryId);
+    deal.setFieldValue(industryField, industryId);
     return deal.save(callback);
   }
 };
 
-dealsDescription = {
-  fields: {
-    industry: {
-      type: 'select',
-      unsetValueDisplayedText: "Not specified"
-    }
-  }
+checkedMethod = function(foo, bar) {
+  throw "not implemented";
 };
 
-},{"./app":1}],4:[function(require,module,exports){
+checkedMethod = check({
+  foo: {
+    is: FooClass
+  },
+  bar: {
+    is: barClass,
+    fields: {
+      baz: function(b) {
+        return b.length > 3;
+      }
+    }
+  }
+}, function(foo, bar) {
+  throw "not implemented";
+});
+
+},{"./app":1,"./objectsApi/selectField":8}],4:[function(require,module,exports){
 var app, industryField;
 
 app = require('./app');
@@ -272,9 +359,9 @@ module.exports = {
       return function(parentEl) {
         var industrySettingsUI, settingsWrapperEl;
         $('.taistSettingsContainer').remove();
-        settingsWrapperEl = $("<div class=\"taistSettingsContainer\"><div class=\"subHeader\">Industries</div><br/><br/></div>");
+        settingsWrapperEl = $("<div class=\"taistSettingsContainer\"><div class=\"subHeader\">Industries</div></div>");
         parentEl.append(settingsWrapperEl);
-        industrySettingsUI = industryField.createSettingsEditor();
+        industrySettingsUI = industryField.createIndustriesListEditor();
         return settingsWrapperEl.append(industrySettingsUI);
       };
     })(this));
@@ -329,14 +416,8 @@ module.exports = EntityRepository = (function() {
 
   EntityRepository.prototype._entityTypeName = null;
 
-  EntityRepository.prototype._fieldSettings = null;
-
   EntityRepository.prototype._getEntityDataObjectName = function() {
     return "type." + this._entityTypeName + ".entities";
-  };
-
-  EntityRepository.prototype._getFieldSettingsDataObjectName = function() {
-    return "type." + this._entityTypeName + ".fieldSettings";
   };
 
   function EntityRepository(_taistApi, _entityTypeName, _schema) {
@@ -348,9 +429,7 @@ module.exports = EntityRepository = (function() {
   EntityRepository.prototype.load = function(callback) {
     return this._loadEntityData((function(_this) {
       return function() {
-        return _this._loadFieldSettings(function() {
-          return callback();
-        });
+        return callback();
       };
     })(this));
   };
@@ -359,22 +438,12 @@ module.exports = EntityRepository = (function() {
     return this._taistApi.companyData.get(this._getEntityDataObjectName(), (function(_this) {
       return function(err, allEntitiesData) {
         var entityData, entityId;
-        _this._taistApi.log("entities data: ", allEntitiesData);
         _this._entities = {};
         for (entityId in allEntitiesData) {
           entityData = allEntitiesData[entityId];
           entityData = allEntitiesData[entityId];
           _this._entities[entityId] = _this._createEntity(entityId, entityData);
         }
-        return callback();
-      };
-    })(this));
-  };
-
-  EntityRepository.prototype._loadFieldSettings = function(callback) {
-    return this._taistApi.companyData.get(this._getFieldSettingsDataObjectName(), (function(_this) {
-      return function(err, res) {
-        _this._fieldSettings = res != null ? res : {};
         return callback();
       };
     })(this));
@@ -393,37 +462,15 @@ module.exports = EntityRepository = (function() {
     return (_base = this._entities)[entityId] != null ? _base[entityId] : _base[entityId] = this._createEntity(entityId, {});
   };
 
-  EntityRepository.prototype.getFieldValueEditor = function(fieldName, entity) {
-    var fieldOptions, fieldUI, fieldUIConstructor;
-    fieldOptions = this._schema.fields[fieldName];
-    fieldUIConstructor = this._taistApi.objects.fieldEditors[fieldOptions.type];
-    fieldUI = new fieldUIConstructor(entity.getFieldValue(fieldName), fieldOptions, this._getFieldSettings(fieldName), function(newValue) {
-      entity.setFieldValue(fieldName, newValue);
-      return entity.save(function() {});
-    });
-    return fieldUI;
-  };
-
-  EntityRepository.prototype._getFieldSettings = function(fieldName) {
-    var _base;
-    return (_base = this._fieldSettings)[fieldName] != null ? _base[fieldName] : _base[fieldName] = {};
-  };
-
-  EntityRepository.prototype.createFieldSettingsEditor = function(fieldName) {
-    var fieldOptions, fieldUIConstructor, settingsUpdateCallback;
-    fieldOptions = this._schema.fields[fieldName];
-    fieldUIConstructor = this._taistApi.objects.fieldEditors[fieldOptions.type];
-    settingsUpdateCallback = (function(_this) {
-      return function(newSettings) {
-        _this._fieldSettings[fieldName] = newSettings;
-        return _this._saveFieldSettings();
-      };
-    })(this);
-    return fieldUIConstructor.createSettingsEditor(this._getFieldSettings(fieldName), settingsUpdateCallback);
-  };
-
-  EntityRepository.prototype._saveFieldSettings = function() {
-    return this._taistApi.companyData.set(this._getFieldSettingsDataObjectName(), this._fieldSettings, function() {});
+  EntityRepository.prototype.getAllEntities = function() {
+    var entity, id, _ref, _results;
+    _ref = this._entities;
+    _results = [];
+    for (id in _ref) {
+      entity = _ref[id];
+      _results.push(entity);
+    }
+    return _results;
   };
 
   return EntityRepository;
@@ -448,13 +495,10 @@ module.exports = {
   },
   registerType: function(name, schema) {
     return this._typeSchemas[name] = schema;
-  },
-  fieldEditors: {
-    select: require('./selectField')
   }
 };
 
-},{"./entityRepository":6,"./selectField":8}],8:[function(require,module,exports){
+},{"./entityRepository":6}],8:[function(require,module,exports){
 var SelectField, app;
 
 app = require('./../app');

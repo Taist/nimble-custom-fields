@@ -12,7 +12,3 @@ module.exports =
 
   registerType: (name, schema) -> @_typeSchemas[name] = schema
 
-  fieldEditors:
-    select: require './selectField'
-
-
