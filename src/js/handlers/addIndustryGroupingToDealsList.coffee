@@ -3,28 +3,30 @@ industryField = require '../industryField'
 customFieldName = 'industry'
 
 module.exports = ->
-  groupMatches = location.hash.match /grouped_by=([^&]+)/
-  fieldToGroup = groupMatches?[1] ? 'none'
-
   findCustomDealsList().remove()
-  addGroupingByIndustry fieldToGroup
 
-  if fieldToGroup is customFieldName
+  addGroupingByCustomField()
+
+  if getCurrentGroupingField() is customFieldName
     loadDealsData (deals) ->
       addCustomFieldToDeals deals
       renderCustomDealsList deals
 
+getCurrentGroupingField = ->
+  groupMatches = location.hash.match /grouped_by=([^&]+)/
+  return groupMatches?[1] ? 'none'
+
 customDealsListClass = 'taist-dealsListWithCustomGrouping'
 findCustomDealsList = -> $ '.' + customDealsListClass
 
-addGroupingByIndustry = (fieldToGroup) ->
+addGroupingByCustomField = ->
   selector = '.listHeader .gwt-ListBox'
   app.api.wait.elementRender selector, (groupingSelect) ->
     unless $("""option[value="#{customFieldName}"]""", groupingSelect).size()
       capitalizedFieldName = customFieldName[0] + (customFieldName.slice 1)
       groupingSelect.append $ """<option value="#{customFieldName}">#{capitalizedFieldName}</option>"""
 
-    if fieldToGroup is customFieldName
+    if getCurrentGroupingField() is customFieldName
       groupingSelect.val customFieldName
 
 renderCustomDealsList = (deals) ->
@@ -41,11 +43,11 @@ replaceOriginalListWithCustom = ->
   $('.groupGlobalHeader').parent().hide()
   $('.emptyView').hide()
 
-  originalDealsList = $ '.mainContainer>div>.dealList'
-  originalDealsList.parent().hide()
+  originalDealsList = ($ '.mainContainer>div>.dealList').parent()
+  originalDealsList.hide()
 
   customDealsList = $ """<div class="#{customDealsListClass}">"""
-  customDealsList.insertBefore originalDealsList.parent()
+  customDealsList.insertBefore originalDealsList
 
   return customDealsList
 

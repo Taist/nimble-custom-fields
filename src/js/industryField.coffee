@@ -1,5 +1,6 @@
 app = require './app'
 selectField = require './objectsApi/selectField'
+entityRepository = require './objectsApi/entityRepository'
 
 _deals = null
 _industries = null
@@ -10,10 +11,9 @@ notSpecifiedCaption = "Not specified"
 
 module.exports =
   init: ->
-    app.api.objects.registerType "deals", {fields: [industryField]}
-    app.api.objects.registerType industryField, {fields: [industryNameField]}
-    _deals = app.api.objects.getTypeRepository "deals"
-    _industries = app.api.objects.getTypeRepository industryField
+    _deals = new entityRepository app.api, "deals", {fields: [industryField]}
+    _industries = new entityRepository app.api, industryField, {fields: [industryNameField]}
+#
   load: (callback) ->
     _deals.load ->
       _industries.load ->
@@ -44,41 +44,14 @@ module.exports =
     industryName ?= notSpecifiedCaption
 
   createIndustriesListEditor: ->
-    listEditorDiv = $ """
-<div class="stagesContainer">
-  <div class="tableHeaders">
-    <div class="name">Name</div>
-  </div>
-  <div style="position: relative; overflow: hidden;">
-    <table cellspacing="0" cellpadding="0" class="industriesList stageList">
-      <tbody>
-      </tbody>
-    </table>
-  </div>
-</div>
-"""
+    listEditorDiv = @_createDom "industriesList"
+
     industriesTable = listEditorDiv.find '.industriesList tbody'
 
     for industry in @_getOrderedIndustriesList()
       console.log 'rendering industry: ', industry
-      industriesTable.append $ """
-      <tr>
-        <td align="left" style="vertical-align: top;">
-          <div class="StageWidget ">
-            <div class="viewContainer">
-              <div class="hoverContainer"><a class="delete" aria-hidden="true"
-                                             style="display: none;">Delete</a> <a >Edit</a>
+      industriesTable.append @_createDom "industryView"
 
-                <div style="clear:both"></div>
-              </div>
-              <div class="stageName">#{industry.getFieldValue "name"}</div>
-            </div>
-
-          </div>
-        </td>
-      </tr>
-
-"""
     return listEditorDiv
 
   _createIndustryEditor: (currentIndustryId, onValueChange) ->
@@ -105,18 +78,40 @@ module.exports =
     deal.setFieldValue industryField, industryId
     deal.save callback
 
+  _createDom: (templateName) -> $ @_domTemplates[templateName]
+
+  _domTemplates:
+    industriesList: """
+    <div class="stagesContainer">
+      <div class="tableHeaders">
+        <div class="name">Name</div>
+      </div>
+      <div style="position: relative; overflow: hidden;">
+        <table cellspacing="0" cellpadding="0" class="industriesList stageList">
+          <tbody>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    """
+
+    industryView: """
+          <tr>
+            <td align="left" style="vertical-align: top;">
+              <div class="StageWidget ">
+                <div class="viewContainer">
+                  <div class="hoverContainer"><a class="delete" aria-hidden="true"
+                                                 style="display: none;">Delete</a> <a >Edit</a>
+
+                    <div style="clear:both"></div>
+                  </div>
+                  <div class="stageName">#{industry.getFieldValue "name"}</div>
+                </div>
+
+              </div>
+            </td>
+          </tr>
+
+    """
 
 
-checkedMethod = (foo, bar) ->
-  throw "not implemented"
-
-checkedMethod = check {
-          foo:
-            is: FooClass
-          bar:
-            is: barClass
-            fields:
-              baz: (b) -> b.length > 3
-        },
-  (foo, bar) ->
-    throw "not implemented"
