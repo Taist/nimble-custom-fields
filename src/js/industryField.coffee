@@ -18,15 +18,11 @@ module.exports =
     _deals.load ->
       _industries.load ->
         #stub for industries
-        _industries.entities =
-          1:
-            name: "IT"
-          2:
-            name: "Health"
-          3:
-            name: "Transportation"
-          4:
-            name: "Finance"
+        _industries._entities =
+          1: _industries._createEntity 1, {name: "IT"}
+          2: _industries._createEntity 2, {name: "Health"}
+          3: _industries._createEntity 3, {name: "Transportation"}
+          4: _industries._createEntity 4, {name: "Finance"}
         callback()
 
   createValueEditor: (dealId) ->
@@ -44,13 +40,16 @@ module.exports =
     industryName ?= notSpecifiedCaption
 
   createIndustriesListEditor: ->
-    listEditorDiv = @_createDom "industriesList"
+    #TODO - finish replicating UI for stages:
+    # edit: pressing "Edit" should display separate form with editable industry name
+    # deleting: should ask for confirmation - see native "Stages" UI
+    # creating - display form similar to edit
+    listEditorDiv = $ @_domTemplates.industriesList
 
     industriesTable = listEditorDiv.find '.industriesList tbody'
 
     for industry in @_getOrderedIndustriesList()
-      console.log 'rendering industry: ', industry
-      industriesTable.append @_createDom "industryView"
+      industriesTable.append $ @_domTemplates.industryView industry
 
     return listEditorDiv
 
@@ -60,7 +59,8 @@ module.exports =
     return fieldUI.createValueEditor()
 
   _getOrderedIndustriesList: ->
-    _industries.getAllEntities().sort (i1, i2) ->
+    industriesList = _industries.getAllEntities()
+    industriesList.sort (i1, i2) ->
       name1 = i1.getFieldValue industryNameField
       name2 = i2.getFieldValue industryNameField
       if name1 > name2
@@ -70,6 +70,8 @@ module.exports =
       else
         return 0
 
+    return industriesList
+
   createValueEditorForNewDeal: (onValueChange) ->
     @_createIndustryEditor null, onValueChange
 
@@ -78,39 +80,36 @@ module.exports =
     deal.setFieldValue industryField, industryId
     deal.save callback
 
-  _createDom: (templateName) -> $ @_domTemplates[templateName]
-
   _domTemplates:
     industriesList: """
-    <div class="stagesContainer">
-      <div class="tableHeaders">
-        <div class="name">Name</div>
+      <div class="stagesContainer">
+        <div class="tableHeaders">
+          <div class="name">Name</div>
+        </div>
+        <div style="position: relative; overflow: hidden;">
+          <table cellspacing="0" cellpadding="0" class="industriesList stageList">
+            <tbody>
+            </tbody>
+          </table>
+        </div>
       </div>
-      <div style="position: relative; overflow: hidden;">
-        <table cellspacing="0" cellpadding="0" class="industriesList stageList">
-          <tbody>
-          </tbody>
-        </table>
-      </div>
-    </div>
     """
 
-    industryView: """
-          <tr>
-            <td align="left" style="vertical-align: top;">
-              <div class="StageWidget ">
-                <div class="viewContainer">
-                  <div class="hoverContainer"><a class="delete" aria-hidden="true"
-                                                 style="display: none;">Delete</a> <a >Edit</a>
+    industryView: (industry) -> """
+      <tr>
+        <td align="left" style="vertical-align: top;">
+          <div class="StageWidget taist-custom-field-settings-industry-edit">
+            <div class="viewContainer">
+              <div class="hoverContainer"><a class="gwt-Anchor delete taist-custom-field-delete-button" >Delete</a> <a class="gwt-Anchor ">Edit</a>
 
-                    <div style="clear:both"></div>
-                  </div>
-                  <div class="stageName">#{industry.getFieldValue "name"}</div>
-                </div>
-
+                <div style="clear:both"></div>
               </div>
-            </td>
-          </tr>
+              <div class="stageName">#{industry.getFieldValue "name"}</div>
+            </div>
+
+          </div>
+        </td>
+      </tr>
 
     """
 

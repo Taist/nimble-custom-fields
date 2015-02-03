@@ -184,19 +184,19 @@ module.exports = {
   load: function(callback) {
     return _deals.load(function() {
       return _industries.load(function() {
-        _industries.entities = {
-          1: {
+        _industries._entities = {
+          1: _industries._createEntity(1, {
             name: "IT"
-          },
-          2: {
+          }),
+          2: _industries._createEntity(2, {
             name: "Health"
-          },
-          3: {
+          }),
+          3: _industries._createEntity(3, {
             name: "Transportation"
-          },
-          4: {
+          }),
+          4: _industries._createEntity(4, {
             name: "Finance"
-          }
+          })
         };
         return callback();
       });
@@ -221,13 +221,12 @@ module.exports = {
   },
   createIndustriesListEditor: function() {
     var industriesTable, industry, listEditorDiv, _i, _len, _ref;
-    listEditorDiv = this._createDom("industriesList");
+    listEditorDiv = $(this._domTemplates.industriesList);
     industriesTable = listEditorDiv.find('.industriesList tbody');
     _ref = this._getOrderedIndustriesList();
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       industry = _ref[_i];
-      console.log('rendering industry: ', industry);
-      industriesTable.append(this._createDom("industryView"));
+      industriesTable.append($(this._domTemplates.industryView(industry)));
     }
     return listEditorDiv;
   },
@@ -250,7 +249,9 @@ module.exports = {
     return fieldUI.createValueEditor();
   },
   _getOrderedIndustriesList: function() {
-    return _industries.getAllEntities().sort(function(i1, i2) {
+    var industriesList;
+    industriesList = _industries.getAllEntities();
+    industriesList.sort(function(i1, i2) {
       var name1, name2;
       name1 = i1.getFieldValue(industryNameField);
       name2 = i2.getFieldValue(industryNameField);
@@ -262,6 +263,7 @@ module.exports = {
         return 0;
       }
     });
+    return industriesList;
   },
   createValueEditorForNewDeal: function(onValueChange) {
     return this._createIndustryEditor(null, onValueChange);
@@ -272,12 +274,11 @@ module.exports = {
     deal.setFieldValue(industryField, industryId);
     return deal.save(callback);
   },
-  _createDom: function(templateName) {
-    return $(this._domTemplates[templateName]);
-  },
   _domTemplates: {
     industriesList: "<div class=\"stagesContainer\">\n  <div class=\"tableHeaders\">\n    <div class=\"name\">Name</div>\n  </div>\n  <div style=\"position: relative; overflow: hidden;\">\n    <table cellspacing=\"0\" cellpadding=\"0\" class=\"industriesList stageList\">\n      <tbody>\n      </tbody>\n    </table>\n  </div>\n</div>",
-    industryView: "<tr>\n  <td align=\"left\" style=\"vertical-align: top;\">\n    <div class=\"StageWidget \">\n      <div class=\"viewContainer\">\n        <div class=\"hoverContainer\"><a class=\"delete\" aria-hidden=\"true\"\n                                       style=\"display: none;\">Delete</a> <a >Edit</a>\n\n          <div style=\"clear:both\"></div>\n        </div>\n        <div class=\"stageName\">" + (industry.getFieldValue("name")) + "</div>\n      </div>\n\n    </div>\n  </td>\n</tr>\n"
+    industryView: function(industry) {
+      return "<tr>\n  <td align=\"left\" style=\"vertical-align: top;\">\n    <div class=\"StageWidget taist-custom-field-settings-industry-edit\">\n      <div class=\"viewContainer\">\n        <div class=\"hoverContainer\"><a class=\"gwt-Anchor delete taist-custom-field-delete-button\" >Delete</a> <a class=\"gwt-Anchor \">Edit</a>\n\n          <div style=\"clear:both\"></div>\n        </div>\n        <div class=\"stageName\">" + (industry.getFieldValue("name")) + "</div>\n      </div>\n\n    </div>\n  </td>\n</tr>\n";
+    }
   }
 };
 
@@ -350,7 +351,7 @@ module.exports = {
       return function(parentEl) {
         var industrySettingsUI, settingsWrapperEl;
         $('.taistSettingsContainer').remove();
-        settingsWrapperEl = $("<div class=\"taistSettingsContainer\"><div class=\"subHeader\">Industries</div></div>");
+        settingsWrapperEl = $("<div class=\"taistSettingsContainer\"><div class=\"subHeader\">Industries</div><br/><br/></div>");
         parentEl.append(settingsWrapperEl);
         industrySettingsUI = industryField.createIndustriesListEditor();
         return settingsWrapperEl.append(industrySettingsUI);
@@ -19123,7 +19124,6 @@ addIndustryGroupingToDealsList = require('./handlers/addIndustryGroupingToDealsL
 
 module.exports = addonEntry = {
   start: function(_taistApi) {
-    extendTaistApi(_taistApi);
     app.api = _taistApi;
     industryField.init();
     setCompanyKey();

@@ -47,7 +47,7 @@ module.exports =
   renderInSettings: ->
     app.api.wait.elementRender '.SettingsDealsView', (parentEl) =>
       $('.taistSettingsContainer').remove()
-      settingsWrapperEl = $ """<div class="taistSettingsContainer"><div class="subHeader">Industries</div></div>"""
+      settingsWrapperEl = $ """<div class="taistSettingsContainer"><div class="subHeader">Industries</div><br/><br/></div>"""
       parentEl.append settingsWrapperEl
       industrySettingsUI = industryField.createIndustriesListEditor()
       settingsWrapperEl.append industrySettingsUI

@@ -5,7 +5,6 @@ addIndustryGroupingToDealsList = require './handlers/addIndustryGroupingToDealsL
 
 module.exports = addonEntry =
   start: (_taistApi) ->
-    extendTaistApi _taistApi
     app.api = _taistApi
 
     #have to set api.objects to init industryField
