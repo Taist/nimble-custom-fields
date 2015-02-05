@@ -30,6 +30,7 @@ module.exports = class EntityRepository
 
   _loadFieldSettings: (callback) ->
     @_taistApi.companyData.get @_getFieldSettingsDataObjectName(), (err, res) =>
+      console.log 'onLoad', @_getFieldSettingsDataObjectName(), res
       @_fieldSettings = res ? {}
       callback()
 
@@ -50,14 +51,7 @@ module.exports = class EntityRepository
 
   _getFieldSettings: (fieldName) -> @_fieldSettings[fieldName] ?= {}
 
-  createFieldSettingsEditor: (fieldName) ->
-    fieldOptions = @_schema.fields[fieldName]
-    fieldUIConstructor = @_taistApi.objects.fieldEditors[fieldOptions.type]
-    settingsUpdateCallback = (newSettings) =>
-      @_fieldSettings[fieldName] = newSettings
-      @_saveFieldSettings()
-
-    return fieldUIConstructor.createSettingsEditor @_getFieldSettings(fieldName), settingsUpdateCallback
+  getFieldSettings: (fieldName) ->
+    @_getFieldSettings(fieldName)
 
   _saveFieldSettings: -> @_taistApi.companyData.set @_getFieldSettingsDataObjectName(), @_fieldSettings, ->
-

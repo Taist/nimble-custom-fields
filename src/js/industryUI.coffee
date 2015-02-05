@@ -39,7 +39,8 @@ module.exports =
     app.api.wait.elementRender '.dealInfoTab .leftColumn', (parentColumn) =>
       ($ '#taist-industryEditor').remove()
       industrySelectUI = $ @_industrySelectInDealEditTemplate
-      (industrySelectUI.find '.taist-selectWrapper').append(industryField.createValueEditor @_getDealIdFromUrl())
+      (industrySelectUI.find '.taist-selectWrapper')
+        .append(industryField.createValueEditor @_getDealIdFromUrl())
       parentColumn.append industrySelectUI
 
   _getDealIdFromUrl: -> location.hash.substring((location.hash.indexOf '?id=') + 4)
@@ -49,27 +50,27 @@ module.exports =
       container = $('.taistSettingsContainer', parentEl)
       unless container.length
         container = $('<div class="taistSettingsContainer">').appendTo parentEl
+
+      industryKey = 'type.deals.fieldSettings'
+      app.api.companyData.get industryKey, (err, settings = {}) ->
+        console.log settings
+
         React = require 'react'
         DictEditor = require './react/dictionaryEditor/dictEditor'
 
+        industries = settings?.industry?.selectOptions
+        industries = [] unless Array.isArray(industries)
+
         dict =
           name: 'Industry'
-          entities: [
-            { id:'1', value:'Health Care' }
-            { id:'2', value:'Transportation' }
-            { id:'3', value:'Security' }
-            { id:'4', value:'Education' }
-          ]
+          entities: industries
           onUpdate: (entities) ->
+            console.log 'onUpdate', entities
+            app.api.companyData.setPart industryKey, 'industry', { selectOptions: entities }, ->
             dict.entities = entities
             React.render ( DictEditor dict ), container[0]
 
         React.render ( DictEditor dict ), container[0]
-
-      # settingsWrapperEl = $ """<div class="taistSettingsContainer"><div class="subHeader">Industries</div><br/><br/></div>"""
-      # parentEl.append settingsWrapperEl
-      # industrySettingsUI = industryField.createSettingsEditor()
-      # settingsWrapperEl.append industrySettingsUI
 
   _industrySelectInDealEditTemplate: "<div id=\"taist-industryEditor\">\n  <div class=\"ContactFieldWidget\">\n    <div class=\"label\">industry:</div>\n    <div class=\"inputField taist-selectWrapper\"></div>\n\n    <div style=\"clear:both\"></div>\n  </div>\n</div>"
   _industrySelectInDealCreationTemplate: "<tr>\n  <td class=\"labelCell\">Industry:</td>\n</tr>\n<tr>\n  <td class=\'fieldCell\'>\n    <div class=\'nmbl-FormListBox\'>\n      <div class=\"taist-selectWrapper\">\n    </div>\n  </td>\n</tr>\n"

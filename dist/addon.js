@@ -173,9 +173,6 @@ module.exports = {
   getIndustryName: function(dealId) {
     return (this._getFieldEditor(dealId)).getDisplayedValue();
   },
-  createSettingsEditor: function() {
-    return _deals.createFieldSettingsEditor("industry");
-  },
   createValueEditorForNewDeal: function(onValueChange) {
     var fieldOptions, fieldUI, fieldUIConstructor;
     fieldOptions = _deals._schema.fields["industry"];
@@ -270,36 +267,38 @@ module.exports = {
   renderInSettings: function() {
     return app.api.wait.elementRender('.SettingsDealsView', (function(_this) {
       return function(parentEl) {
-        var DictEditor, React, container, dict;
+        var container, industryKey;
         container = $('.taistSettingsContainer', parentEl);
         if (!container.length) {
           container = $('<div class="taistSettingsContainer">').appendTo(parentEl);
+        }
+        industryKey = 'type.deals.fieldSettings';
+        return app.api.companyData.get(industryKey, function(err, settings) {
+          var DictEditor, React, dict, industries, _ref;
+          if (settings == null) {
+            settings = {};
+          }
+          console.log(settings);
           React = require('react');
           DictEditor = require('./react/dictionaryEditor/dictEditor');
+          industries = settings != null ? (_ref = settings.industry) != null ? _ref.selectOptions : void 0 : void 0;
+          if (!Array.isArray(industries)) {
+            industries = [];
+          }
           dict = {
             name: 'Industry',
-            entities: [
-              {
-                id: '1',
-                value: 'Health Care'
-              }, {
-                id: '2',
-                value: 'Transportation'
-              }, {
-                id: '3',
-                value: 'Security'
-              }, {
-                id: '4',
-                value: 'Education'
-              }
-            ],
+            entities: industries,
             onUpdate: function(entities) {
+              console.log('onUpdate', entities);
+              app.api.companyData.setPart(industryKey, 'industry', {
+                selectOptions: entities
+              }, function() {});
               dict.entities = entities;
               return React.render(DictEditor(dict), container[0]);
             }
           };
           return React.render(DictEditor(dict), container[0]);
-        }
+        });
       };
     })(this));
   },
@@ -398,6 +397,7 @@ module.exports = EntityRepository = (function() {
   EntityRepository.prototype._loadFieldSettings = function(callback) {
     return this._taistApi.companyData.get(this._getFieldSettingsDataObjectName(), (function(_this) {
       return function(err, res) {
+        console.log('onLoad', _this._getFieldSettingsDataObjectName(), res);
         _this._fieldSettings = res != null ? res : {};
         return callback();
       };
@@ -433,17 +433,8 @@ module.exports = EntityRepository = (function() {
     return (_base = this._fieldSettings)[fieldName] != null ? _base[fieldName] : _base[fieldName] = {};
   };
 
-  EntityRepository.prototype.createFieldSettingsEditor = function(fieldName) {
-    var fieldOptions, fieldUIConstructor, settingsUpdateCallback;
-    fieldOptions = this._schema.fields[fieldName];
-    fieldUIConstructor = this._taistApi.objects.fieldEditors[fieldOptions.type];
-    settingsUpdateCallback = (function(_this) {
-      return function(newSettings) {
-        _this._fieldSettings[fieldName] = newSettings;
-        return _this._saveFieldSettings();
-      };
-    })(this);
-    return fieldUIConstructor.createSettingsEditor(this._getFieldSettings(fieldName), settingsUpdateCallback);
+  EntityRepository.prototype.getFieldSettings = function(fieldName) {
+    return this._getFieldSettings(fieldName);
   };
 
   EntityRepository.prototype._saveFieldSettings = function() {
@@ -497,6 +488,7 @@ module.exports = SelectField = (function() {
     this._options = _options;
     this._settings = _settings;
     this._onValueChange = _onValueChange;
+    console.log('SelectField', this._value, this._options, this._settings);
   }
 
   SelectField.prototype._getSelectOptions = function() {
@@ -539,20 +531,6 @@ module.exports = SelectField = (function() {
       })(this));
     }
     return select;
-  };
-
-  SelectField.createSettingsEditor = function(currentSettings, settingsUpdateCallback) {
-    var optionLines, textArea;
-    textArea = $("<textarea></textarea>");
-    optionLines = currentSettings.selectOptions;
-    textArea.val(optionLines);
-    textArea.change((function(_this) {
-      return function() {
-        currentSettings.selectOptions = textArea.val();
-        return settingsUpdateCallback(currentSettings);
-      };
-    })(this));
-    return textArea;
   };
 
   return SelectField;

@@ -10,6 +10,7 @@ module.exports = class SelectField
   _onValueChange: null
 
   constructor: (@_value, @_options, @_settings, @_onValueChange) ->
+    console.log 'SelectField', @_value, @_options, @_settings
 
   _getSelectOptions: ->
     orderedOptionNames = (@_settings.selectOptions ? "").split '\n'
@@ -38,14 +39,3 @@ module.exports = class SelectField
         @_setValue select.val()
 
     return select
-
-  @createSettingsEditor: (currentSettings, settingsUpdateCallback) ->
-    textArea = $ "<textarea></textarea>"
-    optionLines = currentSettings.selectOptions
-    textArea.val optionLines
-    textArea.change =>
-      currentSettings.selectOptions = textArea.val()
-      settingsUpdateCallback currentSettings
-
-    return textArea
-

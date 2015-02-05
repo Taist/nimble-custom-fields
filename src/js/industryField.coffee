@@ -20,11 +20,6 @@ module.exports =
 #    (_deals.getEntity dealId).getField("industry").getField("name")
   getIndustryName: (dealId) -> (@_getFieldEditor dealId).getDisplayedValue()
 
-  #TODO: change to:
-#  createIndustryListEditForm: ->
-#    app.api.objects.createCollectionEditForm _industriesRepository, {fields: ["name"]}
-  createSettingsEditor: -> _deals.createFieldSettingsEditor "industry"
-
   #TODO: change accordingly to upper ones
   createValueEditorForNewDeal: (onValueChange) ->
     fieldOptions = _deals._schema.fields["industry"]
@@ -45,5 +40,3 @@ dealsDescription =
     industry:
       type: 'select',
       unsetValueDisplayedText: "Not specified"
-
-
