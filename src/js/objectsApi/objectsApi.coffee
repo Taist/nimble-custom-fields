@@ -6,7 +6,7 @@ module.exports =
   getTypeRepository: (name) ->
     schema = @_typeSchemas[name]
     if not schema?
-      throw new Exception """Attempt to get type #{name} that is not registered yet"""
+      throw """Attempt to get type #{name} that is not registered yet"""
 
     return new EntityRepository @_taistApi, name, schema
 
@@ -14,5 +14,3 @@ module.exports =
 
   fieldEditors:
     select: require './selectField'
-
-

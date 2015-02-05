@@ -1,0 +1,11 @@
+.hasActivatedChildren .activatedByParent {
+  display: none;
+}
+
+.hasActivatedChildren:hover {
+  background-color: rgb(243, 243, 243);
+}
+
+.hasActivatedChildren:hover .activatedByParent {
+  display: inline-block;
+}

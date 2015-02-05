@@ -5,6 +5,9 @@ addIndustryGroupingToDealsList = require './handlers/addIndustryGroupingToDealsL
 
 module.exports = addonEntry =
   start: (_taistApi, entryPoint) ->
+    #TODO remove on production
+    window.app = app
+
     extendTaistApi _taistApi
     app.api = _taistApi
 
