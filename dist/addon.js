@@ -230,7 +230,7 @@ module.exports = {
   getIndustryName: function(dealId) {
     var deal, industryId, industryName, _ref;
     console.log('getIndustryName', dealId, _industries);
-    deal = _deals.getEntity(dealId);
+    deal = _deals.getOrCreateEntity(dealId);
     industryId = deal.getFieldValue(industryField);
     if (industryId != null) {
       industryName = (_ref = _industries.getEntity(industryId)) != null ? _ref.getFieldValue(industryNameField) : void 0;
@@ -258,11 +258,17 @@ module.exports = {
         industry = _ref[_i];
         _results.push({
           id: industry._id,
-          value: industry.name
+          value: industry._data.value
         });
       }
       return _results;
     }).call(this);
+    console.log(industryListValues.length);
+    industryListValues.unshift({
+      id: 0,
+      value: 'Not specified'
+    });
+    console.log(industryListValues.length);
     fieldUI = new selectField(currentIndustryId, industryListValues, onValueChange);
     return fieldUI.createValueEditor();
   },
@@ -495,6 +501,10 @@ module.exports = EntityRepository = (function() {
   };
 
   EntityRepository.prototype.getEntity = function(entityId) {
+    return this._entities[entityId];
+  };
+
+  EntityRepository.prototype.getOrCreateEntity = function(entityId) {
     var _base;
     return (_base = this._entities)[entityId] != null ? _base[entityId] : _base[entityId] = this._createEntity(entityId, {});
   };
@@ -524,32 +534,17 @@ module.exports = SelectField = (function() {
 
   SelectField.prototype._options = null;
 
-  SelectField.prototype._settings = null;
-
   SelectField.prototype._onValueChange = null;
 
-  function SelectField(_value, _options, _settings, _onValueChange) {
+  function SelectField(_value, _options, _onValueChange) {
     this._value = _value;
     this._options = _options;
-    this._settings = _settings;
     this._onValueChange = _onValueChange;
-    console.log('SelectField', this._value, this._options, this._settings);
+    console.log('SelectField', this._value, this._options);
   }
 
-  SelectField.prototype._getSelectOptions = function() {
-    var index, option, orderedOptionNames, selectOptions, _i, _len, _ref;
-    orderedOptionNames = ((_ref = this._settings.selectOptions) != null ? _ref : "").split('\n');
-    selectOptions = {};
-    for (index = _i = 0, _len = orderedOptionNames.length; _i < _len; index = ++_i) {
-      option = orderedOptionNames[index];
-      selectOptions[index] = option;
-    }
-    return selectOptions;
-  };
-
   SelectField.prototype.getDisplayedValue = function() {
-    var _ref;
-    return (_ref = this._getSelectOptions()[this._value]) != null ? _ref : this._options.unsetValueDisplayedText;
+    return 'ABC';
   };
 
   SelectField.prototype._setValue = function(newValue) {
@@ -560,21 +555,19 @@ module.exports = SelectField = (function() {
   };
 
   SelectField.prototype.createValueEditor = function() {
-    var defaultOption, optionId, optionName, select, _ref;
+    var option, select, _i, _len, _ref;
     select = $("<select></select>");
-    defaultOption = $("<option >" + this._options.unsetValueDisplayedText + "</option>");
-    select.append(defaultOption);
-    _ref = this._getSelectOptions();
-    for (optionId in _ref) {
-      optionName = _ref[optionId];
-      select.append($("<option value=\"" + optionId + "\">" + optionName + "</option>"));
-      select.val(this._value);
-      select.change((function(_this) {
-        return function() {
-          return _this._setValue(select.val());
-        };
-      })(this));
+    _ref = this._options;
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      option = _ref[_i];
+      select.append($("<option value=\"" + option.id + "\">" + option.value + "</option>"));
     }
+    select.val(this._value || 0);
+    select.change((function(_this) {
+      return function() {
+        return _this._setValue(select.val());
+      };
+    })(this));
     return select;
   };
 

@@ -25,7 +25,7 @@ module.exports =
 
   getIndustryName: (dealId) ->
     console.log 'getIndustryName', dealId, _industries
-    deal = _deals.getEntity dealId
+    deal = _deals.getOrCreateEntity dealId
     industryId = deal.getFieldValue industryField
     if industryId?
       industryName = (_industries.getEntity industryId)?.getFieldValue industryNameField
@@ -47,7 +47,10 @@ module.exports =
     return listEditorDiv
 
   _createIndustryEditor: (currentIndustryId, onValueChange) ->
-    industryListValues = ({id: industry._id, value: industry.name} for industry in @_getOrderedIndustriesList())
+    industryListValues = ({id: industry._id, value: industry._data.value} for industry in @_getOrderedIndustriesList())
+    console.log industryListValues.length
+    industryListValues.unshift { id: 0, value: 'Not specified' }
+    console.log industryListValues.length
     fieldUI = new selectField currentIndustryId, industryListValues, onValueChange
     return fieldUI.createValueEditor()
 

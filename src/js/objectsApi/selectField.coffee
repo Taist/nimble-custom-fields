@@ -5,22 +5,12 @@ module.exports = class SelectField
 
   _options: null
 
-  _settings: null
-
   _onValueChange: null
 
-  constructor: (@_value, @_options, @_settings, @_onValueChange) ->
-    console.log 'SelectField', @_value, @_options, @_settings
+  constructor: (@_value, @_options, @_onValueChange) ->
+    console.log 'SelectField', @_value, @_options
 
-  _getSelectOptions: ->
-    orderedOptionNames = (@_settings.selectOptions ? "").split '\n'
-    selectOptions = {}
-    for option, index in orderedOptionNames
-      selectOptions[index] = option
-
-    return selectOptions
-
-  getDisplayedValue: -> @_getSelectOptions()[@_value] ? @_options.unsetValueDisplayedText
+  getDisplayedValue: -> 'ABC' #@_getSelectOptions()[@_value] ? @_options.unsetValueDisplayedText
 
   _setValue: (newValue) ->
     @_onValueChange? newValue
@@ -28,14 +18,11 @@ module.exports = class SelectField
 
   createValueEditor: ->
     select = $ "<select></select>"
-    defaultOption = $ "<option >" + @_options.unsetValueDisplayedText + "</option>"
-    select.append defaultOption
+    for option in @_options
+      select.append($("<option value=\"" + option.id + "\">" + option.value + "</option>"))
 
-    for optionId, optionName of @_getSelectOptions()
-      select.append($("<option value=\"" + optionId + "\">" + optionName + "</option>"))
-
-      select.val @_value
-      select.change =>
-        @_setValue select.val()
+    select.val @_value or 0
+    select.change =>
+      @_setValue select.val()
 
     return select
