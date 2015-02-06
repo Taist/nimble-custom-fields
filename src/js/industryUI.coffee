@@ -52,26 +52,37 @@ module.exports =
       unless container.length
         container = $('<div class="taistSettingsContainer">').appendTo parentEl
 
-      industryKey = 'type.deals.fieldSettings'
-      app.api.companyData.get industryKey, (err, settings = {}) ->
-        console.log settings
+      industryKey = 'type.industry.entities'
 
-        React = require 'react'
-        DictEditor = require './react/dictionaryEditor/dictEditor'
+      React = require 'react'
+      DictEditor = require './react/dictionaryEditor/dictEditor'
 
-        industries = settings?.industry?.selectOptions
-        industries = [] unless Array.isArray(industries)
+      repoEntities = app.repositories.industry.getAllEntities()
+      dictEntities = []
+      for id, entity of repoEntities
+        data = entity._data
+        data.id = entity._id
+        dictEntities.push data
 
-        dict =
-          name: 'Industry'
-          entities: industries
-          onUpdate: (entities) ->
-            console.log 'onUpdate', entities
-            app.api.companyData.setPart industryKey, 'industry', { selectOptions: entities }, ->
-            dict.entities = entities
-            React.render ( DictEditor dict ), container[0]
+      console.log repoEntities
+      console.log dictEntities
 
-        React.render ( DictEditor dict ), container[0]
+      dict =
+        name: 'Industry'
+        entities: dictEntities
+
+        onUpdate: (entities) ->
+          console.log 'onUpdate', entities
+
+          repoEntities = {}
+          entities.forEach (entity) ->
+            repoEntities[entity.id] = entity
+          app.api.companyData.set industryKey, repoEntities, ->
+
+          dict.entities = entities
+          React.render ( DictEditor dict ), container[0]
+
+      React.render ( DictEditor dict ), container[0]
 
   _industrySelectInDealEditTemplate: "<div id=\"taist-industryEditor\">\n  <div class=\"ContactFieldWidget\">\n    <div class=\"label\">industry:</div>\n    <div class=\"inputField taist-selectWrapper\"></div>\n\n    <div style=\"clear:both\"></div>\n  </div>\n</div>"
   _industrySelectInDealCreationTemplate: "<tr>\n  <td class=\"labelCell\">Industry:</td>\n</tr>\n<tr>\n  <td class=\'fieldCell\'>\n    <div class=\'nmbl-FormListBox\'>\n      <div class=\"taist-selectWrapper\">\n    </div>\n  </td>\n</tr>\n"

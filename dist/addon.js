@@ -4,7 +4,11 @@ module.exports = {
     nimbleToken: '',
     dealsPerPage: 30
   },
-  api: null
+  api: null,
+  repositories: {
+    deals: null,
+    industry: null
+  }
 };
 
 },{}],2:[function(require,module,exports){
@@ -189,13 +193,11 @@ addCustomFieldToDeals = function(deals) {
 };
 
 },{"../app":1,"../industryField":3,"../react/groupedDealList/groupedDealList":15,"react":167}],3:[function(require,module,exports){
-var app, entityRepository, industryField, industryNameField, notSpecifiedCaption, selectField, _deals, _industries;
+var app, industryField, industryNameField, notSpecifiedCaption, selectField, _deals, _industries;
 
 app = require('./app');
 
 selectField = require('./objectsApi/selectField');
-
-entityRepository = require('./objectsApi/entityRepository');
 
 _deals = null;
 
@@ -203,36 +205,16 @@ _industries = null;
 
 industryField = "industry";
 
-industryNameField = "name";
+industryNameField = "value";
 
 notSpecifiedCaption = "Not specified";
 
 module.exports = {
-  init: function() {
-    _deals = new entityRepository(app.api, "deals", {
-      fields: [industryField]
-    });
-    return _industries = new entityRepository(app.api, industryField, {
-      fields: [industryNameField]
-    });
-  },
   load: function(callback) {
+    _deals = app.repositories.deals;
+    _industries = app.repositories.industry;
     return _deals.load(function() {
       return _industries.load(function() {
-        _industries._entities = {
-          1: _industries._createEntity(1, {
-            name: "IT"
-          }),
-          2: _industries._createEntity(2, {
-            name: "Health"
-          }),
-          3: _industries._createEntity(3, {
-            name: "Transportation"
-          }),
-          4: _industries._createEntity(4, {
-            name: "Finance"
-          })
-        };
         return callback();
       });
     });
@@ -246,11 +228,12 @@ module.exports = {
     });
   },
   getIndustryName: function(dealId) {
-    var deal, industryId, industryName;
+    var deal, industryId, industryName, _ref;
+    console.log('getIndustryName', dealId, _industries);
     deal = _deals.getEntity(dealId);
     industryId = deal.getFieldValue(industryField);
     if (industryId != null) {
-      industryName = (_industries.getEntity(industryId)).getFieldValue(industryNameField);
+      industryName = (_ref = _industries.getEntity(industryId)) != null ? _ref.getFieldValue(industryNameField) : void 0;
     }
     return industryName != null ? industryName : industryName = notSpecifiedCaption;
   },
@@ -317,7 +300,7 @@ module.exports = {
   }
 };
 
-},{"./app":1,"./objectsApi/entityRepository":6,"./objectsApi/selectField":7}],4:[function(require,module,exports){
+},{"./app":1,"./objectsApi/selectField":7}],4:[function(require,module,exports){
 var app, industryField;
 
 app = require('./app');
@@ -384,38 +367,39 @@ module.exports = {
   renderInSettings: function() {
     return app.api.wait.elementRender('.SettingsDealsView', (function(_this) {
       return function(parentEl) {
-        var container, industryKey;
+        var DictEditor, React, container, data, dict, dictEntities, entity, id, industryKey, repoEntities;
         container = $('.taistSettingsContainer', parentEl);
         if (!container.length) {
           container = $('<div class="taistSettingsContainer">').appendTo(parentEl);
         }
-        industryKey = 'type.deals.fieldSettings';
-        return app.api.companyData.get(industryKey, function(err, settings) {
-          var DictEditor, React, dict, industries, _ref;
-          if (settings == null) {
-            settings = {};
+        industryKey = 'type.industry.entities';
+        React = require('react');
+        DictEditor = require('./react/dictionaryEditor/dictEditor');
+        repoEntities = app.repositories.industry.getAllEntities();
+        dictEntities = [];
+        for (id in repoEntities) {
+          entity = repoEntities[id];
+          data = entity._data;
+          data.id = entity._id;
+          dictEntities.push(data);
+        }
+        console.log(repoEntities);
+        console.log(dictEntities);
+        dict = {
+          name: 'Industry',
+          entities: dictEntities,
+          onUpdate: function(entities) {
+            console.log('onUpdate', entities);
+            repoEntities = {};
+            entities.forEach(function(entity) {
+              return repoEntities[entity.id] = entity;
+            });
+            app.api.companyData.set(industryKey, repoEntities, function() {});
+            dict.entities = entities;
+            return React.render(DictEditor(dict), container[0]);
           }
-          console.log(settings);
-          React = require('react');
-          DictEditor = require('./react/dictionaryEditor/dictEditor');
-          industries = settings != null ? (_ref = settings.industry) != null ? _ref.selectOptions : void 0 : void 0;
-          if (!Array.isArray(industries)) {
-            industries = [];
-          }
-          dict = {
-            name: 'Industry',
-            entities: industries,
-            onUpdate: function(entities) {
-              console.log('onUpdate', entities);
-              app.api.companyData.setPart(industryKey, 'industry', {
-                selectOptions: entities
-              }, function() {});
-              dict.entities = entities;
-              return React.render(DictEditor(dict), container[0]);
-            }
-          };
-          return React.render(DictEditor(dict), container[0]);
-        });
+        };
+        return React.render(DictEditor(dict), container[0]);
       };
     })(this));
   },
@@ -19268,9 +19252,11 @@ module.exports = warning;
 module.exports = require('./lib/React');
 
 },{"./lib/React":49}],"addon":[function(require,module,exports){
-var addIndustryGroupingToDealsList, addonEntry, app, extractNimbleAuthTokenFromRequest, industryField, industryUI, routesByHashes, setCompanyKey, setRoutes;
+var addIndustryGroupingToDealsList, addonEntry, app, entityRepository, extractNimbleAuthTokenFromRequest, industryField, industryUI, routesByHashes, setCompanyKey, setRoutes;
 
 app = require('./app');
+
+entityRepository = require('./objectsApi/entityRepository');
 
 industryField = require('./industryField');
 
@@ -19282,7 +19268,12 @@ module.exports = addonEntry = {
   start: function(_taistApi) {
     window.app = app;
     app.api = _taistApi;
-    industryField.init();
+    app.repositories.deals = new entityRepository(app.api, "deals", {
+      fields: ["industry"]
+    });
+    app.repositories.industry = new entityRepository(app.api, "industry", {
+      fields: ["value"]
+    });
     setCompanyKey();
     extractNimbleAuthTokenFromRequest();
     return industryField.load(function() {
@@ -19340,6 +19331,6 @@ extractNimbleAuthTokenFromRequest = function() {
   });
 };
 
-},{"./app":1,"./handlers/addIndustryGroupingToDealsList":2,"./industryField":3,"./industryUI":4,"./tools/xmlHttpProxy":21}]},{},[]);
+},{"./app":1,"./handlers/addIndustryGroupingToDealsList":2,"./industryField":3,"./industryUI":4,"./objectsApi/entityRepository":6,"./tools/xmlHttpProxy":21}]},{},[]);
 ;return require("addon")}
 //Just a sample of concat task

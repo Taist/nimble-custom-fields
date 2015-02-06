@@ -1,4 +1,5 @@
 app = require './app'
+entityRepository = require './objectsApi/entityRepository'
 industryField = require './industryField'
 industryUI = require './industryUI'
 addIndustryGroupingToDealsList = require './handlers/addIndustryGroupingToDealsList'
@@ -9,8 +10,8 @@ module.exports = addonEntry =
     window.app = app
     app.api = _taistApi
 
-    #have to set api.objects to init industryField
-    industryField.init()
+    app.repositories.deals = new entityRepository app.api, "deals", { fields: ["industry"] }
+    app.repositories.industry = new entityRepository app.api, "industry", { fields: ["value"] }
 
     setCompanyKey()
     extractNimbleAuthTokenFromRequest()

@@ -1,28 +1,20 @@
 app = require './app'
 selectField = require './objectsApi/selectField'
-entityRepository = require './objectsApi/entityRepository'
 
 _deals = null
 _industries = null
 
 industryField = "industry"
-industryNameField = "name"
+industryNameField = "value"
 notSpecifiedCaption = "Not specified"
 
 module.exports =
-  init: ->
-    _deals = new entityRepository app.api, "deals", {fields: [industryField]}
-    _industries = new entityRepository app.api, industryField, {fields: [industryNameField]}
-#
   load: (callback) ->
+    _deals = app.repositories.deals
+    _industries = app.repositories.industry
+
     _deals.load ->
       _industries.load ->
-        #stub for industries
-        _industries._entities =
-          1: _industries._createEntity 1, {name: "IT"}
-          2: _industries._createEntity 2, {name: "Health"}
-          3: _industries._createEntity 3, {name: "Transportation"}
-          4: _industries._createEntity 4, {name: "Finance"}
         callback()
 
   createValueEditor: (dealId) ->
@@ -32,10 +24,11 @@ module.exports =
       entity.save ->
 
   getIndustryName: (dealId) ->
+    console.log 'getIndustryName', dealId, _industries
     deal = _deals.getEntity dealId
     industryId = deal.getFieldValue industryField
     if industryId?
-      industryName = (_industries.getEntity industryId).getFieldValue industryNameField
+      industryName = (_industries.getEntity industryId)?.getFieldValue industryNameField
 
     industryName ?= notSpecifiedCaption
 
