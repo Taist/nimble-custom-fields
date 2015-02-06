@@ -51,7 +51,7 @@ addGroupingByCustomField = function() {
   return app.api.wait.elementRender(selector, function(groupingSelect) {
     var capitalizedFieldName;
     if (!$("option[value=\"" + customFieldName + "\"]", groupingSelect).size()) {
-      capitalizedFieldName = customFieldName[0] + (customFieldName.slice(1));
+      capitalizedFieldName = customFieldName[0].toUpperCase() + (customFieldName.slice(1));
       groupingSelect.append($("<option value=\"" + customFieldName + "\">" + capitalizedFieldName + "</option>"));
     }
     if (currentlyGroupingByCustomField()) {
