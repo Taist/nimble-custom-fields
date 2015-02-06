@@ -9,3 +9,7 @@
 .hasActivatedChildren:hover .activatedByParent {
   display: inline-block;
 }
+
+.taist-custom-field-settings-industry-edit:not(:hover) .taist-custom-field-delete-button {
+  display: none
+}

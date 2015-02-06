@@ -4,11 +4,9 @@ industryUI = require './industryUI'
 addIndustryGroupingToDealsList = require './handlers/addIndustryGroupingToDealsList'
 
 module.exports = addonEntry =
-  start: (_taistApi, entryPoint) ->
+  start: (_taistApi) ->
     #TODO remove on production
     window.app = app
-
-    extendTaistApi _taistApi
     app.api = _taistApi
 
     #have to set api.objects to init industryField
@@ -18,21 +16,16 @@ module.exports = addonEntry =
     extractNimbleAuthTokenFromRequest()
 
     industryField.load ->
-      setRoutes {
-        'app\/deals\/list': -> addIndustryGroupingToDealsList()
-        '^app/deals/view': -> industryUI.renderInDealViewer(),
-        '^app/deals/edit': -> industryUI.renderInDealEditor(),
-        'app/settings/deals': -> industryUI.renderInSettings()
-      }
-
+      setRoutes()
       industryUI.renderInNewDealDialog()
 
-extendTaistApi = (taistApi) ->
-  objectsApi = require './objectsApi/objectsApi'
-  taistApi.objects = objectsApi
-  objectsApi._taistApi = taistApi
+routesByHashes =
+  'app\/deals\/list': -> addIndustryGroupingToDealsList()
+  '^app/deals/view': -> industryUI.renderInDealViewer()
+  '^app/deals/edit': -> industryUI.renderInDealEditor()
+  'app/settings/deals': -> industryUI.renderInSettings()
 
-setRoutes = (routesByHashes) ->
+setRoutes = ->
   for hashRegexp, routeProcessor of routesByHashes
     do (hashRegexp, routeProcessor) =>
       app.api.hash.when hashRegexp, routeProcessor

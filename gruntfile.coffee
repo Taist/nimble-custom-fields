@@ -7,12 +7,12 @@ module.exports = (grunt) ->
 
 
   grunt.initConfig
-    pkg: grunt.file.readJSON("package.json")
+    pkg: grunt.file.readJSON "package.json"
 
     coffee:
       addon:
         expand: true
-        cwd: 'src/js/',
+        cwd: 'src/js/'
         src: ['**/*.coffee']
         dest: 'build/js/'
         ext: '.js'
@@ -27,7 +27,7 @@ module.exports = (grunt) ->
         options:
           alias: ["./build/js/addon.js:addon"]
 
-          # wrapp as Taist addon
+          # wrap as Taist addon
           postBundleCB: (err, src, next) ->
             src = "function init(){var " + src + ";return require(\"addon\")}"
             next err, src

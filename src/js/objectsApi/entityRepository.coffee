@@ -5,33 +5,21 @@ module.exports = class EntityRepository
   _taistApi: null
   _schema: null
   _entityTypeName: null
-  _fieldSettings: null
 
   _getEntityDataObjectName: -> """type.#{@_entityTypeName}.entities"""
-
-  _getFieldSettingsDataObjectName: ->
-    return """type.#{@_entityTypeName}.fieldSettings"""
 
   constructor: (@_taistApi, @_entityTypeName, @_schema) ->
 
   load: (callback) ->
     @_loadEntityData =>
-      @_loadFieldSettings ->
-        callback()
+      callback()
 
   _loadEntityData: (callback) ->
     @_taistApi.companyData.get @_getEntityDataObjectName(), (err, allEntitiesData) =>
-      @_taistApi.log "entities data: ", allEntitiesData
       @_entities = {}
       for entityId, entityData of allEntitiesData
         entityData = allEntitiesData[entityId]
         @_entities[entityId] = @_createEntity entityId, entityData
-      callback()
-
-  _loadFieldSettings: (callback) ->
-    @_taistApi.companyData.get @_getFieldSettingsDataObjectName(), (err, res) =>
-      console.log 'onLoad', @_getFieldSettingsDataObjectName(), res
-      @_fieldSettings = res ? {}
       callback()
 
   _createEntity: (id, data) -> new Entity @, id, data
@@ -41,17 +29,5 @@ module.exports = class EntityRepository
   getEntity: (entityId) ->
     @_entities[entityId] ?= @_createEntity entityId, {}
 
-  getFieldValueEditor: (fieldName, entity) ->
-    fieldOptions = @_schema.fields[fieldName]
-    fieldUIConstructor = @_taistApi.objects.fieldEditors[fieldOptions.type]
-    fieldUI = new fieldUIConstructor (entity.getFieldValue fieldName), fieldOptions, (@_getFieldSettings fieldName), (newValue) ->
-      entity.setFieldValue fieldName, newValue
-      entity.save ->
-    return fieldUI
-
-  _getFieldSettings: (fieldName) -> @_fieldSettings[fieldName] ?= {}
-
-  getFieldSettings: (fieldName) ->
-    @_getFieldSettings(fieldName)
-
-  _saveFieldSettings: -> @_taistApi.companyData.set @_getFieldSettingsDataObjectName(), @_fieldSettings, ->
+  getAllEntities: ->
+    (entity for id, entity of @_entities)

@@ -47,6 +47,7 @@ module.exports =
 
   renderInSettings: ->
     app.api.wait.elementRender '.SettingsDealsView', (parentEl) =>
+
       container = $('.taistSettingsContainer', parentEl)
       unless container.length
         container = $('<div class="taistSettingsContainer">').appendTo parentEl
