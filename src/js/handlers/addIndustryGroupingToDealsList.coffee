@@ -3,28 +3,34 @@ industryField = require '../industryField'
 customFieldName = 'industry'
 
 module.exports = ->
-  groupMatches = location.hash.match /grouped_by=([^&]+)/
-  fieldToGroup = groupMatches?[1] ? 'none'
-
   findCustomDealsList().remove()
-  addGroupingByIndustry fieldToGroup
 
-  if fieldToGroup is customFieldName
-    loadDealsData (deals) ->
-      addCustomFieldToDeals deals
+  addGroupingByCustomField()
+
+  loadDealsData (deals) ->
+    addCustomFieldToDeals deals
+
+    if currentlyGroupingByCustomField()
       renderCustomDealsList deals
+
+    addCustomColumnToOriginalList()
+
+currentlyGroupingByCustomField = ->
+  groupMatches = location.hash.match /grouped_by=([^&]+)/
+  currentGroupingField = groupMatches?[1] ? 'none'
+  return currentGroupingField is customFieldName
 
 customDealsListClass = 'taist-dealsListWithCustomGrouping'
 findCustomDealsList = -> $ '.' + customDealsListClass
 
-addGroupingByIndustry = (fieldToGroup) ->
+addGroupingByCustomField = ->
   selector = '.listHeader .gwt-ListBox'
   app.api.wait.elementRender selector, (groupingSelect) ->
     unless $("""option[value="#{customFieldName}"]""", groupingSelect).size()
       capitalizedFieldName = customFieldName[0] + (customFieldName.slice 1)
       groupingSelect.append $ """<option value="#{customFieldName}">#{capitalizedFieldName}</option>"""
 
-    if fieldToGroup is customFieldName
+    if currentlyGroupingByCustomField()
       groupingSelect.val customFieldName
 
 renderCustomDealsList = (deals) ->
@@ -41,11 +47,11 @@ replaceOriginalListWithCustom = ->
   $('.groupGlobalHeader').parent().hide()
   $('.emptyView').hide()
 
-  originalDealsList = $ '.mainContainer>div>.dealList'
-  originalDealsList.parent().hide()
+  originalDealsList = ($ '.mainContainer>div>.dealList').parent()
+  originalDealsList.hide()
 
   customDealsList = $ """<div class="#{customDealsListClass}">"""
-  customDealsList.insertBefore originalDealsList.parent()
+  customDealsList.insertBefore originalDealsList
 
   return customDealsList
 
@@ -69,6 +75,32 @@ groupDealsByCustomField = (deals) ->
     groupedDeals.push {name, group, amount}
 
   return groupedDeals
+
+addCustomColumnToOriginalList = ->
+    addCustomColumnHeader()
+    addCustomColumnContents()
+
+addCustomColumnHeader = ->
+  app.api.wait.elementRender '.DealListView .headerTD.subject', (previousHeader) ->
+    if not currentlyGroupingByCustomField()
+      (previousHeader.siblings '.taist-custom-header').remove()
+      previousHeader.after $ """<td class="headerTD c3 taist-custom-header">Industry</td>"""
+
+addCustomColumnContents = ->
+  app.api.wait.elementRender '.DealListView .dealList .body tr td a.deal_subject', (linkToDealInPreviousCell) ->
+    if not currentlyGroupingByCustomField()
+      previousCell = linkToDealInPreviousCell.parent()
+      console.log {previousCell}
+
+      dealUrl = linkToDealInPreviousCell.attr 'href'
+      dealIdPrefix = '?id='
+      dealIdIndex = (dealUrl.indexOf dealIdPrefix) + dealIdPrefix.length
+      dealId = dealUrl.substring dealIdIndex
+      industry = industryField.getIndustryName dealId
+
+      (previousCell.siblings '.taist-custom-cell').remove()
+      previousCell.after $ """<td class="cell c3 taist-custom-cell">#{industry}</td>"""
+
 
 loadDealsData = (callback, loadedDeals = [], page = 1) ->
   $.ajax
