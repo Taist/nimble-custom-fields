@@ -13,20 +13,20 @@ module.exports =
     _deals = app.repositories.deals
     _industries = app.repositories.industry
 
-    _deals.load ->
-      _industries.load ->
+    _industries.load ->
+      _deals.load ->
         callback()
 
   createValueEditor: (dealId) ->
-    entity = _deals.getEntity dealId
+    entity = _deals.getOrCreateEntity dealId
     return @_createIndustryEditor (entity.getFieldValue industryField), (newValue) ->
       entity.setFieldValue industryField, newValue
       entity.save ->
 
   getIndustryName: (dealId) ->
-    console.log 'getIndustryName', dealId, _industries
     deal = _deals.getOrCreateEntity dealId
     industryId = deal.getFieldValue industryField
+    console.log 'getIndustryName', dealId, industryId
     if industryId?
       industryName = (_industries.getEntity industryId)?.getFieldValue industryNameField
 
@@ -72,7 +72,7 @@ module.exports =
     @_createIndustryEditor null, onValueChange
 
   setIndustryInDeal: (dealId, industryId, callback) ->
-    deal = _deals.getEntity dealId
+    deal = _deals.getOrCreateEntity dealId
     deal.setFieldValue industryField, industryId
     deal.save callback
 

@@ -213,15 +213,15 @@ module.exports = {
   load: function(callback) {
     _deals = app.repositories.deals;
     _industries = app.repositories.industry;
-    return _deals.load(function() {
-      return _industries.load(function() {
+    return _industries.load(function() {
+      return _deals.load(function() {
         return callback();
       });
     });
   },
   createValueEditor: function(dealId) {
     var entity;
-    entity = _deals.getEntity(dealId);
+    entity = _deals.getOrCreateEntity(dealId);
     return this._createIndustryEditor(entity.getFieldValue(industryField), function(newValue) {
       entity.setFieldValue(industryField, newValue);
       return entity.save(function() {});
@@ -229,9 +229,9 @@ module.exports = {
   },
   getIndustryName: function(dealId) {
     var deal, industryId, industryName, _ref;
-    console.log('getIndustryName', dealId, _industries);
     deal = _deals.getOrCreateEntity(dealId);
     industryId = deal.getFieldValue(industryField);
+    console.log('getIndustryName', dealId, industryId);
     if (industryId != null) {
       industryName = (_ref = _industries.getEntity(industryId)) != null ? _ref.getFieldValue(industryNameField) : void 0;
     }
@@ -294,7 +294,7 @@ module.exports = {
   },
   setIndustryInDeal: function(dealId, industryId, callback) {
     var deal;
-    deal = _deals.getEntity(dealId);
+    deal = _deals.getOrCreateEntity(dealId);
     deal.setFieldValue(industryField, industryId);
     return deal.save(callback);
   },
@@ -501,6 +501,7 @@ module.exports = EntityRepository = (function() {
   };
 
   EntityRepository.prototype.getEntity = function(entityId) {
+    console.log('getEntity', entityId, this._entities);
     return this._entities[entityId];
   };
 

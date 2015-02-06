@@ -27,6 +27,7 @@ module.exports = class EntityRepository
   _saveEntity: (entity, callback) -> @_taistApi.companyData.setPart @_getEntityDataObjectName(), entity._id, entity._data, callback
 
   getEntity: (entityId) ->
+    console.log 'getEntity', entityId, @_entities
     @_entities[entityId]
 
   getOrCreateEntity: (entityId) ->
