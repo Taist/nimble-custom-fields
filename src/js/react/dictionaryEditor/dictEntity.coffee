@@ -20,7 +20,6 @@ DictEntity = React.createFactory React.createClass
 
   onEdit: ->
     @setState { mode: 'edit' }
-    console.log 'onEdit', @state
 
   createButton: (name, onClickHandler) ->
     options =

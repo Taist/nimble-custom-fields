@@ -231,7 +231,6 @@ module.exports = {
     var deal, industryId, industryName, _ref;
     deal = _deals.getOrCreateEntity(dealId);
     industryId = deal.getFieldValue(industryField);
-    console.log('getIndustryName', dealId, industryId);
     if (industryId != null) {
       industryName = (_ref = _industries.getEntity(industryId)) != null ? _ref.getFieldValue(industryNameField) : void 0;
     }
@@ -263,12 +262,10 @@ module.exports = {
       }
       return _results;
     }).call(this);
-    console.log(industryListValues.length);
     industryListValues.unshift({
       id: 0,
       value: 'Not specified'
     });
-    console.log(industryListValues.length);
     fieldUI = new selectField(currentIndustryId, industryListValues, onValueChange);
     return fieldUI.createValueEditor();
   },
@@ -389,13 +386,10 @@ module.exports = {
           data.id = entity._id;
           dictEntities.push(data);
         }
-        console.log(repoEntities);
-        console.log(dictEntities);
         dict = {
           name: 'Industry',
           entities: dictEntities,
           onUpdate: function(entities) {
-            console.log('onUpdate', entities);
             repoEntities = {};
             entities.forEach(function(entity) {
               return repoEntities[entity.id] = entity;
@@ -501,7 +495,6 @@ module.exports = EntityRepository = (function() {
   };
 
   EntityRepository.prototype.getEntity = function(entityId) {
-    console.log('getEntity', entityId, this._entities);
     return this._entities[entityId];
   };
 
@@ -541,12 +534,7 @@ module.exports = SelectField = (function() {
     this._value = _value;
     this._options = _options;
     this._onValueChange = _onValueChange;
-    console.log('SelectField', this._value, this._options);
   }
-
-  SelectField.prototype.getDisplayedValue = function() {
-    return 'ABC';
-  };
 
   SelectField.prototype._setValue = function(newValue) {
     if (typeof this._onValueChange === "function") {
@@ -597,7 +585,6 @@ DictEditor = React.createFactory(React.createClass({
     }));
   },
   onChange: function(entityId, newValue) {
-    console.log('onChange', entityId, newValue);
     if (entityId) {
       return this.props.onUpdate(this.props.entities.map(function(entity) {
         if (entity.id === entityId) {
@@ -711,10 +698,9 @@ DictEntity = React.createFactory(React.createClass({
     return this.props.actions.onDelete(this.props.entity.id);
   },
   onEdit: function() {
-    this.setState({
+    return this.setState({
       mode: 'edit'
     });
-    return console.log('onEdit', this.state);
   },
   createButton: function(name, onClickHandler) {
     var options;

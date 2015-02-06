@@ -13,7 +13,6 @@ DictEditor = React.createFactory React.createClass
       entity.id isnt entityId
 
   onChange: (entityId, newValue) ->
-    console.log 'onChange', entityId, newValue
     if entityId
       @props.onUpdate @props.entities.map (entity) ->
         if entity.id is entityId then entity.value = newValue

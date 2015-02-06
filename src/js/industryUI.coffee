@@ -64,16 +64,11 @@ module.exports =
         data.id = entity._id
         dictEntities.push data
 
-      console.log repoEntities
-      console.log dictEntities
-
       dict =
         name: 'Industry'
         entities: dictEntities
 
         onUpdate: (entities) ->
-          console.log 'onUpdate', entities
-
           repoEntities = {}
           entities.forEach (entity) ->
             repoEntities[entity.id] = entity

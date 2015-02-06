@@ -8,9 +8,6 @@ module.exports = class SelectField
   _onValueChange: null
 
   constructor: (@_value, @_options, @_onValueChange) ->
-    console.log 'SelectField', @_value, @_options
-
-  getDisplayedValue: -> 'ABC' #@_getSelectOptions()[@_value] ? @_options.unsetValueDisplayedText
 
   _setValue: (newValue) ->
     @_onValueChange? newValue
