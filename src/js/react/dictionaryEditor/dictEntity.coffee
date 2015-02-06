@@ -37,7 +37,7 @@ DictEntity = React.createFactory React.createClass
     @closeEditor()
 
   onSave: ->
-    @props.actions.onChange @props.entity.id, @refs.editorValue.getDOMNode().value
+    @props.actions.onChange @props.entity.id, @refs.valueEditor.getDOMNode().value
     @closeEditor()
 
   showDictEntity: ->
@@ -65,11 +65,12 @@ DictEntity = React.createFactory React.createClass
       div { style: { padding: '8px 9px 7px 8px', backgroundColor: 'rgb(248, 248, 248)' } },
         div { className: 'nmbl-FormTextBox nmbl-FormTextBox-name' },
           input
-            ref: 'editorValue'
+            ref: 'valueEditor'
             className: 'nmbl-AdvancedTextBox'
             type: 'text'
             maxLength: '256'
             defaultValue: @props.entity.value
+            autoFocus: true
           @createButton 'Save', @onSave
           @createButton 'Cancel', @onCancel
 

@@ -726,7 +726,7 @@ DictEntity = React.createFactory(React.createClass({
     return this.closeEditor();
   },
   onSave: function() {
-    this.props.actions.onChange(this.props.entity.id, this.refs.editorValue.getDOMNode().value);
+    this.props.actions.onChange(this.props.entity.id, this.refs.valueEditor.getDOMNode().value);
     return this.closeEditor();
   },
   showDictEntity: function() {
@@ -768,11 +768,12 @@ DictEntity = React.createFactory(React.createClass({
     }, div({
       className: 'nmbl-FormTextBox nmbl-FormTextBox-name'
     }, input({
-      ref: 'editorValue',
+      ref: 'valueEditor',
       className: 'nmbl-AdvancedTextBox',
       type: 'text',
       maxLength: '256',
-      defaultValue: this.props.entity.value
+      defaultValue: this.props.entity.value,
+      autoFocus: true
     }), this.createButton('Save', this.onSave), this.createButton('Cancel', this.onCancel))));
   }
 }));
