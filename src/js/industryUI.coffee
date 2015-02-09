@@ -65,7 +65,7 @@ module.exports =
         dictEntities.push data
 
       dict =
-        name: 'Industry'
+        name: 'Industries'
         entities: dictEntities
 
         onUpdate: (entities) ->
