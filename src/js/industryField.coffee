@@ -31,20 +31,6 @@ module.exports =
 
     industryName ?= notSpecifiedCaption
 
-  createIndustriesListEditor: ->
-    #TODO - finish replicating UI for stages:
-    # edit: pressing "Edit" should display separate form with editable industry name
-    # deleting: should ask for confirmation - see native "Stages" UI
-    # creating - display form similar to edit
-    listEditorDiv = $ @_domTemplates.industriesList
-
-    industriesTable = listEditorDiv.find '.industriesList tbody'
-
-    for industry in @_getOrderedIndustriesList()
-      industriesTable.append $ @_domTemplates.industryView industry
-
-    return listEditorDiv
-
   _createIndustryEditor: (currentIndustryId, onValueChange) ->
     industryListValues = ({id: industry._id, value: industry._data.value} for industry in @_getOrderedIndustriesList())
     industryListValues.unshift { id: 0, value: 'Not specified' }
@@ -72,36 +58,3 @@ module.exports =
     deal = _deals.getOrCreateEntity dealId
     deal.setFieldValue industryField, industryId
     deal.save callback
-
-  _domTemplates:
-    industriesList: """
-      <div class="stagesContainer">
-        <div class="tableHeaders">
-          <div class="name">Name</div>
-        </div>
-        <div style="position: relative; overflow: hidden;">
-          <table cellspacing="0" cellpadding="0" class="industriesList stageList">
-            <tbody>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    """
-
-    industryView: (industry) -> """
-      <tr>
-        <td align="left" style="vertical-align: top;">
-          <div class="StageWidget taist-custom-field-settings-industry-edit">
-            <div class="viewContainer">
-              <div class="hoverContainer"><a class="gwt-Anchor delete taist-custom-field-delete-button" >Delete</a> <a class="gwt-Anchor ">Edit</a>
-
-                <div style="clear:both"></div>
-              </div>
-              <div class="stageName">#{industry.getFieldValue "name"}</div>
-            </div>
-
-          </div>
-        </td>
-      </tr>
-
-    """

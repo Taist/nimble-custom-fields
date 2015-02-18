@@ -6,25 +6,35 @@ module.exports = class EntityRepository
   _schema: null
   _entityTypeName: null
 
-  _getEntityDataObjectName: -> """type.#{@_entityTypeName}.entities"""
+  _getEntityDataObjectName: ->
+    "type.#{@_entityTypeName}.entities"
 
   constructor: (@_taistApi, @_entityTypeName, @_schema) ->
 
   load: (callback) ->
-    @_loadEntityData =>
+    @_loadEntityData ->
       callback()
+
+  _updateEntities: (allEntitiesData, callback) ->
+    @_entities = {}
+    for entityId, entityData of allEntitiesData
+      entityData = allEntitiesData[entityId]
+      @_entities[entityId] = @_createEntity entityId, entityData
+    callback()
 
   _loadEntityData: (callback) ->
     @_taistApi.companyData.get @_getEntityDataObjectName(), (err, allEntitiesData) =>
-      @_entities = {}
-      for entityId, entityData of allEntitiesData
-        entityData = allEntitiesData[entityId]
-        @_entities[entityId] = @_createEntity entityId, entityData
-      callback()
+      @_updateEntities(allEntitiesData, callback)
 
-  _createEntity: (id, data) -> new Entity @, id, data
+  _createEntity: (id, data) ->
+    new Entity @, id, data
 
-  _saveEntity: (entity, callback) -> @_taistApi.companyData.setPart @_getEntityDataObjectName(), entity._id, entity._data, callback
+  _saveEntity: (entity, callback) ->
+    @_taistApi.companyData.setPart @_getEntityDataObjectName(), entity._id, entity._data, callback
+
+  save: (entities, callback) ->
+    @_taistApi.companyData.set @_getEntityDataObjectName(), entities, =>
+      @_updateEntities(entities, callback)
 
   getEntity: (entityId) ->
     @_entities[entityId]
@@ -33,4 +43,7 @@ module.exports = class EntityRepository
     @_entities[entityId] ?= @_createEntity entityId, {}
 
   getAllEntities: ->
-    (entity for id, entity of @_entities)
+    ( entity for id, entity of @_entities )
+
+  getDictionary: ->
+    ( $.extend({}, entity._data, { id }) for id, entity of @_entities )

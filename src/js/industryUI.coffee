@@ -45,34 +45,29 @@ module.exports =
 
   _getDealIdFromUrl: -> location.hash.substring((location.hash.indexOf '?id=') + 4)
 
+  _getInSettingsContainer: (parent) ->
+    container = $('.taistSettingsContainer', parent)
+    unless container.length
+      container = $('<div class="taistSettingsContainer">').appendTo parent
+    container
+
   renderInSettings: ->
-    app.api.wait.elementRender '.SettingsDealsView', (parentEl) =>
-
-      container = $('.taistSettingsContainer', parentEl)
-      unless container.length
-        container = $('<div class="taistSettingsContainer">').appendTo parentEl
-
-      industryKey = 'type.industry.entities'
+    app.api.wait.elementRender '.SettingsDealsView', (parent) =>
 
       React = require 'react'
       DictEditor = require './react/dictionaryEditor/dictEditor'
 
-      repoEntities = app.repositories.industry.getAllEntities()
-      dictEntities = []
-      for id, entity of repoEntities
-        data = entity._data
-        data.id = entity._id
-        dictEntities.push data
+      container = @_getInSettingsContainer parent
 
+      dictEntities = app.repositories.industry.getDictionary()
       dict =
         name: 'Industries'
         entities: dictEntities
-
         onUpdate: (entities) ->
           repoEntities = {}
           entities.forEach (entity) ->
             repoEntities[entity.id] = entity
-          app.api.companyData.set industryKey, repoEntities, ->
+          app.repositories.industry.save repoEntities, ->
 
           dict.entities = entities
           React.render ( DictEditor dict ), container[0]
