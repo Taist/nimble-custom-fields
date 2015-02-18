@@ -1,5 +1,7 @@
 Entity = require './entity'
 
+whenjs = require 'when'
+
 module.exports = class EntityRepository
   _entities: null
   _taistApi: null
@@ -11,20 +13,23 @@ module.exports = class EntityRepository
 
   constructor: (@_taistApi, @_entityTypeName, @_schema) ->
 
-  load: (callback) ->
-    @_loadEntityData ->
-      callback()
+  load: () ->
+    @_loadEntityData()
 
   _updateEntities: (allEntitiesData, callback) ->
     @_entities = {}
     for entityId, entityData of allEntitiesData
       entityData = allEntitiesData[entityId]
       @_entities[entityId] = @_createEntity entityId, entityData
-    callback()
 
-  _loadEntityData: (callback) ->
+  _loadEntityData: ->
+    deferred = whenjs.defer()
     @_taistApi.companyData.get @_getEntityDataObjectName(), (err, allEntitiesData) =>
-      @_updateEntities(allEntitiesData, callback)
+      if err
+        deferred.reject err
+      else
+        deferred.resolve @_updateEntities allEntitiesData
+    deferred.promise
 
   _createEntity: (id, data) ->
     new Entity @, id, data

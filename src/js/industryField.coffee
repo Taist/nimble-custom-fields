@@ -9,13 +9,9 @@ industryNameField = "value"
 notSpecifiedCaption = "Not specified"
 
 module.exports =
-  load: (callback) ->
+  init: () ->
     _deals = app.repositories.deals
     _industries = app.repositories.industry
-
-    _industries.load ->
-      _deals.load ->
-        callback()
 
   createValueEditor: (dealId) ->
     entity = _deals.getOrCreateEntity dealId
