@@ -6,5 +6,6 @@ module.exports =
   api: null
 
   repositories:
+    customFields: null
     deals: null
     industry: null

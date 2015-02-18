@@ -16,7 +16,7 @@ module.exports = class EntityRepository
   load: () ->
     @_loadEntityData()
 
-  _updateEntities: (allEntitiesData, callback) ->
+  _updateEntities: (allEntitiesData) ->
     @_entities = {}
     for entityId, entityData of allEntitiesData
       entityData = allEntitiesData[entityId]
@@ -39,7 +39,9 @@ module.exports = class EntityRepository
 
   save: (entities, callback) ->
     @_taistApi.companyData.set @_getEntityDataObjectName(), entities, =>
-      @_updateEntities(entities, callback)
+      #TODO Fix it
+      @_updateEntities(entities)
+      callback()
 
   getEntity: (entityId) ->
     @_entities[entityId]

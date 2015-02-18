@@ -17,6 +17,7 @@ DictEntity = React.createFactory React.createClass
 
   onDelete: ->
     @props.actions.onDelete @props.entity.id
+    @closeEditor()
 
   onEdit: ->
     @setState { mode: 'edit' }
