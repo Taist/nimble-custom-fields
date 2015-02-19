@@ -36,7 +36,7 @@ module.exports = thisModule =
   _newDealCustomFields: null
 
   renderInNewDealDialog: ->
-    app.api.wait.elementRender '.DealCreateForm tbody', (parent) =>
+    app.api.wait.elementRender '.DealCreateForm>table>tbody', (parent) =>
       container = @_getAddonContainer parent, 'tr', false
 
       $(container).insertAfter $('.fieldCell.stage', parent).parent()

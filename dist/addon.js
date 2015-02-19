@@ -283,7 +283,7 @@ module.exports = thisModule = {
   _renderInEditor: function(parent, reactFieldsEditorClass) {},
   _newDealCustomFields: null,
   renderInNewDealDialog: function() {
-    return app.api.wait.elementRender('.DealCreateForm tbody', (function(_this) {
+    return app.api.wait.elementRender('.DealCreateForm>table>tbody', (function(_this) {
       return function(parent) {
         var CustomFieldsInNewDealDialog, container, deal, dicts, fields, onChange;
         container = _this._getAddonContainer(parent, 'tr', false);
