@@ -1,11 +1,7 @@
 app = require './app'
-industryField = require './industryField'
-
 React = require 'react'
 
 module.exports =
-  _industryForNewDeal: null
-
   _getDealIdFromUrl: -> location.hash.substring((location.hash.indexOf '?id=') + 4)
 
   _getAddonContainer: (parent, element = 'div', shouldBeAppendedToParent = true) ->
@@ -28,7 +24,7 @@ module.exports =
 
     app.repositories.customFields.getAllEntities().map (repository) =>
       id = repository.id
-      customFieldEntity = app.repositories[id]?.getEntity(deal[id])
+      customFieldEntity = app.repositories[id]?.getEntity(deal?[id])
       return {
         id: customFieldEntity?.id or 0
         name: repository.name
