@@ -218,17 +218,17 @@ module.exports = {
   createValueEditor: function(dealId) {
     var entity;
     entity = _deals.getOrCreateEntity(dealId);
-    return this._createIndustryEditor(entity.getFieldValue(industryField), function(newValue) {
-      entity.setFieldValue(industryField, newValue);
-      return entity.save(function() {});
+    return this._createIndustryEditor(entity.industry, function(newValue) {
+      entity.industry = newValue;
+      return _deals._saveEntity(entity, function() {});
     });
   },
   getIndustryName: function(dealId) {
     var deal, industryId, industryName, _ref;
     deal = _deals.getOrCreateEntity(dealId);
-    industryId = deal.getFieldValue(industryField);
+    industryId = deal.industry;
     if (industryId != null) {
-      industryName = (_ref = _industries.getEntity(industryId)) != null ? _ref.getFieldValue(industryNameField) : void 0;
+      industryName = (_ref = _industries.getEntity(industryId)) != null ? _ref.value : void 0;
     }
     return industryName != null ? industryName : industryName = notSpecifiedCaption;
   },
@@ -241,8 +241,8 @@ module.exports = {
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         industry = _ref[_i];
         _results.push({
-          id: industry._id,
-          value: industry._data.value
+          id: industry.id,
+          value: industry.value
         });
       }
       return _results;
@@ -259,8 +259,8 @@ module.exports = {
     industriesList = _industries.getAllEntities();
     industriesList.sort(function(i1, i2) {
       var name1, name2;
-      name1 = i1.getFieldValue(industryNameField);
-      name2 = i2.getFieldValue(industryNameField);
+      name1 = i1.industry;
+      name2 = i2.industry;
       if (name1 > name2) {
         return 1;
       } else if (name1 < name2) {
@@ -277,8 +277,8 @@ module.exports = {
   setIndustryInDeal: function(dealId, industryId, callback) {
     var deal;
     deal = _deals.getOrCreateEntity(dealId);
-    deal.setFieldValue(industryField, industryId);
-    return deal.save(callback);
+    deal.industry = industryId;
+    return _deals._saveEntity(deal, function() {});
   }
 };
 
@@ -381,9 +381,9 @@ module.exports = {
         };
         dicts = app.repositories.customFields.getAllEntities().map(function(repository) {
           return {
-            id: repository._id,
-            name: repository.getFieldValue('name'),
-            entities: app.repositories[repository._id].getDictionary(),
+            id: repository.id,
+            name: repository.name,
+            entities: app.repositories[repository.id].getDictionary(),
             onUpdate: onUpdateDictionary
           };
         });
@@ -460,15 +460,7 @@ module.exports = EntityRepository = (function() {
   };
 
   EntityRepository.prototype._updateEntities = function(allEntitiesData) {
-    var entityData, entityId, _results;
-    this._entities = {};
-    _results = [];
-    for (entityId in allEntitiesData) {
-      entityData = allEntitiesData[entityId];
-      entityData = allEntitiesData[entityId];
-      _results.push(this._entities[entityId] = this._createEntity(entityId, entityData));
-    }
-    return _results;
+    return this._entities = allEntitiesData;
   };
 
   EntityRepository.prototype._loadEntityData = function() {
@@ -486,12 +478,8 @@ module.exports = EntityRepository = (function() {
     return deferred.promise;
   };
 
-  EntityRepository.prototype._createEntity = function(id, data) {
-    return new Entity(this, id, data);
-  };
-
   EntityRepository.prototype._saveEntity = function(entity, callback) {
-    return this._taistApi.companyData.setPart(this._getEntityDataObjectName(), entity._id, entity._data, callback);
+    return this._taistApi.companyData.setPart(this._getEntityDataObjectName(), entity.id, entity, callback);
   };
 
   EntityRepository.prototype.save = function(entities, callback) {
@@ -509,7 +497,9 @@ module.exports = EntityRepository = (function() {
 
   EntityRepository.prototype.getOrCreateEntity = function(entityId) {
     var _base;
-    return (_base = this._entities)[entityId] != null ? _base[entityId] : _base[entityId] = this._createEntity(entityId, {});
+    return (_base = this._entities)[entityId] != null ? _base[entityId] : _base[entityId] = {
+      id: entityId
+    };
   };
 
   EntityRepository.prototype.getAllEntities = function() {
@@ -529,7 +519,7 @@ module.exports = EntityRepository = (function() {
     _results = [];
     for (id in _ref) {
       entity = _ref[id];
-      _results.push($.extend({}, entity._data, {
+      _results.push($.extend({}, entity, {
         id: id
       }));
     }
@@ -21835,6 +21825,7 @@ module.exports = addonEntry = {
     });
     customFields = {};
     customFields['industry'] = {
+      id: 'industry',
       name: 'Industries'
     };
     app.repositories.customFields = new entityRepository(app.api, 'customFields', {
@@ -21842,7 +21833,7 @@ module.exports = addonEntry = {
     });
     app.repositories.customFields._updateEntities(customFields);
     return whenjs.all(app.repositories.customFields.getAllEntities().map(function(repository) {
-      return app.repositories[repository._id].load();
+      return app.repositories[repository.id].load();
     })).then(function() {
       return app.repositories.deals.load();
     }).then(function() {

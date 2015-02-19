@@ -71,9 +71,9 @@ module.exports =
         React.render ( CustomFields { dicts } ), container
 
       dicts = app.repositories.customFields.getAllEntities().map (repository) =>
-        id: repository._id
-        name: repository.getFieldValue 'name'
-        entities: app.repositories[repository._id].getDictionary()
+        id: repository.id
+        name: repository.name
+        entities: app.repositories[repository.id].getDictionary()
         onUpdate: onUpdateDictionary
 
       React.render ( CustomFields { dicts } ), container

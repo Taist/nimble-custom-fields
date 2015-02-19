@@ -15,20 +15,20 @@ module.exports =
 
   createValueEditor: (dealId) ->
     entity = _deals.getOrCreateEntity dealId
-    return @_createIndustryEditor (entity.getFieldValue industryField), (newValue) ->
-      entity.setFieldValue industryField, newValue
-      entity.save ->
+    return @_createIndustryEditor (entity.industry), (newValue) ->
+      entity.industry = newValue
+      _deals._saveEntity entity, ->
 
   getIndustryName: (dealId) ->
     deal = _deals.getOrCreateEntity dealId
-    industryId = deal.getFieldValue industryField
+    industryId = deal.industry
     if industryId?
-      industryName = (_industries.getEntity industryId)?.getFieldValue industryNameField
+      industryName = (_industries.getEntity industryId)?.value
 
     industryName ?= notSpecifiedCaption
 
   _createIndustryEditor: (currentIndustryId, onValueChange) ->
-    industryListValues = ({id: industry._id, value: industry._data.value} for industry in @_getOrderedIndustriesList())
+    industryListValues = ({id: industry.id, value: industry.value} for industry in @_getOrderedIndustriesList())
     industryListValues.unshift { id: 0, value: 'Not specified' }
     fieldUI = new selectField currentIndustryId, industryListValues, onValueChange
     return fieldUI.createValueEditor()
@@ -36,8 +36,8 @@ module.exports =
   _getOrderedIndustriesList: ->
     industriesList = _industries.getAllEntities()
     industriesList.sort (i1, i2) ->
-      name1 = i1.getFieldValue industryNameField
-      name2 = i2.getFieldValue industryNameField
+      name1 = i1.industry
+      name2 = i2.industry
       if name1 > name2
         return 1
       else if name1 < name2
@@ -52,5 +52,5 @@ module.exports =
 
   setIndustryInDeal: (dealId, industryId, callback) ->
     deal = _deals.getOrCreateEntity dealId
-    deal.setFieldValue industryField, industryId
-    deal.save callback
+    deal.industry = industryId
+    _deals._saveEntity deal, ->

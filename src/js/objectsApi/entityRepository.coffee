@@ -17,10 +17,7 @@ module.exports = class EntityRepository
     @_loadEntityData()
 
   _updateEntities: (allEntitiesData) ->
-    @_entities = {}
-    for entityId, entityData of allEntitiesData
-      entityData = allEntitiesData[entityId]
-      @_entities[entityId] = @_createEntity entityId, entityData
+    @_entities = allEntitiesData
 
   _loadEntityData: ->
     deferred = whenjs.defer()
@@ -31,11 +28,8 @@ module.exports = class EntityRepository
         deferred.resolve @_updateEntities allEntitiesData
     deferred.promise
 
-  _createEntity: (id, data) ->
-    new Entity @, id, data
-
   _saveEntity: (entity, callback) ->
-    @_taistApi.companyData.setPart @_getEntityDataObjectName(), entity._id, entity._data, callback
+    @_taistApi.companyData.setPart @_getEntityDataObjectName(), entity.id, entity, callback
 
   save: (entities, callback) ->
     @_taistApi.companyData.set @_getEntityDataObjectName(), entities, =>
@@ -47,10 +41,10 @@ module.exports = class EntityRepository
     @_entities[entityId]
 
   getOrCreateEntity: (entityId) ->
-    @_entities[entityId] ?= @_createEntity entityId, {}
+    @_entities[entityId] ?= { id: entityId }
 
   getAllEntities: ->
     ( entity for id, entity of @_entities )
 
   getDictionary: ->
-    ( $.extend({}, entity._data, { id }) for id, entity of @_entities )
+    ( $.extend({}, entity, { id }) for id, entity of @_entities )

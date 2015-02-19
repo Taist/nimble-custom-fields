@@ -21,13 +21,13 @@ module.exports = addonEntry =
     app.repositories.industry = new entityRepository app.api, 'industry', { fields: ['value'] }
 
     customFields = {}
-    customFields[ 'industry' ] = { name: 'Industries' }
+    customFields[ 'industry' ] = { id: 'industry', name: 'Industries' }
     app.repositories.customFields = new entityRepository app.api, 'customFields', { fields: ['name'] }
     app.repositories.customFields._updateEntities customFields
 
     whenjs.all(
       app.repositories.customFields.getAllEntities().map (repository) ->
-        app.repositories[ repository._id ].load()
+        app.repositories[ repository.id ].load()
     )
     .then () ->
       app.repositories.deals.load()
