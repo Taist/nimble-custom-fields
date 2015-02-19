@@ -21817,6 +21817,7 @@ module.exports = addonEntry = {
     var customFields;
     window.app = app;
     app.api = _taistApi;
+    extractNimbleAuthTokenFromRequest();
     app.repositories.deals = new entityRepository(app.api, 'deals', {
       fields: ['industry']
     });

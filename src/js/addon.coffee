@@ -17,6 +17,8 @@ module.exports = addonEntry =
     window.app = app
     app.api = _taistApi
 
+    extractNimbleAuthTokenFromRequest()
+
     app.repositories.deals = new entityRepository app.api, 'deals', { fields: ['industry'] }
     app.repositories.industry = new entityRepository app.api, 'industry', { fields: ['value'] }
 
