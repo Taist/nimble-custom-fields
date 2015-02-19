@@ -5,13 +5,12 @@ whenjs = require 'when'
 module.exports = class EntityRepository
   _entities: null
   _taistApi: null
-  _schema: null
   _entityTypeName: null
 
   _getEntityDataObjectName: ->
     "type.#{@_entityTypeName}.entities"
 
-  constructor: (@_taistApi, @_entityTypeName, @_schema) ->
+  constructor: (@_taistApi, @_entityTypeName) ->
 
   load: () ->
     @_loadEntityData()

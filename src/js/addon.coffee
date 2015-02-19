@@ -19,17 +19,19 @@ module.exports = addonEntry =
 
     extractNimbleAuthTokenFromRequest()
 
-    app.repositories.deals = new entityRepository app.api, 'deals', { fields: ['industry'] }
-    app.repositories.industry = new entityRepository app.api, 'industry', { fields: ['value'] }
+    app.repositories.deals = new entityRepository app.api, 'deals'
 
     customFields = {}
     customFields[ 'industry' ] = { id: 'industry', name: 'Industries' }
-    app.repositories.customFields = new entityRepository app.api, 'customFields', { fields: ['name'] }
+    customFields[ '1424347059189.5615' ] = { id: '1424347059189.5615', name: 'CustomField' }
+    app.repositories.customFields = new entityRepository app.api, 'customFields'
     app.repositories.customFields._updateEntities customFields
 
     whenjs.all(
       app.repositories.customFields.getAllEntities().map (repository) ->
-        app.repositories[ repository.id ].load()
+        id = repository.id
+        app.repositories[id] = new entityRepository(app.api, id)
+        app.repositories[id].load()
     )
     .then () ->
       app.repositories.deals.load()

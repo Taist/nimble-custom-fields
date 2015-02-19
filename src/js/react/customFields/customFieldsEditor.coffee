@@ -4,7 +4,7 @@ React = require 'react'
 
 DictEditor = require '../dictionaryEditor/dictEditor'
 
-CustomFields = React.createFactory React.createClass
+CustomFieldsEditor = React.createFactory React.createClass
   render: ->
     div {},
       h3 {}, 'CUSTOM FIELDS BY TAIST'
@@ -12,4 +12,4 @@ CustomFields = React.createFactory React.createClass
         div { key: dict.id },
           DictEditor dict
 
-module.exports = CustomFields
+module.exports = CustomFieldsEditor

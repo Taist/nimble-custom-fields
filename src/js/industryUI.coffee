@@ -1,6 +1,8 @@
 app = require './app'
 industryField = require './industryField'
 
+React = require 'react'
+
 module.exports =
   _industryForNewDeal: null
   renderInNewDealDialog: ->
@@ -17,46 +19,64 @@ module.exports =
       console.log "rendering: ", industrySelectUI, dealCreateFormTable
       previousRow.after industrySelectUI
 
-  renderInDealViewer: ->
-    app.api.wait.elementRender '.DealView .generalInfo', (parentCell) =>
-      @_saveIndustryForFreshlyCreatedDeal =>
-        @_displayIndustryInDealViewer parentCell
-
-  _saveIndustryForFreshlyCreatedDeal: (callback) ->
-    if @_industryForNewDeal?
-      industryField.setIndustryInDeal @_getDealIdFromUrl(), @_industryForNewDeal, =>
-        @_industryForNewDeal = null
-        callback()
-
-    else
-      callback()
-
-  _displayIndustryInDealViewer: (parentCell) ->
-    ($ '#taist-industryViewer').remove()
-    parentCell.append """<div id=\"taist-industryViewer\" class=\"dealMainField\">Industry:&nbsp<div >#{industryField.getIndustryName @_getDealIdFromUrl()}</div> </div>"""
-
-  renderInDealEditor: ->
-    app.api.wait.elementRender '.dealInfoTab .leftColumn', (parentColumn) =>
-      ($ '#taist-industryEditor').remove()
-      industrySelectUI = $ @_industrySelectInDealEditTemplate
-      (industrySelectUI.find '.taist-selectWrapper')
-        .append(industryField.createValueEditor @_getDealIdFromUrl())
-      parentColumn.append industrySelectUI
-
   _getDealIdFromUrl: -> location.hash.substring((location.hash.indexOf '?id=') + 4)
 
-  _getInSettingsContainer: (parent) ->
-    container = $('.taistSettingsContainer', parent)
+  _getAddonContainer: (parent) ->
+    container = $('.taistContainer', parent)
     unless container.length
-      container = $('<div class="taistSettingsContainer">').appendTo parent
+      container = $('<div class="taistContainer">').appendTo parent
     container[0]
+
+  _getCustomFieldsDicts: ->
+    app.repositories.customFields.getAllEntities().map (repository) =>
+      id: repository.id
+      name: repository.name
+      entities: app.repositories[repository.id].getDictionary()
+
+  _getCustomFieldsValues: (deal) ->
+    unless deal
+      deal = app.repositories.deals.getEntity @_getDealIdFromUrl()
+
+    app.repositories.customFields.getAllEntities().map (repository) =>
+      id = repository.id
+      customFieldEntity = app.repositories[id]?.getEntity(deal[id])
+      return {
+        id: customFieldEntity?.id or 0
+        name: repository.name
+        value: customFieldEntity?.value or 'Not specified'
+      }
+
+  renderInDealEditor: ->
+    app.api.wait.elementRender '.dealInfoTab .leftColumn', (parent) =>
+      container = @_getAddonContainer parent
+
+      dicts = @_getCustomFieldsDicts()
+
+      deal = app.repositories.deals.getEntity @_getDealIdFromUrl()
+      fields = @_getCustomFieldsValues deal
+
+      onChange = (dictId, optionId) ->
+        deal[dictId] = optionId
+        app.repositories.deals._saveEntity deal, ->
+          console.log 'I belive it is successfuly saved', dictId, optionId
+
+      CustomFieldsInDealEditor = require './react/customFields/CustomFieldsInDealEditor'
+      React.render ( CustomFieldsInDealEditor { dicts, fields, onChange } ), container
+
+  renderInDealViewer: ->
+    app.api.wait.elementRender '.DealView .generalInfo', (parent) =>
+      container = @_getAddonContainer parent
+
+      fields = @_getCustomFieldsValues()
+
+      CustomFieldsViewer = require './react/customFields/CustomFieldsViewer'
+      React.render ( CustomFieldsViewer { fields } ), container
 
   renderInSettings: ->
     app.api.wait.elementRender '.SettingsDealsView', (parent) =>
 
-      container = @_getInSettingsContainer parent
-      React = require 'react'
-      CustomFields = require './react/customFields/customFields'
+      container = @_getAddonContainer parent
+      CustomFieldsEditor = require './react/customFields/CustomFieldsEditor'
 
       onUpdateDictionary = (entities) ->
         #The function is called with dict as a context because of React
@@ -68,15 +88,13 @@ module.exports =
         dicts.forEach (dict) =>
           if dict.id is @id
             dict.entities = entities
-        React.render ( CustomFields { dicts } ), container
+        React.render ( CustomFieldsEditor { dicts } ), container
 
-      dicts = app.repositories.customFields.getAllEntities().map (repository) =>
-        id: repository.id
-        name: repository.name
-        entities: app.repositories[repository.id].getDictionary()
-        onUpdate: onUpdateDictionary
+      dicts = @_getCustomFieldsDicts()
+      dicts.forEach (dict) ->
+        dict.onUpdate = onUpdateDictionary
 
-      React.render ( CustomFields { dicts } ), container
+      React.render ( CustomFieldsEditor { dicts } ), container
 
   _industrySelectInDealEditTemplate: "<div id=\"taist-industryEditor\">\n  <div class=\"ContactFieldWidget\">\n    <div class=\"label\">industry:</div>\n    <div class=\"inputField taist-selectWrapper\"></div>\n\n    <div style=\"clear:both\"></div>\n  </div>\n</div>"
   _industrySelectInDealCreationTemplate: "<tr>\n  <td class=\"labelCell\">Industry:</td>\n</tr>\n<tr>\n  <td class=\'fieldCell\'>\n    <div class=\'nmbl-FormListBox\'>\n      <div class=\"taist-selectWrapper\">\n    </div>\n  </td>\n</tr>\n"
