@@ -19,6 +19,8 @@ module.exports = addonEntry =
 
     extractNimbleAuthTokenFromRequest()
 
+    waitingForNewDealRequest()
+
     app.repositories.deals = new entityRepository app.api, 'deals'
 
     customFields = {}
@@ -51,10 +53,18 @@ setRoutes = ->
     do (hashRegexp, routeProcessor) =>
       app.api.hash.when hashRegexp, routeProcessor
 
+proxy = require './tools/xmlHttpProxy'
+
 extractNimbleAuthTokenFromRequest = ->
-  proxy = require './tools/xmlHttpProxy'
   proxy.onRequestFinish (request) ->
     url = request.responseURL
     tokenMatches = url.match /\/api\/sessions\/([0-9abcdef-]{36})\?/
     if tokenMatches?
       app.options.nimbleToken = tokenMatches[1]
+
+waitingForNewDealRequest = ->
+  proxy.onRequestFinish (request) ->
+    url = request.responseURL
+    if url.match /\/api\/deals\?/
+      dealId = JSON.parse(request.responseText)?.deal?.id
+      industryUI.saveCustomFieldsForNewDeal dealId

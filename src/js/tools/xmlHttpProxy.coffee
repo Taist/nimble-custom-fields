@@ -22,6 +22,3 @@ _listenForRequestFinish = (request) ->
         handler request
 
     originalOnReadyStateChange?.apply request, arguments
-
-
-

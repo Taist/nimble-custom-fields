@@ -28,7 +28,9 @@ module.exports = class EntityRepository
     deferred.promise
 
   _saveEntity: (entity, callback) ->
-    @_taistApi.companyData.setPart @_getEntityDataObjectName(), entity.id, entity, callback
+    @_taistApi.companyData.setPart @_getEntityDataObjectName(), entity.id, entity, =>
+      @_entities[entity.id] = entity
+      callback()
 
   save: (entities, callback) ->
     @_taistApi.companyData.set @_getEntityDataObjectName(), entities, =>

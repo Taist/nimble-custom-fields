@@ -4,7 +4,6 @@ React = require 'react'
 
 CustomFieldsViewer = React.createFactory React.createClass
   render: ->
-    console.log @props
     div {},
       @props.fields.map (field) =>
         div { key: field.name },

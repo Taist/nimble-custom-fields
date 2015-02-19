@@ -225,13 +225,13 @@ module.exports = {
 };
 
 },{"./app":1}],4:[function(require,module,exports){
-var React, app;
+var React, app, thisModule;
 
 app = require('./app');
 
 React = require('react');
 
-module.exports = {
+module.exports = thisModule = {
   _getDealIdFromUrl: function() {
     return location.hash.substring((location.hash.indexOf('?id=')) + 4);
   },
@@ -281,6 +281,7 @@ module.exports = {
     })(this));
   },
   _renderInEditor: function(parent, reactFieldsEditorClass) {},
+  _newDealCustomFields: null,
   renderInNewDealDialog: function() {
     return app.api.wait.elementRender('.DealCreateForm tbody', (function(_this) {
       return function(parent) {
@@ -288,13 +289,21 @@ module.exports = {
         container = _this._getAddonContainer(parent, 'tr', false);
         $(container).insertAfter($('.fieldCell.stage', parent).parent());
         dicts = _this._getCustomFieldsDicts();
+        _this._newDealCustomFields = null;
         deal = {};
         fields = _this._getCustomFieldsValues(deal);
+        CustomFieldsInNewDealDialog = require('./react/customFields/customFieldsInNewDealDialog');
         onChange = function(dictId, optionId) {
           deal[dictId] = optionId;
+          fields = thisModule._getCustomFieldsValues(deal);
+          React.render(CustomFieldsInNewDealDialog({
+            dicts: dicts,
+            fields: fields,
+            onChange: onChange
+          }), container);
+          thisModule._newDealCustomFields = deal;
           return console.log('onChange', deal);
         };
-        CustomFieldsInNewDealDialog = require('./react/customFields/customFieldsInNewDealDialog');
         return React.render(CustomFieldsInNewDealDialog({
           dicts: dicts,
           fields: fields,
@@ -303,21 +312,44 @@ module.exports = {
       };
     })(this));
   },
+  saveCustomFieldsForNewDeal: function(dealId) {
+    var deal;
+    if (dealId && this._newDealCustomFields) {
+      deal = $.extend({
+        id: dealId
+      }, this._newDealCustomFields);
+      this._newDealCustomFields = null;
+      return app.repositories.deals._saveEntity(deal, (function(_this) {
+        return function() {
+          console.log('I belive it is successfuly saved', deal);
+          return _this.renderInDealEditor();
+        };
+      })(this));
+    }
+  },
   renderInDealEditor: function() {
     return app.api.wait.elementRender('.dealInfoTab .leftColumn', (function(_this) {
       return function(parent) {
         var CustomFieldsInDealEditor, container, deal, dicts, fields, onChange;
         container = _this._getAddonContainer(parent);
         dicts = _this._getCustomFieldsDicts();
-        deal = app.repositories.deals.getEntity(_this._getDealIdFromUrl());
+        deal = app.repositories.deals.getEntity(_this._getDealIdFromUrl()) || {
+          id: _this._getDealIdFromUrl()
+        };
         fields = _this._getCustomFieldsValues(deal);
+        CustomFieldsInDealEditor = require('./react/customFields/customFieldsInDealEditor');
         onChange = function(dictId, optionId) {
           deal[dictId] = optionId;
+          fields = thisModule._getCustomFieldsValues(deal);
+          React.render(CustomFieldsInDealEditor({
+            dicts: dicts,
+            fields: fields,
+            onChange: onChange
+          }), container);
           return app.repositories.deals._saveEntity(deal, function() {
             return console.log('I belive it is successfuly saved', dictId, optionId);
           });
         };
-        CustomFieldsInDealEditor = require('./react/customFields/customFieldsInDealEditor');
         return React.render(CustomFieldsInDealEditor({
           dicts: dicts,
           fields: fields,
@@ -454,7 +486,12 @@ module.exports = EntityRepository = (function() {
   };
 
   EntityRepository.prototype._saveEntity = function(entity, callback) {
-    return this._taistApi.companyData.setPart(this._getEntityDataObjectName(), entity.id, entity, callback);
+    return this._taistApi.companyData.setPart(this._getEntityDataObjectName(), entity.id, entity, (function(_this) {
+      return function() {
+        _this._entities[entity.id] = entity;
+        return callback();
+      };
+    })(this));
   };
 
   EntityRepository.prototype.save = function(entities, callback) {
@@ -542,22 +579,23 @@ defaultSelectValue = {
 
 CustomFieldsSelect = React.createFactory(React.createClass({
   onChange: function() {
-    return this.props.onChange(this.props.dict.id, this.refs.select.getDOMNode().value);
+    var newValue;
+    newValue = this.refs.select.getDOMNode().value;
+    return this.props.onChange(this.props.dict.id, newValue);
   },
   render: function() {
-    var currentFieldValue, dict, _ref1, _ref2;
-    dict = this.props.dict;
+    var currentFieldValue, _ref1, _ref2;
     currentFieldValue = (_ref1 = this.props.fields) != null ? _ref1.filter((function(_this) {
       return function(field) {
-        return field.name === dict.name;
+        return field.name === _this.props.dict.name;
       };
     })(this)) : void 0;
     return select({
       ref: 'select',
       onChange: this.onChange,
-      defaultValue: ((_ref2 = currentFieldValue[0]) != null ? _ref2.id : void 0) || 0,
+      value: ((_ref2 = currentFieldValue[0]) != null ? _ref2.id : void 0) || 0,
       style: this.props.selectStyle
-    }, [defaultSelectValue].concat(dict.entities).map((function(_this) {
+    }, [defaultSelectValue].concat(this.props.dict.entities).map((function(_this) {
       return function(entity) {
         return option({
           key: entity.id,
@@ -579,7 +617,6 @@ div = React.DOM.div;
 
 CustomFieldsViewer = React.createFactory(React.createClass({
   render: function() {
-    console.log(this.props);
     return div({}, this.props.fields.map((function(_this) {
       return function(field) {
         return div({
@@ -21877,7 +21914,7 @@ define(function (require) {
 })(typeof define === 'function' && define.amd ? define : function (factory) { module.exports = factory(require); });
 
 },{"./lib/Promise":173,"./lib/TimeoutError":175,"./lib/apply":176,"./lib/decorators/array":177,"./lib/decorators/flow":178,"./lib/decorators/fold":179,"./lib/decorators/inspect":180,"./lib/decorators/iterate":181,"./lib/decorators/progress":182,"./lib/decorators/timed":183,"./lib/decorators/unhandledRejection":184,"./lib/decorators/with":185}],"addon":[function(require,module,exports){
-var addIndustryGroupingToDealsList, addonEntry, app, entityRepository, extractNimbleAuthTokenFromRequest, getNewEntityId, industryField, industryUI, routesByHashes, setRoutes, whenjs;
+var addIndustryGroupingToDealsList, addonEntry, app, entityRepository, extractNimbleAuthTokenFromRequest, getNewEntityId, industryField, industryUI, proxy, routesByHashes, setRoutes, waitingForNewDealRequest, whenjs;
 
 app = require('./app');
 
@@ -21901,6 +21938,7 @@ module.exports = addonEntry = {
     window.app = app;
     app.api = _taistApi;
     extractNimbleAuthTokenFromRequest();
+    waitingForNewDealRequest();
     app.repositories.deals = new entityRepository(app.api, 'deals');
     customFields = {};
     customFields['industry'] = {
@@ -21957,15 +21995,26 @@ setRoutes = function() {
   return _results;
 };
 
+proxy = require('./tools/xmlHttpProxy');
+
 extractNimbleAuthTokenFromRequest = function() {
-  var proxy;
-  proxy = require('./tools/xmlHttpProxy');
   return proxy.onRequestFinish(function(request) {
     var tokenMatches, url;
     url = request.responseURL;
     tokenMatches = url.match(/\/api\/sessions\/([0-9abcdef-]{36})\?/);
     if (tokenMatches != null) {
       return app.options.nimbleToken = tokenMatches[1];
+    }
+  });
+};
+
+waitingForNewDealRequest = function() {
+  return proxy.onRequestFinish(function(request) {
+    var dealId, url, _ref, _ref1;
+    url = request.responseURL;
+    if (url.match(/\/api\/deals\?/)) {
+      dealId = (_ref = JSON.parse(request.responseText)) != null ? (_ref1 = _ref.deal) != null ? _ref1.id : void 0 : void 0;
+      return industryUI.saveCustomFieldsForNewDeal(dealId);
     }
   });
 };

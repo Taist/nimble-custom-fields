@@ -1,7 +1,7 @@
 app = require './app'
 React = require 'react'
 
-module.exports =
+module.exports = thisModule =
   _getDealIdFromUrl: -> location.hash.substring((location.hash.indexOf '?id=') + 4)
 
   _getAddonContainer: (parent, element = 'div', shouldBeAppendedToParent = true) ->
@@ -33,6 +33,8 @@ module.exports =
 
   _renderInEditor: (parent, reactFieldsEditorClass) ->
 
+  _newDealCustomFields: null
+
   renderInNewDealDialog: ->
     app.api.wait.elementRender '.DealCreateForm tbody', (parent) =>
       container = @_getAddonContainer parent, 'tr', false
@@ -41,15 +43,31 @@ module.exports =
 
       dicts = @_getCustomFieldsDicts()
 
+      @_newDealCustomFields = null;
       deal = {}
       fields = @_getCustomFieldsValues deal
 
-      onChange = (dictId, optionId) ->
+      CustomFieldsInNewDealDialog = require './react/customFields/customFieldsInNewDealDialog'
+
+      onChange = (dictId, optionId) =>
+        #The function is called with select as a context because of React
         deal[dictId] = optionId
+
+        fields = thisModule._getCustomFieldsValues deal
+        React.render ( CustomFieldsInNewDealDialog { dicts, fields, onChange } ), container
+
+        thisModule._newDealCustomFields = deal
         console.log 'onChange', deal
 
-      CustomFieldsInNewDealDialog = require './react/customFields/customFieldsInNewDealDialog'
       React.render ( CustomFieldsInNewDealDialog { dicts, fields, onChange } ), container
+
+  saveCustomFieldsForNewDeal: (dealId) ->
+    if dealId and @_newDealCustomFields
+      deal = $.extend { id: dealId }, @_newDealCustomFields
+      @_newDealCustomFields = null
+      app.repositories.deals._saveEntity deal, =>
+        console.log 'I belive it is successfuly saved', deal
+        @renderInDealEditor()
 
   renderInDealEditor: ->
     app.api.wait.elementRender '.dealInfoTab .leftColumn', (parent) =>
@@ -57,15 +75,21 @@ module.exports =
 
       dicts = @_getCustomFieldsDicts()
 
-      deal = app.repositories.deals.getEntity @_getDealIdFromUrl()
+      deal = app.repositories.deals.getEntity( @_getDealIdFromUrl() ) or { id: @_getDealIdFromUrl() }
       fields = @_getCustomFieldsValues deal
 
+      CustomFieldsInDealEditor = require './react/customFields/customFieldsInDealEditor'
+
       onChange = (dictId, optionId) ->
+        #The function is called with select as a context because of React
         deal[dictId] = optionId
+
+        fields = thisModule._getCustomFieldsValues deal
+        React.render ( CustomFieldsInDealEditor { dicts, fields, onChange } ), container
+
         app.repositories.deals._saveEntity deal, ->
           console.log 'I belive it is successfuly saved', dictId, optionId
 
-      CustomFieldsInDealEditor = require './react/customFields/customFieldsInDealEditor'
       React.render ( CustomFieldsInDealEditor { dicts, fields, onChange } ), container
 
   renderInDealViewer: ->
