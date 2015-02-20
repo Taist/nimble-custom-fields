@@ -1,6 +1,6 @@
 module.exports =
   options:
-    nimbleToken: ''
+    nimbleToken: null
     dealsPerPage: 30
 
   api: null

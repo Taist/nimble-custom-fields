@@ -1,7 +1,6 @@
 app = require './app'
 entityRepository = require './objectsApi/entityRepository'
 
-industryField = require './industryField'
 industryUI = require './industryUI'
 
 addIndustryGroupingToDealsList = require './handlers/addIndustryGroupingToDealsList'
@@ -38,7 +37,6 @@ module.exports = addonEntry =
     .then () ->
       app.repositories.deals.load()
     .then () ->
-      industryField.init()
       setRoutes()
       industryUI.renderInNewDealDialog()
 

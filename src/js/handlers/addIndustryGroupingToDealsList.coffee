@@ -1,11 +1,13 @@
 app = require '../app'
-industryField = require '../industryField'
-customFieldName = 'industry'
+
+customFields = []
 
 module.exports = ->
   findCustomDealsList().remove()
 
-  addGroupingByCustomField()
+  customFields = app.repositories.customFields.getAllEntities()
+
+  addGroupingByCustomFields()
 
   loadDealsData (deals) ->
     addCustomFieldToDeals deals
@@ -13,25 +15,41 @@ module.exports = ->
     if currentlyGroupingByCustomField()
       renderCustomDealsList deals
 
-    addCustomColumnToOriginalList()
+    addCustomColumnsToOriginalList()
 
-currentlyGroupingByCustomField = ->
+getCurrentGroupingFieldName = () ->
   groupMatches = location.hash.match /grouped_by=([^&]+)/
-  currentGroupingField = groupMatches?[1] ? 'none'
-  return currentGroupingField is customFieldName
+  currentGroupingFieldName = groupMatches?[1] ? 'none'
+
+currentlyGroupingByCustomField = () ->
+  currentGroupingFieldName = getCurrentGroupingFieldName()
+  customFields.filter(
+    (field) -> field.name is currentGroupingFieldName
+  ).length > 0
+
+getCurrentGroupingField = () ->
+  currentField = null
+  currentGroupingFieldName = getCurrentGroupingFieldName()
+  customFields.forEach (field) ->
+    if field.name is currentGroupingFieldName
+      currentField = field
+  return currentField
 
 customDealsListClass = 'taist-dealsListWithCustomGrouping'
 findCustomDealsList = -> $ '.' + customDealsListClass
 
-addGroupingByCustomField = ->
+addGroupingByCustomFields = () ->
   selector = '.listHeader .gwt-ListBox'
   app.api.wait.elementRender selector, (groupingSelect) ->
-    unless $("""option[value="#{customFieldName}"]""", groupingSelect).size()
-      capitalizedFieldName = customFieldName[0].toUpperCase() + (customFieldName.slice 1)
-      groupingSelect.append $ """<option value="#{customFieldName}">#{capitalizedFieldName}</option>"""
+    currentGroupingFieldName = getCurrentGroupingFieldName()
+    customFields.forEach (field) ->
+      fieldName = field.name
+      unless $("option[value=\"#{fieldName}\"]", groupingSelect).size()
+        capitalizedFieldName = fieldName[0].toUpperCase() + (fieldName.slice 1)
+        groupingSelect.append $ """<option value="#{fieldName}">#{capitalizedFieldName}</option>"""
 
-    if currentlyGroupingByCustomField()
-      groupingSelect.val customFieldName
+      if currentGroupingFieldName is fieldName
+        groupingSelect.val fieldName
 
 renderCustomDealsList = (deals) ->
   customDealsList = replaceOriginalListWithCustom()
@@ -57,10 +75,15 @@ replaceOriginalListWithCustom = ->
 
 groupDealsByCustomField = (deals) ->
   groups = {}
+
+  customField = getCurrentGroupingField()
+  console.log customField
+
   for deal in deals
-    customFieldValue = deal[customFieldName]
-    groups[customFieldValue] ?= []
-    groups[customFieldValue].push deal
+    customFieldValueId = deal[customField.id]
+    value = app.repositories[customField.id].getEntity(customFieldValueId)?.value ? 'Not specified'
+    groups[value] ?= []
+    groups[value].push deal
 
   groupedDeals = []
   for name, group of groups
@@ -76,38 +99,46 @@ groupDealsByCustomField = (deals) ->
 
   return groupedDeals
 
-addCustomColumnToOriginalList = ->
-    addCustomColumnHeader()
-    addCustomColumnContents()
+addCustomColumnsToOriginalList = ->
+  addCustomColumnsHeader()
+  addCustomColumnsContents()
 
-addCustomColumnHeader = ->
+addCustomColumnsHeader = ->
   app.api.wait.elementRender '.DealListView .headerTD.subject', (previousHeader) ->
     if not currentlyGroupingByCustomField()
       (previousHeader.siblings '.taist-custom-header').remove()
-      previousHeader.after $ """<td class="headerTD c3 taist-custom-header">Industry</td>"""
+      customFields.forEach (field) ->
+        previousHeader.after $ "<td class=\"headerTD c1 taist-custom-header\">#{field.name}</td>"
 
-addCustomColumnContents = ->
+addCustomColumnsContents = ->
   app.api.wait.elementRender '.DealListView .dealList .body tr td a.deal_subject', (linkToDealInPreviousCell) ->
     if not currentlyGroupingByCustomField()
       previousCell = linkToDealInPreviousCell.parent()
-      console.log {previousCell}
+      (previousCell.siblings '.taist-custom-cell').remove()
 
       dealUrl = linkToDealInPreviousCell.attr 'href'
       dealIdPrefix = '?id='
       dealIdIndex = (dealUrl.indexOf dealIdPrefix) + dealIdPrefix.length
       dealId = dealUrl.substring dealIdIndex
-      industry = industryField.getIndustryName dealId
 
-      (previousCell.siblings '.taist-custom-cell').remove()
-      previousCell.after $ """<td class="cell c3 taist-custom-cell">#{industry}</td>"""
-
+      customFields.forEach (field) ->
+        customFieldValueId = app.repositories.deals.getEntity(dealId)?[field.id]
+        value = app.repositories[field.id].getEntity(customFieldValueId)?.value ? 'Not specified'
+        previousCell.after $ """<td class="cell c1 taist-custom-cell">#{value}</td>"""
 
 loadDealsData = (callback, loadedDeals = [], page = 1) ->
+  unless app.options.nimbleToken
+    console.log 'There is no Nimble Token'
+    setTimeout () ->
+      loadDealsData(callback, loadedDeals, page)
+    , 200
+    return
+
   $.ajax
     url: '/api/deals'
     dataType: "json"
     headers:
-      Authorization: """Nimble token="#{app.options.nimbleToken}\""""
+      Authorization: "Nimble token=\"#{app.options.nimbleToken}\""
     data:
       sort_by: 'age'
       dir: 'asc'
@@ -126,4 +157,4 @@ loadDealsData = (callback, loadedDeals = [], page = 1) ->
 
 addCustomFieldToDeals = (deals) ->
   for deal in deals
-    deal.industry = industryField.getIndustryName deal.id
+    $.extend deal, app.repositories.deals.getEntity deal.id
