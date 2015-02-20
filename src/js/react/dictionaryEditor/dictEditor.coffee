@@ -30,8 +30,6 @@ DictEditor = React.createFactory React.createClass
 
   render: ->
     div { style: { marginTop: 30, width: 565 } },
-      div { className: 'subHeader' },
-        @props.name
       div { style: { clear: 'both', height: '1px' }, dangerouslySetInnerHTML: __html: '&nbsp;' }
       div { style: { marginTop: '15px', borderTop: '1px solid #f3f3f3' } },
         @props.entities.concat(@state.newEntity).map (entity) =>

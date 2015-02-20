@@ -3,6 +3,7 @@ React = require 'react'
 { div, a, input } = React.DOM
 
 NimbleAlert = require('../nimble/nimbleAlert')
+NimbleInlineEditor = require('../nimble/nimbleInlineEditor')
 
 DictEntity = React.createFactory React.createClass
   getInitialState: ->
@@ -22,24 +23,11 @@ DictEntity = React.createFactory React.createClass
   onEdit: ->
     @setState { mode: 'edit' }
 
-  createButton: (name, onClickHandler) ->
-    options =
-      tabIndex: 0,
-      className: 'nmbl-Button nmbl-Button-WebkitGecko'
-      style: { marginLeft: 12 }
-      onClick: onClickHandler
-    div options, div { className: 'nmbl-ButtonContent' }, name
-
   closeEditor: ->
     @setState { mode: 'view' }
 
-  onCancel: ->
-    @props.actions.onCancel()
-    @closeEditor()
-
-  onSave: ->
-    @props.actions.onChange @props.entity.id, @refs.valueEditor.getDOMNode().value
-    @closeEditor()
+  onSave: (newValue) ->
+    @props.actions.onChange @props.entity.id, newValue
 
   showDictEntity: ->
     div { className: 'hasActivatedChildren', style: { padding: '15px 9px' } },
@@ -64,15 +52,12 @@ DictEntity = React.createFactory React.createClass
         }
     else
       div { style: { padding: '8px 9px 7px 8px', backgroundColor: 'rgb(248, 248, 248)' } },
-        div { className: 'nmbl-FormTextBox nmbl-FormTextBox-name' },
-          input
-            ref: 'valueEditor'
-            className: 'nmbl-AdvancedTextBox'
-            type: 'text'
-            maxLength: '256'
-            defaultValue: @props.entity.value
-            autoFocus: true
-          @createButton 'Save', @onSave
-          @createButton 'Cancel', @onCancel
+        NimbleInlineEditor {
+          value: @props.entity.value
+          actions:
+            onCancel: @props.actions.onCancel
+            onSave: @onSave
+          closeEditor: @closeEditor
+        }
 
 module.exports = DictEntity

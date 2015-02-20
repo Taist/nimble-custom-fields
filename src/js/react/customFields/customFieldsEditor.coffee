@@ -10,6 +10,9 @@ CustomFieldsEditor = React.createFactory React.createClass
       h3 {}, 'CUSTOM FIELDS BY TAIST'
       @props.dicts.map (dict) =>
         div { key: dict.id },
-          DictEditor dict
+          div { className: 'subHeader' },
+            dict.name
+          div {},
+            DictEditor dict
 
 module.exports = CustomFieldsEditor
