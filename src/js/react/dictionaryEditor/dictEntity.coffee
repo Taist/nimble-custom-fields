@@ -2,8 +2,8 @@ React = require 'react'
 
 { div, a, input } = React.DOM
 
-NimbleAlert = require('../nimble/nimbleAlert')
-NimbleInlineEditor = require('../nimble/nimbleInlineEditor')
+NimbleAlert = require '../nimble/nimbleAlert'
+NimbleInlineEditor = require '../nimble/nimbleInlineEditor'
 
 DictEntity = React.createFactory React.createClass
   getInitialState: ->

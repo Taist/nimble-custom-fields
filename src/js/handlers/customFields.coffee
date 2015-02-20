@@ -119,8 +119,20 @@ module.exports = thisModule =
             dict.entities = entities
         React.render ( CustomFieldsEditor { dicts } ), container
 
+      onChangeDictionaryName = (newName) ->
+        #The function is called with dict as a context because of React
+        dict = app.repositories.customFields.getEntity(@id)
+        dict.name = newName
+        app.repositories.customFields._saveEntity dict, ->
+
+        dicts.forEach (dict) =>
+          if dict.id is @id
+            dict.name = newName
+        React.render ( CustomFieldsEditor { dicts } ), container
+
       dicts = @_getCustomFieldsDicts()
       dicts.forEach (dict) ->
         dict.onUpdate = onUpdateDictionary
+        dict.onRename = onChangeDictionaryName
 
       React.render ( CustomFieldsEditor { dicts } ), container

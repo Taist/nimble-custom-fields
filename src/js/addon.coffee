@@ -22,18 +22,22 @@ module.exports = addonEntry =
 
     app.repositories.deals = new entityRepository app.api, 'deals'
 
-    customFields = {}
-    customFields[ 'industry' ] = { id: 'industry', name: 'Industries' }
-    customFields[ '1424347059189.5615' ] = { id: '1424347059189.5615', name: 'CustomField' }
-    app.repositories.customFields = new entityRepository app.api, 'customFields'
-    app.repositories.customFields._updateEntities customFields
+    #TODO Uncomment to create test data
+    # customFields = {}
+    # customFields[ 'industry' ] = { id: 'industry', name: 'Industries' }
+    # customFields[ '1424347059189.5615' ] = { id: '1424347059189.5615', name: 'CustomField' }
+    # app.repositories.customFields = new entityRepository app.api, 'customFields'
+    # app.repositories.customFields.save customFields, ->
 
-    whenjs.all(
-      app.repositories.customFields.getAllEntities().map (repository) ->
-        id = repository.id
-        app.repositories[id] = new entityRepository(app.api, id)
-        app.repositories[id].load()
-    )
+    app.repositories.customFields = new entityRepository app.api, 'customFields'
+    app.repositories.customFields.load()
+    .then () ->
+      whenjs.all(
+        app.repositories.customFields.getAllEntities().map (repository) ->
+          id = repository.id
+          app.repositories[id] = new entityRepository(app.api, id)
+          app.repositories[id].load()
+      )
     .then () ->
       app.repositories.deals.load()
     .then () ->

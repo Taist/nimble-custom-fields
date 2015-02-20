@@ -2,7 +2,7 @@ React = require 'react'
 
 { div, a } = React.DOM
 
-DictEntity = require('./dictEntity')
+DictEntity = require './dictEntity'
 
 DictEditor = React.createFactory React.createClass
   getInitialState: ->

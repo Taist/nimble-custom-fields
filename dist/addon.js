@@ -395,7 +395,7 @@ module.exports = thisModule = {
   renderInSettings: function() {
     return app.api.wait.elementRender('.SettingsDealsView', (function(_this) {
       return function(parent) {
-        var CustomFieldsEditor, container, dicts, onUpdateDictionary;
+        var CustomFieldsEditor, container, dicts, onChangeDictionaryName, onUpdateDictionary;
         container = _this._getAddonContainer(parent);
         CustomFieldsEditor = require('../react/customFields/CustomFieldsEditor');
         onUpdateDictionary = function(entities) {
@@ -416,9 +416,26 @@ module.exports = thisModule = {
             dicts: dicts
           }), container);
         };
+        onChangeDictionaryName = function(newName) {
+          var dict;
+          dict = app.repositories.customFields.getEntity(this.id);
+          dict.name = newName;
+          app.repositories.customFields._saveEntity(dict, function() {});
+          dicts.forEach((function(_this) {
+            return function(dict) {
+              if (dict.id === _this.id) {
+                return dict.name = newName;
+              }
+            };
+          })(this));
+          return React.render(CustomFieldsEditor({
+            dicts: dicts
+          }), container);
+        };
         dicts = _this._getCustomFieldsDicts();
         dicts.forEach(function(dict) {
-          return dict.onUpdate = onUpdateDictionary;
+          dict.onUpdate = onUpdateDictionary;
+          return dict.onRename = onChangeDictionaryName;
         });
         return React.render(CustomFieldsEditor({
           dicts: dicts
@@ -575,13 +592,68 @@ module.exports = EntityRepository = (function() {
 })();
 
 },{"./entity":4,"when":190}],6:[function(require,module,exports){
-var CustomFieldsEditor, DictEditor, React, div, h3, _ref;
+var CustomFieldsEditor, DictEditor, DictHeader, NimbleInlineEditor, React, a, div, h3, _ref;
 
 React = require('react');
 
-_ref = React.DOM, div = _ref.div, h3 = _ref.h3;
+_ref = React.DOM, div = _ref.div, h3 = _ref.h3, a = _ref.a;
 
 DictEditor = require('../dictionaryEditor/dictEditor');
+
+NimbleInlineEditor = require('../nimble/nimbleInlineEditor');
+
+DictHeader = React.createFactory(React.createClass({
+  getInitialState: function() {
+    return {
+      mode: 'view'
+    };
+  },
+  fixedBlockStyle: function(width) {
+    if (width == null) {
+      width = 200;
+    }
+    return {
+      display: 'inline-block',
+      width: width
+    };
+  },
+  onEdit: function() {
+    return this.setState({
+      mode: 'edit'
+    });
+  },
+  closeEditor: function() {
+    return this.setState({
+      mode: 'view'
+    });
+  },
+  onSave: function(newName) {
+    return this.props.onRename(newName);
+  },
+  render: function() {
+    return div({
+      className: 'subHeader'
+    }, this.state.mode === 'view' ? div({}, div({
+      style: this.fixedBlockStyle()
+    }, this.props.name), div({
+      style: this.fixedBlockStyle(50)
+    }, a({
+      onClick: this.onEdit
+    }, 'Edit'))) : div({
+      style: {
+        marginTop: -8,
+        marginBottom: -6
+      }
+    }, NimbleInlineEditor({
+      value: this.props.name,
+      actions: {
+        onCancel: function() {},
+        onSave: this.onSave
+      },
+      closeEditor: this.closeEditor
+    })));
+  }
+}));
 
 CustomFieldsEditor = React.createFactory(React.createClass({
   render: function() {
@@ -589,9 +661,7 @@ CustomFieldsEditor = React.createFactory(React.createClass({
       return function(dict) {
         return div({
           key: dict.id
-        }, div({
-          className: 'subHeader'
-        }, dict.name), div({}, DictEditor(dict)));
+        }, DictHeader(dict), DictEditor(dict));
       };
     })(this)));
   }
@@ -599,7 +669,7 @@ CustomFieldsEditor = React.createFactory(React.createClass({
 
 module.exports = CustomFieldsEditor;
 
-},{"../dictionaryEditor/dictEditor":11,"react":172}],7:[function(require,module,exports){
+},{"../dictionaryEditor/dictEditor":11,"../nimble/nimbleInlineEditor":24,"react":172}],7:[function(require,module,exports){
 var CustomFieldsSelect, React, defaultSelectValue, option, select, _ref;
 
 React = require('react');
@@ -21991,29 +22061,20 @@ getNewEntityId = function() {
 
 module.exports = addonEntry = {
   start: function(_taistApi) {
-    var customFields;
     window.app = app;
     app.api = _taistApi;
     extractNimbleAuthTokenFromRequest();
     waitingForNewDealRequest();
     app.repositories.deals = new entityRepository(app.api, 'deals');
-    customFields = {};
-    customFields['industry'] = {
-      id: 'industry',
-      name: 'Industries'
-    };
-    customFields['1424347059189.5615'] = {
-      id: '1424347059189.5615',
-      name: 'CustomField'
-    };
     app.repositories.customFields = new entityRepository(app.api, 'customFields');
-    app.repositories.customFields._updateEntities(customFields);
-    return whenjs.all(app.repositories.customFields.getAllEntities().map(function(repository) {
-      var id;
-      id = repository.id;
-      app.repositories[id] = new entityRepository(app.api, id);
-      return app.repositories[id].load();
-    })).then(function() {
+    return app.repositories.customFields.load().then(function() {
+      return whenjs.all(app.repositories.customFields.getAllEntities().map(function(repository) {
+        var id;
+        id = repository.id;
+        app.repositories[id] = new entityRepository(app.api, id);
+        return app.repositories[id].load();
+      }));
+    }).then(function() {
       return app.repositories.deals.load();
     }).then(function() {
       setRoutes();
