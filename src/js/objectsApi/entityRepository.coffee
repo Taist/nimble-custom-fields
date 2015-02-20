@@ -48,4 +48,7 @@ module.exports = class EntityRepository
     ( entity for id, entity of @_entities )
 
   getDictionary: ->
-    ( $.extend({}, entity, { id }) for id, entity of @_entities )
+    dictEntities = ( $.extend({}, entity, { id }) for id, entity of @_entities )
+    dictEntities.sort (a, b) ->
+      if a.value > b.value then 1 else -1 
+    return dictEntities

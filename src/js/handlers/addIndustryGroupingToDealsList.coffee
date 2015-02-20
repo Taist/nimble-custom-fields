@@ -1,6 +1,7 @@
 app = require '../app'
 
 customFields = []
+notSpecifiedValue = 'Not Specified'
 
 module.exports = ->
   findCustomDealsList().remove()
@@ -81,7 +82,7 @@ groupDealsByCustomField = (deals) ->
 
   for deal in deals
     customFieldValueId = deal[customField.id]
-    value = app.repositories[customField.id].getEntity(customFieldValueId)?.value ? 'Not specified'
+    value = app.repositories[customField.id].getEntity(customFieldValueId)?.value ? notSpecifiedValue
     groups[value] ?= []
     groups[value].push deal
 
@@ -96,6 +97,10 @@ groupDealsByCustomField = (deals) ->
       amount.weighted += deal.amount * deal.probability / 100
 
     groupedDeals.push {name, group, amount}
+
+  groupedDeals.sort (a, b) ->
+    toStr = (group) -> if group.name is notSpecifiedValue then '' else group.name
+    if toStr(a) > toStr(b) then 1 else -1
 
   return groupedDeals
 
@@ -123,7 +128,7 @@ addCustomColumnsContents = ->
 
       customFields.forEach (field) ->
         customFieldValueId = app.repositories.deals.getEntity(dealId)?[field.id]
-        value = app.repositories[field.id].getEntity(customFieldValueId)?.value ? 'Not specified'
+        value = app.repositories[field.id].getEntity(customFieldValueId)?.value ? notSpecifiedValue
         previousCell.after $ """<td class="cell c1 taist-custom-cell">#{value}</td>"""
 
 loadDealsData = (callback, loadedDeals = [], page = 1) ->

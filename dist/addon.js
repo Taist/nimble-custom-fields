@@ -13,11 +13,13 @@ module.exports = {
 };
 
 },{}],2:[function(require,module,exports){
-var addCustomColumnsContents, addCustomColumnsHeader, addCustomColumnsToOriginalList, addCustomFieldToDeals, addGroupingByCustomFields, app, currentlyGroupingByCustomField, customDealsListClass, customFields, findCustomDealsList, getCurrentGroupingField, getCurrentGroupingFieldName, groupDealsByCustomField, loadDealsData, renderCustomDealsList, replaceOriginalListWithCustom;
+var addCustomColumnsContents, addCustomColumnsHeader, addCustomColumnsToOriginalList, addCustomFieldToDeals, addGroupingByCustomFields, app, currentlyGroupingByCustomField, customDealsListClass, customFields, findCustomDealsList, getCurrentGroupingField, getCurrentGroupingFieldName, groupDealsByCustomField, loadDealsData, notSpecifiedValue, renderCustomDealsList, replaceOriginalListWithCustom;
 
 app = require('../app');
 
 customFields = [];
+
+notSpecifiedValue = 'Not Specified';
 
 module.exports = function() {
   findCustomDealsList().remove();
@@ -115,7 +117,7 @@ groupDealsByCustomField = function(deals) {
   for (_i = 0, _len = deals.length; _i < _len; _i++) {
     deal = deals[_i];
     customFieldValueId = deal[customField.id];
-    value = (_ref = (_ref1 = app.repositories[customField.id].getEntity(customFieldValueId)) != null ? _ref1.value : void 0) != null ? _ref : 'Not specified';
+    value = (_ref = (_ref1 = app.repositories[customField.id].getEntity(customFieldValueId)) != null ? _ref1.value : void 0) != null ? _ref : notSpecifiedValue;
     if (groups[value] == null) {
       groups[value] = [];
     }
@@ -139,6 +141,21 @@ groupDealsByCustomField = function(deals) {
       amount: amount
     });
   }
+  groupedDeals.sort(function(a, b) {
+    var toStr;
+    toStr = function(group) {
+      if (group.name === notSpecifiedValue) {
+        return '';
+      } else {
+        return group.name;
+      }
+    };
+    if (toStr(a) > toStr(b)) {
+      return 1;
+    } else {
+      return -1;
+    }
+  });
   return groupedDeals;
 };
 
@@ -171,7 +188,7 @@ addCustomColumnsContents = function() {
       return customFields.forEach(function(field) {
         var customFieldValueId, value, _ref, _ref1, _ref2;
         customFieldValueId = (_ref = app.repositories.deals.getEntity(dealId)) != null ? _ref[field.id] : void 0;
-        value = (_ref1 = (_ref2 = app.repositories[field.id].getEntity(customFieldValueId)) != null ? _ref2.value : void 0) != null ? _ref1 : 'Not specified';
+        value = (_ref1 = (_ref2 = app.repositories[field.id].getEntity(customFieldValueId)) != null ? _ref2.value : void 0) != null ? _ref1 : notSpecifiedValue;
         return previousCell.after($("<td class=\"cell c1 taist-custom-cell\">" + value + "</td>"));
       });
     }
@@ -531,16 +548,27 @@ module.exports = EntityRepository = (function() {
   };
 
   EntityRepository.prototype.getDictionary = function() {
-    var entity, id, _ref, _results;
-    _ref = this._entities;
-    _results = [];
-    for (id in _ref) {
-      entity = _ref[id];
-      _results.push($.extend({}, entity, {
-        id: id
-      }));
-    }
-    return _results;
+    var dictEntities, entity, id;
+    dictEntities = (function() {
+      var _ref, _results;
+      _ref = this._entities;
+      _results = [];
+      for (id in _ref) {
+        entity = _ref[id];
+        _results.push($.extend({}, entity, {
+          id: id
+        }));
+      }
+      return _results;
+    }).call(this);
+    dictEntities.sort(function(a, b) {
+      if (a.value > b.value) {
+        return 1;
+      } else {
+        return -1;
+      }
+    });
+    return dictEntities;
   };
 
   return EntityRepository;
