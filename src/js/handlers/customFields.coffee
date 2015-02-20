@@ -1,4 +1,4 @@
-app = require './app'
+app = require '../app'
 React = require 'react'
 
 module.exports = thisModule =
@@ -47,7 +47,7 @@ module.exports = thisModule =
       deal = {}
       fields = @_getCustomFieldsValues deal
 
-      CustomFieldsInNewDealDialog = require './react/customFields/customFieldsInNewDealDialog'
+      CustomFieldsInNewDealDialog = require '../react/customFields/customFieldsInNewDealDialog'
 
       onChange = (dictId, optionId) =>
         #The function is called with select as a context because of React
@@ -78,7 +78,7 @@ module.exports = thisModule =
       deal = app.repositories.deals.getEntity( @_getDealIdFromUrl() ) or { id: @_getDealIdFromUrl() }
       fields = @_getCustomFieldsValues deal
 
-      CustomFieldsInDealEditor = require './react/customFields/customFieldsInDealEditor'
+      CustomFieldsInDealEditor = require '../react/customFields/customFieldsInDealEditor'
 
       onChange = (dictId, optionId) ->
         #The function is called with select as a context because of React
@@ -98,14 +98,14 @@ module.exports = thisModule =
 
       fields = @_getCustomFieldsValues()
 
-      CustomFieldsViewer = require './react/customFields/CustomFieldsViewer'
+      CustomFieldsViewer = require '../react/customFields/CustomFieldsViewer'
       React.render ( CustomFieldsViewer { fields } ), container
 
   renderInSettings: ->
     app.api.wait.elementRender '.SettingsDealsView', (parent) =>
 
       container = @_getAddonContainer parent
-      CustomFieldsEditor = require './react/customFields/CustomFieldsEditor'
+      CustomFieldsEditor = require '../react/customFields/CustomFieldsEditor'
 
       onUpdateDictionary = (entities) ->
         #The function is called with dict as a context because of React

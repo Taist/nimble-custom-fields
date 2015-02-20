@@ -113,7 +113,6 @@ groupDealsByCustomField = function(deals) {
   var amount, customField, customFieldValueId, deal, group, groupedDeals, groups, name, value, _i, _j, _len, _len1, _ref, _ref1;
   groups = {};
   customField = getCurrentGroupingField();
-  console.log(customField);
   for (_i = 0, _len = deals.length; _i < _len; _i++) {
     deal = deals[_i];
     customFieldValueId = deal[customField.id];
@@ -206,7 +205,7 @@ loadDealsData = function(callback, loadedDeals, page) {
     console.log('There is no Nimble Token');
     setTimeout(function() {
       return loadDealsData(callback, loadedDeals, page);
-    }, 200);
+    }, 1000);
     return;
   }
   return $.ajax({
@@ -249,7 +248,7 @@ addCustomFieldToDeals = function(deals) {
 },{"../app":1,"../react/groupedDealList/groupedDealList":18,"react":171}],3:[function(require,module,exports){
 var React, app, thisModule;
 
-app = require('./app');
+app = require('../app');
 
 React = require('react');
 
@@ -314,7 +313,7 @@ module.exports = thisModule = {
         _this._newDealCustomFields = null;
         deal = {};
         fields = _this._getCustomFieldsValues(deal);
-        CustomFieldsInNewDealDialog = require('./react/customFields/customFieldsInNewDealDialog');
+        CustomFieldsInNewDealDialog = require('../react/customFields/customFieldsInNewDealDialog');
         onChange = function(dictId, optionId) {
           deal[dictId] = optionId;
           fields = thisModule._getCustomFieldsValues(deal);
@@ -359,7 +358,7 @@ module.exports = thisModule = {
           id: _this._getDealIdFromUrl()
         };
         fields = _this._getCustomFieldsValues(deal);
-        CustomFieldsInDealEditor = require('./react/customFields/customFieldsInDealEditor');
+        CustomFieldsInDealEditor = require('../react/customFields/customFieldsInDealEditor');
         onChange = function(dictId, optionId) {
           deal[dictId] = optionId;
           fields = thisModule._getCustomFieldsValues(deal);
@@ -386,7 +385,7 @@ module.exports = thisModule = {
         var CustomFieldsViewer, container, fields;
         container = _this._getAddonContainer(parent);
         fields = _this._getCustomFieldsValues();
-        CustomFieldsViewer = require('./react/customFields/CustomFieldsViewer');
+        CustomFieldsViewer = require('../react/customFields/CustomFieldsViewer');
         return React.render(CustomFieldsViewer({
           fields: fields
         }), container);
@@ -398,7 +397,7 @@ module.exports = thisModule = {
       return function(parent) {
         var CustomFieldsEditor, container, dicts, onUpdateDictionary;
         container = _this._getAddonContainer(parent);
-        CustomFieldsEditor = require('./react/customFields/CustomFieldsEditor');
+        CustomFieldsEditor = require('../react/customFields/CustomFieldsEditor');
         onUpdateDictionary = function(entities) {
           var repoEntities;
           repoEntities = {};
@@ -429,7 +428,7 @@ module.exports = thisModule = {
   }
 };
 
-},{"./app":1,"./react/customFields/CustomFieldsEditor":6,"./react/customFields/CustomFieldsViewer":8,"./react/customFields/customFieldsInDealEditor":9,"./react/customFields/customFieldsInNewDealDialog":10,"react":171}],4:[function(require,module,exports){
+},{"../app":1,"../react/customFields/CustomFieldsEditor":6,"../react/customFields/CustomFieldsViewer":8,"../react/customFields/customFieldsInDealEditor":9,"../react/customFields/customFieldsInNewDealDialog":10,"react":171}],4:[function(require,module,exports){
 var Entity;
 
 module.exports = Entity = (function() {
@@ -21947,13 +21946,13 @@ define(function (require) {
 })(typeof define === 'function' && define.amd ? define : function (factory) { module.exports = factory(require); });
 
 },{"./lib/Promise":172,"./lib/TimeoutError":174,"./lib/apply":175,"./lib/decorators/array":176,"./lib/decorators/flow":177,"./lib/decorators/fold":178,"./lib/decorators/inspect":179,"./lib/decorators/iterate":180,"./lib/decorators/progress":181,"./lib/decorators/timed":182,"./lib/decorators/unhandledRejection":183,"./lib/decorators/with":184}],"addon":[function(require,module,exports){
-var addIndustryGroupingToDealsList, addonEntry, app, entityRepository, extractNimbleAuthTokenFromRequest, getNewEntityId, industryUI, proxy, routesByHashes, setRoutes, waitingForNewDealRequest, whenjs;
+var addIndustryGroupingToDealsList, addonEntry, app, customFieldsHandler, entityRepository, extractNimbleAuthTokenFromRequest, getNewEntityId, proxy, routesByHashes, setRoutes, waitingForNewDealRequest, whenjs;
 
 app = require('./app');
 
 entityRepository = require('./objectsApi/entityRepository');
 
-industryUI = require('./industryUI');
+customFieldsHandler = require('./handlers/customFields');
 
 addIndustryGroupingToDealsList = require('./handlers/addIndustryGroupingToDealsList');
 
@@ -21991,7 +21990,7 @@ module.exports = addonEntry = {
       return app.repositories.deals.load();
     }).then(function() {
       setRoutes();
-      return industryUI.renderInNewDealDialog();
+      return customFieldsHandler.renderInNewDealDialog();
     });
   }
 };
@@ -22001,13 +22000,13 @@ routesByHashes = {
     return addIndustryGroupingToDealsList();
   },
   '^app/deals/view': function() {
-    return industryUI.renderInDealViewer();
+    return customFieldsHandler.renderInDealViewer();
   },
   '^app/deals/edit': function() {
-    return industryUI.renderInDealEditor();
+    return customFieldsHandler.renderInDealEditor();
   },
   'app/settings/deals': function() {
-    return industryUI.renderInSettings();
+    return customFieldsHandler.renderInSettings();
   }
 };
 
@@ -22044,11 +22043,11 @@ waitingForNewDealRequest = function() {
     url = request.responseURL;
     if (url.match(/\/api\/deals\?/)) {
       dealId = (_ref = JSON.parse(request.responseText)) != null ? (_ref1 = _ref.deal) != null ? _ref1.id : void 0 : void 0;
-      return industryUI.saveCustomFieldsForNewDeal(dealId);
+      return customFieldsHandler.saveCustomFieldsForNewDeal(dealId);
     }
   });
 };
 
-},{"./app":1,"./handlers/addIndustryGroupingToDealsList":2,"./industryUI":3,"./objectsApi/entityRepository":5,"./tools/xmlHttpProxy":24,"when":189}]},{},[]);
+},{"./app":1,"./handlers/addIndustryGroupingToDealsList":2,"./handlers/customFields":3,"./objectsApi/entityRepository":5,"./tools/xmlHttpProxy":24,"when":189}]},{},[]);
 ;return require("addon")}
 //Just a sample of concat task

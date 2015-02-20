@@ -78,7 +78,6 @@ groupDealsByCustomField = (deals) ->
   groups = {}
 
   customField = getCurrentGroupingField()
-  console.log customField
 
   for deal in deals
     customFieldValueId = deal[customField.id]
@@ -136,7 +135,7 @@ loadDealsData = (callback, loadedDeals = [], page = 1) ->
     console.log 'There is no Nimble Token'
     setTimeout () ->
       loadDealsData(callback, loadedDeals, page)
-    , 200
+    , 1000
     return
 
   $.ajax

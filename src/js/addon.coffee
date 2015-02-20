@@ -1,7 +1,7 @@
 app = require './app'
 entityRepository = require './objectsApi/entityRepository'
 
-industryUI = require './industryUI'
+customFieldsHandler = require './handlers/customFields'
 
 addIndustryGroupingToDealsList = require './handlers/addIndustryGroupingToDealsList'
 
@@ -38,13 +38,13 @@ module.exports = addonEntry =
       app.repositories.deals.load()
     .then () ->
       setRoutes()
-      industryUI.renderInNewDealDialog()
+      customFieldsHandler.renderInNewDealDialog()
 
 routesByHashes =
   'app\/deals\/list': -> addIndustryGroupingToDealsList()
-  '^app/deals/view': -> industryUI.renderInDealViewer()
-  '^app/deals/edit': -> industryUI.renderInDealEditor()
-  'app/settings/deals': -> industryUI.renderInSettings()
+  '^app/deals/view': -> customFieldsHandler.renderInDealViewer()
+  '^app/deals/edit': -> customFieldsHandler.renderInDealEditor()
+  'app/settings/deals': -> customFieldsHandler.renderInSettings()
 
 setRoutes = ->
   for hashRegexp, routeProcessor of routesByHashes
@@ -65,4 +65,4 @@ waitingForNewDealRequest = ->
     url = request.responseURL
     if url.match /\/api\/deals\?/
       dealId = JSON.parse(request.responseText)?.deal?.id
-      industryUI.saveCustomFieldsForNewDeal dealId
+      customFieldsHandler.saveCustomFieldsForNewDeal dealId
