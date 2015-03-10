@@ -28,9 +28,12 @@ module.exports = class EntityRepository
     deferred.promise
 
   _saveEntity: (entity, callback) ->
+    unless entity.id
+      entity.id = new Date().getTime() + Math.random()
+
     @_taistApi.companyData.setPart @_getEntityDataObjectName(), entity.id, entity, =>
       @_entities[entity.id] = entity
-      callback()
+      callback(entity)
 
   save: (entities, callback) ->
     @_taistApi.companyData.set @_getEntityDataObjectName(), entities, =>
@@ -40,9 +43,6 @@ module.exports = class EntityRepository
 
   getEntity: (entityId) ->
     @_entities[entityId]
-
-  getOrCreateEntity: (entityId) ->
-    @_entities[entityId] ?= { id: entityId }
 
   getAllEntities: ->
     ( entity for id, entity of @_entities )

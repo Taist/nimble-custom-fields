@@ -246,11 +246,13 @@ addCustomFieldToDeals = function(deals) {
 };
 
 },{"../app":1,"../react/groupedDealList/groupedDealList":18,"react":172}],3:[function(require,module,exports){
-var React, app, thisModule;
+var React, app, entityRepository, thisModule;
 
 app = require('../app');
 
 React = require('react');
+
+entityRepository = require('../objectsApi/entityRepository');
 
 module.exports = thisModule = {
   _getDealIdFromUrl: function() {
@@ -322,8 +324,7 @@ module.exports = thisModule = {
             fields: fields,
             onChange: onChange
           }), container);
-          thisModule._newDealCustomFields = deal;
-          return console.log('onChange', deal);
+          return thisModule._newDealCustomFields = deal;
         };
         return React.render(CustomFieldsInNewDealDialog({
           dicts: dicts,
@@ -395,7 +396,7 @@ module.exports = thisModule = {
   renderInSettings: function() {
     return app.api.wait.elementRender('.SettingsDealsView', (function(_this) {
       return function(parent) {
-        var CustomFieldsEditor, container, dicts, onChangeDictionaryName, onUpdateDictionary;
+        var CustomFieldsEditor, container, dicts, onChangeDictionaryName, onCreateNewCustomField, onUpdateDictionary;
         container = _this._getAddonContainer(parent);
         CustomFieldsEditor = require('../react/customFields/CustomFieldsEditor');
         onUpdateDictionary = function(entities) {
@@ -432,20 +433,35 @@ module.exports = thisModule = {
             dicts: dicts
           }), container);
         };
+        onCreateNewCustomField = function(name) {
+          return app.repositories.customFields._saveEntity({
+            name: name
+          }, function(dict) {
+            app.repositories[dict.id] = new entityRepository(app.api, dict.id);
+            dict.entities = [];
+            dict.onUpdate = onUpdateDictionary;
+            dict.onRename = onChangeDictionaryName;
+            dicts.push(dict);
+            return React.render(CustomFieldsEditor({
+              dicts: dicts
+            }), container);
+          });
+        };
         dicts = _this._getCustomFieldsDicts();
         dicts.forEach(function(dict) {
           dict.onUpdate = onUpdateDictionary;
           return dict.onRename = onChangeDictionaryName;
         });
         return React.render(CustomFieldsEditor({
-          dicts: dicts
+          dicts: dicts,
+          onCreateNewCustomField: onCreateNewCustomField
         }), container);
       };
     })(this));
   }
 };
 
-},{"../app":1,"../react/customFields/CustomFieldsEditor":6,"../react/customFields/CustomFieldsViewer":8,"../react/customFields/customFieldsInDealEditor":9,"../react/customFields/customFieldsInNewDealDialog":10,"react":172}],4:[function(require,module,exports){
+},{"../app":1,"../objectsApi/entityRepository":5,"../react/customFields/CustomFieldsEditor":6,"../react/customFields/CustomFieldsViewer":8,"../react/customFields/customFieldsInDealEditor":9,"../react/customFields/customFieldsInNewDealDialog":10,"react":172}],4:[function(require,module,exports){
 var Entity;
 
 module.exports = Entity = (function() {
@@ -524,10 +540,13 @@ module.exports = EntityRepository = (function() {
   };
 
   EntityRepository.prototype._saveEntity = function(entity, callback) {
+    if (!entity.id) {
+      entity.id = new Date().getTime() + Math.random();
+    }
     return this._taistApi.companyData.setPart(this._getEntityDataObjectName(), entity.id, entity, (function(_this) {
       return function() {
         _this._entities[entity.id] = entity;
-        return callback();
+        return callback(entity);
       };
     })(this));
   };
@@ -543,13 +562,6 @@ module.exports = EntityRepository = (function() {
 
   EntityRepository.prototype.getEntity = function(entityId) {
     return this._entities[entityId];
-  };
-
-  EntityRepository.prototype.getOrCreateEntity = function(entityId) {
-    var _base;
-    return (_base = this._entities)[entityId] != null ? _base[entityId] : _base[entityId] = {
-      id: entityId
-    };
   };
 
   EntityRepository.prototype.getAllEntities = function() {
@@ -686,10 +698,13 @@ CustomFieldsEditor = React.createFactory(React.createClass({
     });
   },
   onCreateNewCustomField: function(fieldName) {
-    return console.log('onCreateNewCustomField', fieldName);
+    var _base;
+    console.log(fieldName);
+    if (fieldName.length > 0) {
+      return typeof (_base = this.props).onCreateNewCustomField === "function" ? _base.onCreateNewCustomField(fieldName) : void 0;
+    }
   },
   render: function() {
-    console.log(this.props.dicts[0]);
     return div({}, h3({}, 'CUSTOM FIELDS BY TAIST'), div({}, this.state.mode === 'view' ? div({
       style: {
         paddingLeft: 9,

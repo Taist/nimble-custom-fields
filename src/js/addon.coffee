@@ -22,13 +22,6 @@ module.exports = addonEntry =
 
     app.repositories.deals = new entityRepository app.api, 'deals'
 
-    #TODO Uncomment to create test data
-    # customFields = {}
-    # customFields[ 'industry' ] = { id: 'industry', name: 'Industries' }
-    # customFields[ '1424347059189.5615' ] = { id: '1424347059189.5615', name: 'CustomField' }
-    # app.repositories.customFields = new entityRepository app.api, 'customFields'
-    # app.repositories.customFields.save customFields, ->
-
     app.repositories.customFields = new entityRepository app.api, 'customFields'
     app.repositories.customFields.load()
     .then () ->

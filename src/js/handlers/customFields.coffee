@@ -1,6 +1,8 @@
 app = require '../app'
 React = require 'react'
 
+entityRepository = require '../objectsApi/entityRepository'
+
 module.exports = thisModule =
   _getDealIdFromUrl: -> location.hash.substring((location.hash.indexOf '?id=') + 4)
 
@@ -57,7 +59,6 @@ module.exports = thisModule =
         React.render ( CustomFieldsInNewDealDialog { dicts, fields, onChange } ), container
 
         thisModule._newDealCustomFields = deal
-        console.log 'onChange', deal
 
       React.render ( CustomFieldsInNewDealDialog { dicts, fields, onChange } ), container
 
@@ -130,9 +131,20 @@ module.exports = thisModule =
             dict.name = newName
         React.render ( CustomFieldsEditor { dicts } ), container
 
+      onCreateNewCustomField = (name) ->
+        app.repositories.customFields._saveEntity { name }, (dict) ->
+          app.repositories[dict.id] = new entityRepository(app.api, dict.id)
+
+          dict.entities = []
+          dict.onUpdate = onUpdateDictionary
+          dict.onRename = onChangeDictionaryName
+
+          dicts.push dict
+          React.render ( CustomFieldsEditor { dicts } ), container
+
       dicts = @_getCustomFieldsDicts()
       dicts.forEach (dict) ->
         dict.onUpdate = onUpdateDictionary
         dict.onRename = onChangeDictionaryName
 
-      React.render ( CustomFieldsEditor { dicts } ), container
+      React.render ( CustomFieldsEditor { dicts, onCreateNewCustomField } ), container

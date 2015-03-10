@@ -59,11 +59,11 @@ CustomFieldsEditor = React.createFactory React.createClass
     }
 
   onCreateNewCustomField: (fieldName) ->
-    console.log 'onCreateNewCustomField', fieldName
+    console.log fieldName
+    if fieldName.length > 0
+      @props.onCreateNewCustomField?(fieldName)
 
   render: ->
-    console.log @props.dicts[0]
-
     div {},
       h3 {}, 'CUSTOM FIELDS BY TAIST'
       div {},
