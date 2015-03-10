@@ -28,7 +28,7 @@ DictEditor = React.createFactory React.createClass
     @setState newEntity: null
 
   render: ->
-    div { style: { marginTop: 30, width: 565 } },
+    div { style: { marginTop: 32, width: 565 } },
       div { style: { clear: 'both', height: '1px' }, dangerouslySetInnerHTML: __html: '&nbsp;' }
       div { style: { marginTop: '15px', borderTop: '1px solid #f3f3f3' } },
         @props.entities.concat(@state.newEntity).map (entity) =>
@@ -41,7 +41,7 @@ DictEditor = React.createFactory React.createClass
                 onChange: @onChange
                 onCancel: @onCancel
       unless @state.newEntity
-        div { style: { padding: '15px 9px' } },
+        div { style: { padding: '8px 9px 32px 9px', borderTop: '1px solid #f3f3f3' } },
           a { onClick: @onAdd }, "Add  #{@props.name}"
 
 module.exports = DictEditor

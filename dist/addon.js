@@ -697,7 +697,7 @@ CustomFieldsEditor = React.createFactory(React.createClass({
     }, this.state.alertMessage), div({
       className: 'closeOrange',
       onClick: this.onCloseAlert
-    })) : void 0, h3({}, 'CUSTOM FIELDS BY TAIST'), div({}, this.state.mode === 'view' ? div({
+    })) : void 0, h3({}, 'Custom fields'), div({}, this.state.mode === 'view' ? div({
       style: {
         paddingLeft: 9,
         paddingTop: 5
@@ -931,7 +931,7 @@ DictEditor = React.createFactory(React.createClass({
   render: function() {
     return div({
       style: {
-        marginTop: 30,
+        marginTop: 32,
         width: 565
       }
     }, div({
@@ -965,7 +965,8 @@ DictEditor = React.createFactory(React.createClass({
       };
     })(this))), !this.state.newEntity ? div({
       style: {
-        padding: '15px 9px'
+        padding: '8px 9px 32px 9px',
+        borderTop: '1px solid #f3f3f3'
       }
     }, a({
       onClick: this.onAdd

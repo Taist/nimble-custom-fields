@@ -48,7 +48,7 @@ CustomFieldsEditor = React.createFactory React.createClass
         },
           div { className: 'gwt-Label' }, @state.alertMessage
           div { className: 'closeOrange', onClick: @onCloseAlert }
-      h3 {}, 'CUSTOM FIELDS BY TAIST'
+      h3 {}, 'Custom fields'
       div {},
         if @state.mode is 'view'
           div { style: paddingLeft: 9, paddingTop: 5 },
