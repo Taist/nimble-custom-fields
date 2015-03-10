@@ -396,7 +396,7 @@ module.exports = thisModule = {
   renderInSettings: function() {
     return app.api.wait.elementRender('.SettingsDealsView', (function(_this) {
       return function(parent) {
-        var CustomFieldsEditor, container, dicts, onChangeDictionaryName, onCreateNewCustomField, onUpdateDictionary;
+        var CustomFieldsEditor, container, dicts, onChangeDictionaryName, onCreateNewCustomField, onDeleteDictionaryEntity, onUpdateDictionary;
         container = _this._getAddonContainer(parent);
         CustomFieldsEditor = require('../react/customFields/CustomFieldsEditor');
         onUpdateDictionary = function(entities) {
@@ -433,6 +433,25 @@ module.exports = thisModule = {
             dicts: dicts
           }), container);
         };
+        onDeleteDictionaryEntity = function(entityId) {
+          var deals;
+          deals = app.repositories.deals.getAllEntities().filter((function(_this) {
+            return function(deal) {
+              return deal[_this.id] === entityId;
+            };
+          })(this));
+          if (deals.length > 0) {
+            return React.render(CustomFieldsEditor({
+              dicts: dicts,
+              onCreateNewCustomField: onCreateNewCustomField,
+              alertMessage: 'Error deleting custom field value. Is is linked to some existed deal'
+            }), container);
+          } else {
+            return this.onUpdate(this.entities.filter(function(entity) {
+              return entity.id !== entityId;
+            }));
+          }
+        };
         onCreateNewCustomField = function(name) {
           return app.repositories.customFields._saveEntity({
             name: name
@@ -441,6 +460,7 @@ module.exports = thisModule = {
             dict.entities = [];
             dict.onUpdate = onUpdateDictionary;
             dict.onRename = onChangeDictionaryName;
+            dict.onDelete = onDeleteDictionaryEntity;
             dicts.push(dict);
             return React.render(CustomFieldsEditor({
               dicts: dicts
@@ -450,7 +470,8 @@ module.exports = thisModule = {
         dicts = _this._getCustomFieldsDicts();
         dicts.forEach(function(dict) {
           dict.onUpdate = onUpdateDictionary;
-          return dict.onRename = onChangeDictionaryName;
+          dict.onRename = onChangeDictionaryName;
+          return dict.onDelete = onDeleteDictionaryEntity;
         });
         return React.render(CustomFieldsEditor({
           dicts: dicts,
@@ -619,7 +640,8 @@ NimbleInlineEditor = require('../nimble/nimbleInlineEditor');
 CustomFieldsEditor = React.createFactory(React.createClass({
   getInitialState: function() {
     return {
-      mode: 'view'
+      mode: 'view',
+      alertMessage: ''
     };
   },
   onEditMode: function() {
@@ -641,13 +663,43 @@ CustomFieldsEditor = React.createFactory(React.createClass({
   },
   onCreateNewCustomField: function(fieldName) {
     var _base;
-    console.log(fieldName);
     if (fieldName.length > 0) {
       return typeof (_base = this.props).onCreateNewCustomField === "function" ? _base.onCreateNewCustomField(fieldName) : void 0;
     }
   },
+  onCloseAlert: function() {
+    return this.setState({
+      alertMessage: ''
+    });
+  },
+  alertTimeout: 4 * 1000,
+  componentWillReceiveProps: function(newProps) {
+    return this.setState({
+      alertMessage: newProps.alertMessage || ''
+    }, function() {
+      if (this.state.alertMessage.length > 0) {
+        return setTimeout((function(_this) {
+          return function() {
+            return _this.onCloseAlert();
+          };
+        })(this), this.alertTimeout);
+      }
+    });
+  },
   render: function() {
-    return div({}, h3({}, 'CUSTOM FIELDS BY TAIST'), div({}, this.state.mode === 'view' ? div({
+    return div({}, this.state.alertMessage.length > 0 ? div({
+      className: 'nmbl-StatusPanel nmbl-StatusPanel-warning',
+      style: {
+        top: 60,
+        left: '50%',
+        transform: 'translate(-50%, -50%)'
+      }
+    }, div({
+      className: 'gwt-Label'
+    }, this.state.alertMessage), div({
+      className: 'closeOrange',
+      onClick: this.onCloseAlert
+    })) : void 0, h3({}, 'CUSTOM FIELDS BY TAIST'), div({}, this.state.mode === 'view' ? div({
       style: {
         paddingLeft: 9,
         paddingTop: 5
@@ -844,9 +896,7 @@ DictEditor = React.createFactory(React.createClass({
     };
   },
   onDelete: function(entityId) {
-    return this.props.onUpdate(this.props.entities.filter(function(entity) {
-      return entity.id !== entityId;
-    }));
+    return this.props.onDelete(entityId);
   },
   onChange: function(entityId, newValue) {
     if (entityId) {
@@ -1351,8 +1401,9 @@ NimbleAlert = React.createFactory(React.createClass({
     }), div({
       className: 'nmbl-NimbleModalDialog nmbl-NimbleModalDialog-nmbl-ConfirmDialog',
       style: {
-        left: '40%',
-        top: '30%',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
         position: 'absolute',
         overflow: 'visible'
       }

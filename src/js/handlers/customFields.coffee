@@ -131,6 +131,21 @@ module.exports = thisModule =
             dict.name = newName
         React.render ( CustomFieldsEditor { dicts } ), container
 
+      onDeleteDictionaryEntity = (entityId) ->
+        #The function is called with dict as a context because of React
+        deals = app.repositories.deals.getAllEntities().filter (deal) =>
+          deal[@id] is entityId
+
+        if deals.length > 0
+          React.render ( CustomFieldsEditor {
+            dicts
+            onCreateNewCustomField
+            alertMessage : 'Error deleting custom field value. Is is linked to some existed deal' 
+          } ), container
+        else
+          @onUpdate @entities.filter (entity) ->
+            entity.id isnt entityId
+
       onCreateNewCustomField = (name) ->
         app.repositories.customFields._saveEntity { name }, (dict) ->
           app.repositories[dict.id] = new entityRepository(app.api, dict.id)
@@ -138,6 +153,7 @@ module.exports = thisModule =
           dict.entities = []
           dict.onUpdate = onUpdateDictionary
           dict.onRename = onChangeDictionaryName
+          dict.onDelete = onDeleteDictionaryEntity
 
           dicts.push dict
           React.render ( CustomFieldsEditor { dicts } ), container
@@ -146,5 +162,6 @@ module.exports = thisModule =
       dicts.forEach (dict) ->
         dict.onUpdate = onUpdateDictionary
         dict.onRename = onChangeDictionaryName
+        dict.onDelete = onDeleteDictionaryEntity
 
       React.render ( CustomFieldsEditor { dicts, onCreateNewCustomField } ), container

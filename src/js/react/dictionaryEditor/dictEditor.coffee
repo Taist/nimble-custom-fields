@@ -9,8 +9,7 @@ DictEditor = React.createFactory React.createClass
     newEntity: null
 
   onDelete: (entityId) ->
-    @props.onUpdate @props.entities.filter (entity) ->
-      entity.id isnt entityId
+    @props.onDelete entityId
 
   onChange: (entityId, newValue) ->
     if entityId

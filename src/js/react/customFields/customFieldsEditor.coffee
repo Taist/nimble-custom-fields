@@ -9,6 +9,7 @@ NimbleInlineEditor = require '../nimble/nimbleInlineEditor'
 CustomFieldsEditor = React.createFactory React.createClass
   getInitialState: ->
     mode: 'view'
+    alertMessage: ''
 
   onEditMode: ->
     @setState {
@@ -21,12 +22,33 @@ CustomFieldsEditor = React.createFactory React.createClass
     }
 
   onCreateNewCustomField: (fieldName) ->
-    console.log fieldName
     if fieldName.length > 0
       @props.onCreateNewCustomField?(fieldName)
 
+  onCloseAlert: ->
+     @setState alertMessage: ''
+
+  alertTimeout: 4 * 1000
+
+  componentWillReceiveProps: (newProps) ->
+    @setState { alertMessage: newProps.alertMessage or '' }, ->
+      if @state.alertMessage.length > 0
+        setTimeout =>
+          @onCloseAlert()
+        , @alertTimeout
+
   render: ->
     div {},
+      if @state.alertMessage.length > 0
+        div {
+          className: 'nmbl-StatusPanel nmbl-StatusPanel-warning'
+          style:
+            top: 60
+            left: '50%'
+            transform: 'translate(-50%, -50%)'
+        },
+          div { className: 'gwt-Label' }, @state.alertMessage
+          div { className: 'closeOrange', onClick: @onCloseAlert }
       h3 {}, 'CUSTOM FIELDS BY TAIST'
       div {},
         if @state.mode is 'view'

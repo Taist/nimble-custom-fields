@@ -23,8 +23,9 @@ NimbleAlert = React.createFactory React.createClass
       div {
         className: 'nmbl-NimbleModalDialog nmbl-NimbleModalDialog-nmbl-ConfirmDialog'
         style:
-          left: '40%'
-          top: '30%'
+          top: '50%'
+          left: '50%'
+          transform: 'translate(-50%, -50%)'
           position: 'absolute'
           overflow: 'visible'
       },
