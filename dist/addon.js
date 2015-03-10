@@ -608,6 +608,11 @@ DictHeader = React.createFactory(React.createClass({
       mode: 'view'
     };
   },
+  componentDidMount: function() {
+    return this.setState({
+      mode: this.props.mode || 'view'
+    });
+  },
   fixedBlockStyle: function(width) {
     if (width == null) {
       width = 200;
@@ -623,9 +628,11 @@ DictHeader = React.createFactory(React.createClass({
     });
   },
   closeEditor: function() {
-    return this.setState({
+    var _base;
+    this.setState({
       mode: 'view'
     });
+    return typeof (_base = this.props).onCancel === "function" ? _base.onCancel() : void 0;
   },
   onSave: function(newName) {
     return this.props.onRename(newName);
@@ -656,8 +663,49 @@ DictHeader = React.createFactory(React.createClass({
 }));
 
 CustomFieldsEditor = React.createFactory(React.createClass({
+  getInitialState: function() {
+    return {
+      mode: 'view'
+    };
+  },
+  onEditMode: function() {
+    return this.setState({
+      mode: 'edit',
+      newDict: {
+        mode: 'edit',
+        name: '',
+        onRename: this.onCreateNewCustomField,
+        onCancel: (function(_this) {
+          return function() {
+            return _this.setState({
+              mode: 'view'
+            });
+          };
+        })(this)
+      }
+    });
+  },
+  onCreateNewCustomField: function(fieldName) {
+    return console.log('onCreateNewCustomField', fieldName);
+  },
   render: function() {
-    return div({}, h3({}, 'CUSTOM FIELDS BY TAIST'), this.props.dicts.map((function(_this) {
+    console.log(this.props.dicts[0]);
+    return div({}, h3({}, 'CUSTOM FIELDS BY TAIST'), div({}, this.state.mode === 'view' ? div({
+      style: {
+        paddingLeft: 9,
+        paddingTop: 5
+      }
+    }, a({
+      onClick: this.onEditMode
+    }, 'Add new custom field')) : DictHeader(this.state.newDict), div({
+      style: {
+        clear: 'both',
+        height: '1px'
+      },
+      dangerouslySetInnerHTML: {
+        __html: '&nbsp;'
+      }
+    })), this.props.dicts.map((function(_this) {
       return function(dict) {
         return div({
           key: dict.id

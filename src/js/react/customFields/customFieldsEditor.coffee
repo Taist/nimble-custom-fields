@@ -9,6 +9,9 @@ DictHeader = React.createFactory React.createClass
   getInitialState: ->
     mode: 'view'
 
+  componentDidMount: () ->
+    @setState mode: ( @props.mode or 'view' )
+
   fixedBlockStyle: (width = 200) ->
     display: 'inline-block'
     width: width
@@ -18,6 +21,8 @@ DictHeader = React.createFactory React.createClass
 
   closeEditor: ->
     @setState { mode: 'view' }
+    @props.onCancel?()
+
 
   onSave: (newName) ->
     @props.onRename newName
@@ -40,9 +45,35 @@ DictHeader = React.createFactory React.createClass
           }
 
 CustomFieldsEditor = React.createFactory React.createClass
+  getInitialState: ->
+    mode: 'view'
+
+  onEditMode: ->
+    @setState {
+      mode: 'edit'
+      newDict:
+        mode: 'edit'
+        name: ''
+        onRename: @onCreateNewCustomField
+        onCancel: => @setState mode: 'view'
+    }
+
+  onCreateNewCustomField: (fieldName) ->
+    console.log 'onCreateNewCustomField', fieldName
+
   render: ->
+    console.log @props.dicts[0]
+
     div {},
       h3 {}, 'CUSTOM FIELDS BY TAIST'
+      div {},
+        if @state.mode is 'view'
+          div { style: paddingLeft: 9, paddingTop: 5 },
+            a { onClick: @onEditMode }, 'Add new custom field'
+        else
+          DictHeader @state.newDict
+        div { style: { clear: 'both', height: '1px' }, dangerouslySetInnerHTML: __html: '&nbsp;' }
+
       @props.dicts.map (dict) =>
         div { key: dict.id },
           DictHeader dict
