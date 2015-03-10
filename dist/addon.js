@@ -625,7 +625,7 @@ module.exports = EntityRepository = (function() {
 })();
 
 },{"./entity":4,"when":191}],6:[function(require,module,exports){
-var CustomFieldsEditor, DictEditor, DictHeader, NimbleInlineEditor, React, a, div, h3, _ref;
+var CustomFieldsEditor, DictEditor, DictHeader, React, a, div, h3, _ref;
 
 React = require('react');
 
@@ -634,8 +634,6 @@ _ref = React.DOM, div = _ref.div, h3 = _ref.h3, a = _ref.a;
 DictEditor = require('../dictionaryEditor/dictEditor');
 
 DictHeader = require('../dictionaryEditor/dictHeader');
-
-NimbleInlineEditor = require('../nimble/nimbleInlineEditor');
 
 CustomFieldsEditor = React.createFactory(React.createClass({
   getInitialState: function() {
@@ -726,7 +724,7 @@ CustomFieldsEditor = React.createFactory(React.createClass({
 
 module.exports = CustomFieldsEditor;
 
-},{"../dictionaryEditor/dictEditor":11,"../dictionaryEditor/dictHeader":13,"../nimble/nimbleInlineEditor":25,"react":173}],7:[function(require,module,exports){
+},{"../dictionaryEditor/dictEditor":11,"../dictionaryEditor/dictHeader":13,"react":173}],7:[function(require,module,exports){
 var CustomFieldsSelect, React, defaultSelectValue, option, select, _ref;
 
 React = require('react');
@@ -1075,11 +1073,13 @@ DictEntity = React.createFactory(React.createClass({
 module.exports = DictEntity;
 
 },{"../nimble/nimbleAlert":24,"../nimble/nimbleInlineEditor":25,"react":173}],13:[function(require,module,exports){
-var DictHeader, React, a, div, _ref;
+var DictHeader, NimbleInlineEditor, React, a, div, _ref;
 
 React = require('react');
 
 _ref = React.DOM, div = _ref.div, a = _ref.a;
+
+NimbleInlineEditor = require('../nimble/nimbleInlineEditor');
 
 DictHeader = React.createFactory(React.createClass({
   getInitialState: function() {
@@ -1143,7 +1143,7 @@ DictHeader = React.createFactory(React.createClass({
 
 module.exports = DictHeader;
 
-},{"react":173}],14:[function(require,module,exports){
+},{"../nimble/nimbleInlineEditor":25,"react":173}],14:[function(require,module,exports){
 var Deal, React, div, formatAmount;
 
 React = require('react');

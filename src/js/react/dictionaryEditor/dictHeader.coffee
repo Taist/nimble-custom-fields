@@ -2,6 +2,8 @@ React = require 'react'
 
 { div, a } = React.DOM
 
+NimbleInlineEditor = require '../nimble/nimbleInlineEditor'
+
 DictHeader = React.createFactory React.createClass
   getInitialState: ->
     mode: 'view'

@@ -4,7 +4,6 @@ React = require 'react'
 
 DictEditor = require '../dictionaryEditor/dictEditor'
 DictHeader = require '../dictionaryEditor/dictHeader'
-NimbleInlineEditor = require '../nimble/nimbleInlineEditor'
 
 CustomFieldsEditor = React.createFactory React.createClass
   getInitialState: ->
