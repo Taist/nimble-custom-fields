@@ -516,7 +516,7 @@ module.exports = EntityRepository = (function() {
         if (err) {
           return deferred.reject(err);
         } else {
-          return deferred.resolve(_this._updateEntities(allEntitiesData));
+          return deferred.resolve(_this._updateEntities(allEntitiesData || []));
         }
       };
     })(this));

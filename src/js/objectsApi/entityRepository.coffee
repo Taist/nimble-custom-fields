@@ -24,7 +24,7 @@ module.exports = class EntityRepository
       if err
         deferred.reject err
       else
-        deferred.resolve @_updateEntities allEntitiesData
+        deferred.resolve @_updateEntities(allEntitiesData or [])
     deferred.promise
 
   _saveEntity: (entity, callback) ->
@@ -50,5 +50,5 @@ module.exports = class EntityRepository
   getDictionary: ->
     dictEntities = ( $.extend({}, entity, { id }) for id, entity of @_entities )
     dictEntities.sort (a, b) ->
-      if a.value > b.value then 1 else -1 
+      if a.value > b.value then 1 else -1
     return dictEntities
