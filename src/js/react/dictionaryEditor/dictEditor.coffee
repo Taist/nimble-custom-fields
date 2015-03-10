@@ -41,7 +41,7 @@ DictEditor = React.createFactory React.createClass
                 onChange: @onChange
                 onCancel: @onCancel
       unless @state.newEntity
-        div { style: { padding: '8px 9px 32px 9px', borderTop: '1px solid #f3f3f3' } },
+        div { style: { padding: '8px 9px 24px 9px', borderTop: '1px solid #f3f3f3' } },
           a { onClick: @onAdd }, "Add  #{@props.name}"
 
 module.exports = DictEditor

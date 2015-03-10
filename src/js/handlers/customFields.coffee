@@ -108,6 +108,13 @@ module.exports = thisModule =
       container = @_getAddonContainer parent
       CustomFieldsEditor = require '../react/customFields/CustomFieldsEditor'
 
+      reactRender = (alertMessage) ->
+        React.render ( CustomFieldsEditor {
+          dicts,
+          onCreateNewCustomField
+          alertMessage
+        } ), container
+
       onUpdateDictionary = (entities) ->
         #The function is called with dict as a context because of React
         repoEntities = {}
@@ -118,7 +125,7 @@ module.exports = thisModule =
         dicts.forEach (dict) =>
           if dict.id is @id
             dict.entities = entities
-        React.render ( CustomFieldsEditor { dicts } ), container
+        reactRender()
 
       onChangeDictionaryName = (newName) ->
         #The function is called with dict as a context because of React
@@ -129,7 +136,7 @@ module.exports = thisModule =
         dicts.forEach (dict) =>
           if dict.id is @id
             dict.name = newName
-        React.render ( CustomFieldsEditor { dicts } ), container
+        reactRender()
 
       onDeleteDictionaryEntity = (entityId) ->
         #The function is called with dict as a context because of React
@@ -137,11 +144,7 @@ module.exports = thisModule =
           deal[@id] is entityId
 
         if deals.length > 0
-          React.render ( CustomFieldsEditor {
-            dicts
-            onCreateNewCustomField
-            alertMessage : 'Error deleting custom field value. Is is linked to some existed deal' 
-          } ), container
+          reactRender 'Error deleting custom field value. Is is linked to some existed deal'
         else
           @onUpdate @entities.filter (entity) ->
             entity.id isnt entityId
@@ -156,7 +159,7 @@ module.exports = thisModule =
           dict.onDelete = onDeleteDictionaryEntity
 
           dicts.push dict
-          React.render ( CustomFieldsEditor { dicts } ), container
+          reactRender()
 
       dicts = @_getCustomFieldsDicts()
       dicts.forEach (dict) ->
@@ -164,4 +167,4 @@ module.exports = thisModule =
         dict.onRename = onChangeDictionaryName
         dict.onDelete = onDeleteDictionaryEntity
 
-      React.render ( CustomFieldsEditor { dicts, onCreateNewCustomField } ), container
+      reactRender()

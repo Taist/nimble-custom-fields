@@ -396,9 +396,16 @@ module.exports = thisModule = {
   renderInSettings: function() {
     return app.api.wait.elementRender('.SettingsDealsView', (function(_this) {
       return function(parent) {
-        var CustomFieldsEditor, container, dicts, onChangeDictionaryName, onCreateNewCustomField, onDeleteDictionaryEntity, onUpdateDictionary;
+        var CustomFieldsEditor, container, dicts, onChangeDictionaryName, onCreateNewCustomField, onDeleteDictionaryEntity, onUpdateDictionary, reactRender;
         container = _this._getAddonContainer(parent);
         CustomFieldsEditor = require('../react/customFields/CustomFieldsEditor');
+        reactRender = function(alertMessage) {
+          return React.render(CustomFieldsEditor({
+            dicts: dicts,
+            onCreateNewCustomField: onCreateNewCustomField,
+            alertMessage: alertMessage
+          }), container);
+        };
         onUpdateDictionary = function(entities) {
           var repoEntities;
           repoEntities = {};
@@ -413,9 +420,7 @@ module.exports = thisModule = {
               }
             };
           })(this));
-          return React.render(CustomFieldsEditor({
-            dicts: dicts
-          }), container);
+          return reactRender();
         };
         onChangeDictionaryName = function(newName) {
           var dict;
@@ -429,9 +434,7 @@ module.exports = thisModule = {
               }
             };
           })(this));
-          return React.render(CustomFieldsEditor({
-            dicts: dicts
-          }), container);
+          return reactRender();
         };
         onDeleteDictionaryEntity = function(entityId) {
           var deals;
@@ -441,11 +444,7 @@ module.exports = thisModule = {
             };
           })(this));
           if (deals.length > 0) {
-            return React.render(CustomFieldsEditor({
-              dicts: dicts,
-              onCreateNewCustomField: onCreateNewCustomField,
-              alertMessage: 'Error deleting custom field value. Is is linked to some existed deal'
-            }), container);
+            return reactRender('Error deleting custom field value. Is is linked to some existed deal');
           } else {
             return this.onUpdate(this.entities.filter(function(entity) {
               return entity.id !== entityId;
@@ -462,9 +461,7 @@ module.exports = thisModule = {
             dict.onRename = onChangeDictionaryName;
             dict.onDelete = onDeleteDictionaryEntity;
             dicts.push(dict);
-            return React.render(CustomFieldsEditor({
-              dicts: dicts
-            }), container);
+            return reactRender();
           });
         };
         dicts = _this._getCustomFieldsDicts();
@@ -473,10 +470,7 @@ module.exports = thisModule = {
           dict.onRename = onChangeDictionaryName;
           return dict.onDelete = onDeleteDictionaryEntity;
         });
-        return React.render(CustomFieldsEditor({
-          dicts: dicts,
-          onCreateNewCustomField: onCreateNewCustomField
-        }), container);
+        return reactRender();
       };
     })(this));
   }
@@ -670,7 +664,7 @@ CustomFieldsEditor = React.createFactory(React.createClass({
       alertMessage: ''
     });
   },
-  alertTimeout: 4 * 1000,
+  alertTimeout: 3 * 1000,
   componentWillReceiveProps: function(newProps) {
     return this.setState({
       alertMessage: newProps.alertMessage || ''
@@ -965,7 +959,7 @@ DictEditor = React.createFactory(React.createClass({
       };
     })(this))), !this.state.newEntity ? div({
       style: {
-        padding: '8px 9px 32px 9px',
+        padding: '8px 9px 24px 9px',
         borderTop: '1px solid #f3f3f3'
       }
     }, a({
@@ -1123,10 +1117,10 @@ DictHeader = React.createFactory(React.createClass({
     }, this.state.mode === 'view' ? div({}, div({
       style: this.fixedBlockStyle()
     }, this.props.name), div({
-      style: this.fixedBlockStyle(50)
+      style: this.fixedBlockStyle(100)
     }, a({
       onClick: this.onEdit
-    }, 'Edit'))) : div({
+    }, 'Rename field'))) : div({
       style: {
         marginTop: -8,
         marginBottom: -6

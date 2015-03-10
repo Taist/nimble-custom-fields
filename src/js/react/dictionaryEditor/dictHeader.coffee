@@ -31,8 +31,8 @@ DictHeader = React.createFactory React.createClass
       if @state.mode is 'view'
         div {},
           div { style: @fixedBlockStyle() }, @props.name
-          div { style: @fixedBlockStyle(50) },
-            a { onClick: @onEdit }, 'Edit'
+          div { style: @fixedBlockStyle(100) },
+            a { onClick: @onEdit }, 'Rename field'
       else
         div { style: marginTop: -8, marginBottom: -6 },
           NimbleInlineEditor {
