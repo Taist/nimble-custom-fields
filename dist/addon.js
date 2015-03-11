@@ -187,7 +187,7 @@ addCustomColumnsContents = function() {
       return customFields.forEach(function(field) {
         var customFieldValueId, value, _ref, _ref1, _ref2;
         customFieldValueId = (_ref = app.repositories.deals.getEntity(dealId)) != null ? _ref[field.id] : void 0;
-        value = (_ref1 = (_ref2 = app.repositories[field.id].getEntity(customFieldValueId)) != null ? _ref2.value : void 0) != null ? _ref1 : notSpecifiedValue;
+        value = (_ref1 = (_ref2 = app.repositories[field.id].getEntity(customFieldValueId)) != null ? _ref2.value : void 0) != null ? _ref1 : '-';
         return previousCell.after($("<td class=\"cell c1 taist-custom-cell\">" + value + "</td>"));
       });
     }

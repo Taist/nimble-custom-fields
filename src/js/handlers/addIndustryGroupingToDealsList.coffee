@@ -127,7 +127,7 @@ addCustomColumnsContents = ->
 
       customFields.forEach (field) ->
         customFieldValueId = app.repositories.deals.getEntity(dealId)?[field.id]
-        value = app.repositories[field.id].getEntity(customFieldValueId)?.value ? notSpecifiedValue
+        value = app.repositories[field.id].getEntity(customFieldValueId)?.value ? '-'
         previousCell.after $ """<td class="cell c1 taist-custom-cell">#{value}</td>"""
 
 loadDealsData = (callback, loadedDeals = [], page = 1) ->
