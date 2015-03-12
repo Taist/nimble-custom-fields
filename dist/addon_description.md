@@ -1,7 +1,20 @@
-Addon adds custom field "Industry" to Deals. It is displayed in the deals list, and you can group deals by it.
-Industries list is set in "Settings -> Deals".
+Addon allows you to add multiple custom fields to deals. 
 
-We plan to extend the addon to allow creation of any custom fields to any entities like Deals, Contacts, Companies and Activities with custom behaviour.
+You can view them in deal pages and in the deals list. The deals list can also be grouped by them.
 
-So if you need any specific custom deals, please write in the comments below what exactly you need, and we will offer you a solution.
+Every field now is of "single choice" type - it allows to select a single value from a list of values. 
 
+Examples of fields:
+===================
+* Industry (Healthcare, IT, Transportation, ...)
+* Lead source (Events, Online ads, Recommendations,...)
+  
+How to use:
+===========
+0. **Enable addon** :)
+1. **Adding new custom field**: 
+  * go to "Settings -> Deals", scroll down to new section "Custom fields"
+  * press "Add new custom field", input field name, for example, `Industry`, and press `Save`.  A row with your field name will appear.
+  * a new link with your field name appears below - in our example it will be `Add Industry` - use it to add a new value to the list.
+2. Set field values while creating or editing any deal.
+3. Fields will be displayed on deal pages and in the deals list.
