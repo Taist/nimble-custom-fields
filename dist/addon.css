@@ -13,3 +13,10 @@
 .taist-custom-field-settings-industry-edit:not(:hover) .taist-custom-field-delete-button {
   display: none
 }
+
+.DealListView .mainContainer .dealList .c1.taist-custom-cell,
+.DealListView .mainContainer .groupGlobalHeader .c1.taist-custom-header {
+  width: 120px;
+  min-width: 120px;
+  overflow: hidden;
+}

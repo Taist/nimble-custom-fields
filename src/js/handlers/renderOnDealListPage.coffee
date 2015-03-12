@@ -1,26 +1,41 @@
 app = require '../app'
+React = require 'react'
 
 customFields = []
+selectedFields = {}
 notSpecifiedValue = 'Not Specified'
 
-module.exports = ->
-  findCustomDealsList().remove()
+customFieldControlContainer = null
 
-  customFields = app.repositories.customFields.getAllEntities()
+onChangeCustomFieldSelection = (fieldName, isSelected) ->
+  selectedFields[fieldName] = isSelected
+  app.api.localStorage.set 'selectedCustomFields', selectedFields
+  renderCustomFieldsControl()
+  addCustomColumnsToOriginalList()
 
-  addGroupingByCustomFields()
+renderCustomFieldsControl = ->
+  CustomFieldsSelector = require '../react/dealList/customFieldsSelector'
+  React.render (CustomFieldsSelector {
+    fields: customFields,
+    selected: selectedFields
+    onChange: onChangeCustomFieldSelection
+  }), customFieldControlContainer
 
-  loadDealsData (deals) ->
-    addCustomFieldToDeals deals
+addCustomFieldsControl = ->
+  selectedFields = app.api.localStorage.get('selectedCustomFields') or {}
+  selector = '.listHeader'
+  app.api.wait.elementRender selector, (listHeader) ->
+    unless customFieldControlContainer
+      customFieldControlContainer = $('<div>')
+        .css( { position: 'absolute', left: 10, paddingTop: 3 } )
+        .get( 0 )
 
-    if currentlyGroupingByCustomField()
-      renderCustomDealsList deals
-
-    addCustomColumnsToOriginalList()
+    $(customFieldControlContainer).appendTo(listHeader)
+    renderCustomFieldsControl()
 
 getCurrentGroupingFieldName = () ->
   groupMatches = location.hash.match /grouped_by=([^&]+)/
-  currentGroupingFieldName = groupMatches?[1] ? 'none'
+  currentGroupingFieldName = (groupMatches?[1] ? 'none').replace '+', ' '
 
 currentlyGroupingByCustomField = () ->
   currentGroupingFieldName = getCurrentGroupingFieldName()
@@ -58,7 +73,6 @@ renderCustomDealsList = (deals) ->
   customDealsList.show()
   groupedDeals = groupDealsByCustomField deals
 
-  React = require 'react'
   GroupedDealList = require '../react/groupedDealList/groupedDealList'
   React.render (GroupedDealList {deals: groupedDeals}), customDealsList[0]
 
@@ -107,28 +121,33 @@ addCustomColumnsToOriginalList = ->
   addCustomColumnsHeader()
   addCustomColumnsContents()
 
+isFieldVisible = (field) ->
+  currentGroupFieldName = getCurrentGroupingFieldName()
+  currentGroupFieldName isnt field.name and selectedFields[field.name]
+
 addCustomColumnsHeader = ->
   app.api.wait.elementRender '.DealListView .headerTD.subject', (previousHeader) ->
-    if not currentlyGroupingByCustomField()
-      (previousHeader.siblings '.taist-custom-header').remove()
-      customFields.forEach (field) ->
+    (previousHeader.siblings '.taist-custom-header').remove()
+
+    customFields.forEach (field) ->
+      if isFieldVisible field
         previousHeader.after $ "<td class=\"headerTD c1 taist-custom-header\">#{field.name}</td>"
 
 addCustomColumnsContents = ->
   app.api.wait.elementRender '.DealListView .dealList .body tr td a.deal_subject', (linkToDealInPreviousCell) ->
-    if not currentlyGroupingByCustomField()
-      previousCell = linkToDealInPreviousCell.parent()
-      (previousCell.siblings '.taist-custom-cell').remove()
+    previousCell = linkToDealInPreviousCell.parent()
+    (previousCell.siblings '.taist-custom-cell').remove()
 
-      dealUrl = linkToDealInPreviousCell.attr 'href'
-      dealIdPrefix = '?id='
-      dealIdIndex = (dealUrl.indexOf dealIdPrefix) + dealIdPrefix.length
-      dealId = dealUrl.substring dealIdIndex
+    dealUrl = linkToDealInPreviousCell.attr 'href'
+    dealIdPrefix = '?id='
+    dealIdIndex = (dealUrl.indexOf dealIdPrefix) + dealIdPrefix.length
+    dealId = dealUrl.substring dealIdIndex
 
-      customFields.forEach (field) ->
+    customFields.forEach (field) ->
+      if isFieldVisible field
         customFieldValueId = app.repositories.deals.getEntity(dealId)?[field.id]
         value = app.repositories[field.id].getEntity(customFieldValueId)?.value ? '-'
-        previousCell.after $ """<td class="cell c1 taist-custom-cell">#{value}</td>"""
+        previousCell.after $ """<td class="cell c1 taist-custom-cell" title="#{value}">#{value}</td>"""
 
 loadDealsData = (callback, loadedDeals = [], page = 1) ->
   unless app.options.nimbleToken
@@ -162,3 +181,19 @@ loadDealsData = (callback, loadedDeals = [], page = 1) ->
 addCustomFieldToDeals = (deals) ->
   for deal in deals
     $.extend deal, app.repositories.deals.getEntity deal.id
+
+module.exports = ->
+  findCustomDealsList().remove()
+
+  customFields = app.repositories.customFields.getAllEntities()
+
+  addCustomFieldsControl()
+  addGroupingByCustomFields()
+
+  loadDealsData (deals) ->
+    addCustomFieldToDeals deals
+
+    if currentlyGroupingByCustomField()
+      renderCustomDealsList deals
+
+    addCustomColumnsToOriginalList()

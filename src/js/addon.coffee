@@ -3,7 +3,7 @@ entityRepository = require './objectsApi/entityRepository'
 
 customFieldsHandler = require './handlers/customFields'
 
-addIndustryGroupingToDealsList = require './handlers/addIndustryGroupingToDealsList'
+renderOnDealListPage = require './handlers/renderOnDealListPage'
 
 whenjs = require 'when'
 
@@ -38,7 +38,7 @@ module.exports = addonEntry =
       customFieldsHandler.renderInNewDealDialog()
 
 routesByHashes =
-  'app\/deals\/list': -> addIndustryGroupingToDealsList()
+  'app\/deals\/list': -> renderOnDealListPage()
   '^app/deals/view': -> customFieldsHandler.renderInDealViewer()
   '^app/deals/edit': -> customFieldsHandler.renderInDealEditor()
   'app/settings/deals': -> customFieldsHandler.renderInSettings()
