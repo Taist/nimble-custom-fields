@@ -71,79 +71,73 @@ module.exports = thisModule = {
     })(this));
   },
   _renderInEditor: function(parent, reactFieldsEditorClass) {},
-  _newDealCustomFields: null,
-  renderInNewDealDialog: function() {
-    return app.api.wait.elementRender('.DealCreateForm>table>tbody', (function(_this) {
-      return function(parent) {
-        var CustomFieldsInNewDealDialog, container, deal, dicts, fields, onChange;
-        container = _this._getAddonContainer(parent, 'tr', false);
-        $(container).insertAfter($('.fieldCell.stage', parent).parent());
-        dicts = _this._getCustomFieldsDicts();
-        _this._newDealCustomFields = null;
-        deal = {};
-        fields = _this._getCustomFieldsValues(deal);
-        CustomFieldsInNewDealDialog = require('../react/customFields/customFieldsInNewDealDialog');
-        onChange = function(dictId, optionId) {
-          deal[dictId] = optionId;
-          fields = thisModule._getCustomFieldsValues(deal);
-          React.render(CustomFieldsInNewDealDialog({
-            dicts: dicts,
-            fields: fields,
-            onChange: onChange
-          }), container);
-          return thisModule._newDealCustomFields = deal;
-        };
-        return React.render(CustomFieldsInNewDealDialog({
+  editedDeals: [],
+  saveCustomFields: function(dealId, isNew) {
+    var deal, editedDealId;
+    console.log('saveCustomFields', dealId, isNew);
+    editedDealId = isNew ? 'newDeal' : dealId;
+    if (dealId) {
+      if (this.editedDeals[editedDealId]) {
+        deal = $.extend({}, this.editedDeals[editedDealId], {
+          id: dealId
+        });
+        delete this.editedDeals[editedDealId];
+        return app.repositories.deals._saveEntity(deal, (function(_this) {
+          return function() {
+            console.log('I belive it is successfuly saved - ', editedDealId, deal);
+            return _this.renderInDealViewer();
+          };
+        })(this));
+      }
+    }
+  },
+  renderDealEditor: function(dealId, CustomFieldDealEditor, container) {
+    var deal, dicts, fields, onChange;
+    dicts = this._getCustomFieldsDicts();
+    delete this.editedDeals[dealId];
+    deal = {};
+    if (dealId !== 'newId') {
+      deal = $.extend({}, app.repositories.deals.getEntity(dealId) || {
+        id: dealId
+      });
+    }
+    fields = this._getCustomFieldsValues(deal);
+    onChange = (function(_this) {
+      return function(dictId, optionId) {
+        deal[dictId] = optionId;
+        fields = thisModule._getCustomFieldsValues(deal);
+        React.render(CustomFieldDealEditor({
           dicts: dicts,
           fields: fields,
           onChange: onChange
         }), container);
+        return thisModule.editedDeals[dealId] = deal;
+      };
+    })(this);
+    return React.render(CustomFieldDealEditor({
+      dicts: dicts,
+      fields: fields,
+      onChange: onChange
+    }), container);
+  },
+  renderInNewDealDialog: function() {
+    return app.api.wait.elementRender('.DealCreateForm>table>tbody', (function(_this) {
+      return function(parent) {
+        var CustomFieldDealEditor, container;
+        container = _this._getAddonContainer(parent, 'tr', false);
+        $(container).insertAfter($('.fieldCell.stage', parent).parent());
+        CustomFieldDealEditor = require('../react/customFields/customFieldsInNewDealDialog');
+        return _this.renderDealEditor('newDeal', CustomFieldDealEditor, container);
       };
     })(this));
-  },
-  saveCustomFieldsForNewDeal: function(dealId) {
-    var deal;
-    if (dealId && this._newDealCustomFields) {
-      deal = $.extend({
-        id: dealId
-      }, this._newDealCustomFields);
-      this._newDealCustomFields = null;
-      return app.repositories.deals._saveEntity(deal, (function(_this) {
-        return function() {
-          console.log('I belive it is successfuly saved', deal);
-          return _this.renderInDealViewer();
-        };
-      })(this));
-    }
   },
   renderInDealEditor: function() {
     return app.api.wait.elementRender('.dealInfoTab .leftColumn', (function(_this) {
       return function(parent) {
-        var CustomFieldsInDealEditor, container, deal, dicts, fields, onChange;
+        var CustomFieldDealEditor, container;
         container = _this._getAddonContainer(parent);
-        dicts = _this._getCustomFieldsDicts();
-        deal = app.repositories.deals.getEntity(_this._getDealIdFromUrl()) || {
-          id: _this._getDealIdFromUrl()
-        };
-        fields = _this._getCustomFieldsValues(deal);
-        CustomFieldsInDealEditor = require('../react/customFields/customFieldsInDealEditor');
-        onChange = function(dictId, optionId) {
-          deal[dictId] = optionId;
-          fields = thisModule._getCustomFieldsValues(deal);
-          React.render(CustomFieldsInDealEditor({
-            dicts: dicts,
-            fields: fields,
-            onChange: onChange
-          }), container);
-          return app.repositories.deals._saveEntity(deal, function() {
-            return console.log('I belive it is successfuly saved', dictId, optionId);
-          });
-        };
-        return React.render(CustomFieldsInDealEditor({
-          dicts: dicts,
-          fields: fields,
-          onChange: onChange
-        }), container);
+        CustomFieldDealEditor = require('../react/customFields/customFieldsInDealEditor');
+        return _this.renderDealEditor(_this._getDealIdFromUrl(), CustomFieldDealEditor, container);
       };
     })(this));
   },
@@ -22407,11 +22401,14 @@ extractNimbleAuthTokenFromRequest = function() {
 
 waitingForNewDealRequest = function() {
   return proxy.onRequestFinish(function(request) {
-    var dealId, url, _ref, _ref1;
+    var dealId, isNew, matches, url, _ref, _ref1;
     url = request.responseURL;
     if (url.match(/\/api\/deals\?/)) {
       dealId = (_ref = JSON.parse(request.responseText)) != null ? (_ref1 = _ref.deal) != null ? _ref1.id : void 0 : void 0;
-      return customFieldsHandler.saveCustomFieldsForNewDeal(dealId);
+      return customFieldsHandler.saveCustomFields(dealId, isNew = true);
+    } else if (matches = url.match(/\/api\/deals\/([0-9a-f]{24})\?_method=PUT/)) {
+      dealId = matches[1];
+      return customFieldsHandler.saveCustomFields(dealId, isNew = false);
     }
   });
 };
