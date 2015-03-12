@@ -14,9 +14,24 @@
   display: none
 }
 
+.DealListView .mainContainer .dealList .body td.cell,
+.DealListView .mainContainer .dealList td.headerTD,
+.DealListView .mainContainer .groupGlobalHeader td.headerTD {
+  box-sizing: border-box;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+.DealListView .mainContainer .groupGlobalHeader td.headerTD.subject {
+  width: 23%
+}
+
 .DealListView .mainContainer .dealList .c1.taist-custom-cell,
+.DealListView .mainContainer .dealList .c1.taist-custom-header,
 .DealListView .mainContainer .groupGlobalHeader .c1.taist-custom-header {
   width: 120px;
   min-width: 120px;
+  max-width: 120px;
   overflow: hidden;
+  box-sizing: border-box;
 }

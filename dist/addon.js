@@ -282,8 +282,7 @@ addCustomFieldsControl = function() {
   return app.api.wait.elementRender(selector, function(listHeader) {
     if (!customFieldControlContainer) {
       customFieldControlContainer = $('<div>').css({
-        position: 'absolute',
-        left: 10,
+        position: 'relative',
         paddingTop: 3
       }).get(0);
     }
@@ -945,19 +944,24 @@ CustomFieldsSelector = React.createFactory(React.createClass({
   render: function() {
     return div({}, div({
       onClick: this.onSwitchMode,
+      className: 'gwt-Label-fieldName',
       style: {
-        marginBottom: 2,
         cursor: 'pointer',
         backgroundImage: AwesomeIcons.getURL('gear'),
         backgroundSize: 'contain',
         backgroundRepeat: 'no-repeat',
-        paddingLeft: 16
+        paddingLeft: 16,
+        opacity: 0.65,
+        fontWeight: 'normal'
       }
     }, 'Displayed custom fields'), this.state.mode === 'select' ? div({
       style: {
         background: 'white',
         padding: 4,
-        border: '1px solid silver'
+        marginTop: 4,
+        border: '1px solid silver',
+        position: 'absolute',
+        minWidth: 200
       }
     }, div({
       style: {
@@ -971,7 +975,8 @@ CustomFieldsSelector = React.createFactory(React.createClass({
         backgroundImage: AwesomeIcons.getURL('remove'),
         backgroundSize: 'contain',
         backgroundRepeat: 'no-repeat',
-        paddingLeft: 16
+        paddingLeft: 16,
+        opacity: 0.65
       }
     }, ' ')), this.props.fields.map((function(_this) {
       return function(field) {

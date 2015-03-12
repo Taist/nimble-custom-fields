@@ -18,18 +18,28 @@ CustomFieldsSelector = React.createFactory React.createClass
     div {},
       div {
         onClick: @onSwitchMode
+        className: 'gwt-Label-fieldName'
         style:
-          marginBottom: 2
           cursor: 'pointer'
           backgroundImage: AwesomeIcons.getURL 'gear'
           backgroundSize: 'contain'
           backgroundRepeat: 'no-repeat'
           paddingLeft: 16
+          opacity: 0.65
+          fontWeight: 'normal'
       }, 'Displayed custom fields'
 
 
       if @state.mode is 'select'
-        div { style: background: 'white', padding: 4, border: '1px solid silver'},
+        div {
+          style:
+            background: 'white'
+            padding: 4
+            marginTop: 4
+            border: '1px solid silver'
+            position: 'absolute'
+            minWidth: 200
+        },
           div { style: textAlign: 'right' },
             span {
               onClick: @onSwitchMode
@@ -40,6 +50,7 @@ CustomFieldsSelector = React.createFactory React.createClass
                 backgroundSize: 'contain'
                 backgroundRepeat: 'no-repeat'
                 paddingLeft: 16
+                opacity: 0.65
             }, ' '
 
           @props.fields.map (field) =>
