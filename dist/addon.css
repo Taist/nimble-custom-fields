@@ -20,6 +20,7 @@
   box-sizing: border-box;
   padding-left: 5px;
   padding-right: 5px;
+  overflow: hidden;
 }
 
 .DealListView .mainContainer .dealList .body td.cell {

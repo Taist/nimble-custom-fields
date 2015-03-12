@@ -21,12 +21,13 @@ CustomFieldsSelector = React.createFactory React.createClass
         className: 'gwt-Label-fieldName'
         style:
           cursor: 'pointer'
-          backgroundImage: AwesomeIcons.getURL 'gear'
+          backgroundImage: AwesomeIcons.getURL 'gear', 'gray40'
           backgroundSize: 'contain'
           backgroundRepeat: 'no-repeat'
-          paddingLeft: 16
-          opacity: 0.65
-          fontWeight: 'normal'
+
+          color: '#666'
+          paddingLeft: 18
+          marginTop: 4
       }, 'Displayed custom fields'
 
 

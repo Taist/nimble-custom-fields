@@ -27,7 +27,7 @@ addCustomFieldsControl = ->
   app.api.wait.elementRender selector, (listHeader) ->
     unless customFieldControlContainer
       customFieldControlContainer = $('<div>')
-        .css( { position: 'relative', paddingTop: 3 } )
+        .css( { position: 'relative' } )
         .get( 0 )
 
     $(customFieldControlContainer).appendTo(listHeader)
