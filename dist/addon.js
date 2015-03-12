@@ -111,7 +111,7 @@ module.exports = thisModule = {
       return app.repositories.deals._saveEntity(deal, (function(_this) {
         return function() {
           console.log('I belive it is successfuly saved', deal);
-          return _this.renderInDealEditor();
+          return _this.renderInDealViewer();
         };
       })(this));
     }

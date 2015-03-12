@@ -68,7 +68,8 @@ module.exports = thisModule =
       @_newDealCustomFields = null
       app.repositories.deals._saveEntity deal, =>
         console.log 'I belive it is successfuly saved', deal
-        @renderInDealEditor()
+        @renderInDealViewer()
+        # @renderInDealEditor()
 
   renderInDealEditor: ->
     app.api.wait.elementRender '.dealInfoTab .leftColumn', (parent) =>
