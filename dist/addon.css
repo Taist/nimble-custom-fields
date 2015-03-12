@@ -22,8 +22,43 @@
   padding-right: 5px;
 }
 
-.DealListView .mainContainer .groupGlobalHeader td.headerTD.subject {
+.DealListView .mainContainer .dealList .body td.cell {
+  border-left: '1px solid white'
+}
+
+.DealListView .mainContainer .groupGlobalHeader td.headerTD.c0,
+.DealListView .mainContainer .dealList .body td.cell.c0 {
   width: 23%
+}
+
+.DealListView .mainContainer .groupGlobalHeader td.headerTD.c1,
+.DealListView .mainContainer .dealList .body td.cell.c1 {
+  width: 12%
+}
+
+.DealListView .mainContainer .groupGlobalHeader td.headerTD.c2,
+.DealListView .mainContainer .dealList .body td.cell.c2 {
+  width: 12%
+}
+
+.DealListView .mainContainer .groupGlobalHeader td.headerTD.c3,
+.DealListView .mainContainer .dealList .body td.cell.c3 {
+  width: 17%
+}
+
+.DealListView .mainContainer .groupGlobalHeader td.headerTD.c4,
+.DealListView .mainContainer .dealList .body td.cell.c4 {
+  width: 12%
+}
+
+.DealListView .mainContainer .groupGlobalHeader td.headerTD.c5,
+.DealListView .mainContainer .dealList .body td.cell.c5 {
+  width: 15%
+}
+
+.DealListView .mainContainer .groupGlobalHeader td.headerTD.c6,
+.DealListView .mainContainer .dealList .body td.cell.c6 {
+  width: 9%
 }
 
 .DealListView .mainContainer .dealList .c1.taist-custom-cell,
