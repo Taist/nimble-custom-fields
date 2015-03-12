@@ -138,16 +138,16 @@ module.exports = thisModule =
             dict.name = newName
         reactRender()
 
-      onDeleteDictionaryEntity = (entityId) ->
+      onDeleteDictionaryEntity = (deletedEntity) ->
         #The function is called with dict as a context because of React
         deals = app.repositories.deals.getAllEntities().filter (deal) =>
-          deal[@id] is entityId
+          deal[@id] is deletedEntity.id
 
         if deals.length > 0
-          reactRender 'Error deleting custom field value. Is is linked to some existed deal'
+          reactRender "Cannot delete '#{deletedEntity.value}' - it is used in some deals"
         else
           @onUpdate @entities.filter (entity) ->
-            entity.id isnt entityId
+            entity.id isnt deletedEntity.id
 
       onCreateNewCustomField = (name) ->
         app.repositories.customFields._saveEntity { name }, (dict) ->

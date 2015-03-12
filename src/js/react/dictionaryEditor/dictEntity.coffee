@@ -17,7 +17,7 @@ DictEntity = React.createFactory React.createClass
     @setState { mode: 'onDelete' }
 
   onDelete: ->
-    @props.actions.onDelete @props.entity.id
+    @props.actions.onDelete @props.entity
     @closeEditor()
 
   onEdit: ->
@@ -45,7 +45,8 @@ DictEntity = React.createFactory React.createClass
       div {},
         @showDictEntity()
         NimbleAlert {
-          message: "Are you sure, you want to delete #{@props.dictName}?"
+          title: 'Confirm deletion'
+          message: "Are you sure, you want to delete '#{@props.entity.value}'?"
           actionName: 'Delete'
           onAction: @onDelete
           onCancel: @closeEditor

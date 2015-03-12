@@ -203,18 +203,18 @@ module.exports = thisModule = {
           })(this));
           return reactRender();
         };
-        onDeleteDictionaryEntity = function(entityId) {
+        onDeleteDictionaryEntity = function(deletedEntity) {
           var deals;
           deals = app.repositories.deals.getAllEntities().filter((function(_this) {
             return function(deal) {
-              return deal[_this.id] === entityId;
+              return deal[_this.id] === deletedEntity.id;
             };
           })(this));
           if (deals.length > 0) {
-            return reactRender('Error deleting custom field value. Is is linked to some existed deal');
+            return reactRender("Cannot delete '" + deletedEntity.value + "' - it is used in some deals");
           } else {
             return this.onUpdate(this.entities.filter(function(entity) {
-              return entity.id !== entityId;
+              return entity.id !== deletedEntity.id;
             }));
           }
         };
@@ -708,7 +708,7 @@ CustomFieldsEditor = React.createFactory(React.createClass({
       alertMessage: ''
     });
   },
-  alertTimeout: 3 * 1000,
+  alertTimeout: 5 * 1000,
   componentWillReceiveProps: function(newProps) {
     return this.setState({
       alertMessage: newProps.alertMessage || ''
@@ -1130,7 +1130,7 @@ DictEntity = React.createFactory(React.createClass({
     });
   },
   onDelete: function() {
-    this.props.actions.onDelete(this.props.entity.id);
+    this.props.actions.onDelete(this.props.entity);
     return this.closeEditor();
   },
   onEdit: function() {
@@ -1173,7 +1173,8 @@ DictEntity = React.createFactory(React.createClass({
         borderBottom: '1px solid #f3f3f3'
       }
     }, this.state.mode === 'view' && this.props.entity.id ? this.showDictEntity() : this.state.mode === 'onDelete' ? div({}, this.showDictEntity(), NimbleAlert({
-      message: "Are you sure, you want to delete " + this.props.dictName + "?",
+      title: 'Confirm deletion',
+      message: "Are you sure, you want to delete '" + this.props.entity.value + "'?",
       actionName: 'Delete',
       onAction: this.onDelete,
       onCancel: this.closeEditor
@@ -1540,7 +1541,7 @@ NimbleAlert = React.createFactory(React.createClass({
       className: 'caption'
     }, div({
       className: 'captionText'
-    }, 'Warning'), div({
+    }, this.props.title || 'Warning'), div({
       className: 'close',
       onClick: this.props.onCancel,
       dangerouslySetInnerHTML: {
