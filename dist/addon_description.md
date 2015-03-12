@@ -1,8 +1,8 @@
-Addon enables to add multiple custom fields to deals. 
+Addon allows you to add multiple custom fields to deals. 
 
-You can view them on the deal pages and in the deals list. The deals list can also be grouped by them.
+You can view them in deal pages and in the deals list. The deals list can also be grouped by them.
 
-Every field now is of "single choice" type - allows to select a single value from a list of values. 
+Every field now is of "single choice" type - it allows to select a single value from a list of values. 
 
 Examples of fields:
 ===================
@@ -10,7 +10,7 @@ Examples of fields:
 * Lead source (Events, Online ads, Recommendations,...)
   
 How to use:
------------
+===========
 0. **Enable addon** :)
 1. **Adding new custom field**: 
   * go to "Settings -> Deals", scroll down to new section "Custom fields"
