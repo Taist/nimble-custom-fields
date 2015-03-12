@@ -17,4 +17,4 @@ How to use:
   * press "Add new custom field", input field name, for example, `Industry`, and press `Save`.  A row with your field name will appear.
   * a new link with your field name appears below - in our example it will be `Add Industry` - use it to add a new value to the list.
 2. Set field values while creating or editing any deal.
-3. Fields will be displayed on deal pages and in the deals list.
+3. Viewing fields in the deals list: a link "Displayed custom fields" appears above the deals table - use it to choose what fields to display
