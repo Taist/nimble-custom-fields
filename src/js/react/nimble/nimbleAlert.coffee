@@ -34,7 +34,7 @@ NimbleAlert = React.createFactory React.createClass
             div { className: 'shadow' },
               div { className: 'border' },
                 div { className: 'caption' },
-                  div { className: 'captionText' }, 'Warning'
+                  div { className: 'captionText' }, @props.title or 'Warning'
                   div { className: 'close', onClick: @props.onCancel, dangerouslySetInnerHTML: __html: '&nbsp;' }
                   div { className: 'nmbl-floatBraker', dangerouslySetInnerHTML: __html: '&nbsp;' }
                 div { className: 'content' },

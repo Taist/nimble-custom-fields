@@ -61,5 +61,10 @@ waitingForNewDealRequest = ->
   proxy.onRequestFinish (request) ->
     url = request.responseURL
     if url.match /\/api\/deals\?/
+      #new deal
       dealId = JSON.parse(request.responseText)?.deal?.id
-      customFieldsHandler.saveCustomFieldsForNewDeal dealId
+      customFieldsHandler.saveCustomFields dealId, isNew = true
+    else if matches = url.match /\/api\/deals\/([0-9a-f]{24})\?_method=PUT/
+      #save deal
+      dealId = matches[1]
+      customFieldsHandler.saveCustomFields dealId, isNew = false

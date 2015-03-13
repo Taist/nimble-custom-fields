@@ -27,7 +27,7 @@ CustomFieldsEditor = React.createFactory React.createClass
   onCloseAlert: ->
      @setState alertMessage: ''
 
-  alertTimeout: 3 * 1000
+  alertTimeout: 5 * 1000
 
   componentWillReceiveProps: (newProps) ->
     @setState { alertMessage: newProps.alertMessage or '' }, ->

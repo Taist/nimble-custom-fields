@@ -21,6 +21,7 @@
   padding-left: 5px;
   padding-right: 5px;
   overflow: hidden;
+  min-width: 40px;
 }
 
 .DealListView .mainContainer .dealList .body td.cell {
@@ -28,46 +29,58 @@
 }
 
 .DealListView .mainContainer .groupGlobalHeader td.headerTD.c0,
+.DealListView .mainContainer .dealList td.headerTD.c0,
 .DealListView .mainContainer .dealList .body td.cell.c0 {
-  width: 23%
+  width: 25%;
+  min-width: 190px;
 }
 
 .DealListView .mainContainer .groupGlobalHeader td.headerTD.c1,
+.DealListView .mainContainer .dealList td.headerTD.c1,
 .DealListView .mainContainer .dealList .body td.cell.c1 {
-  width: 12%
+  width: 20%;
 }
 
 .DealListView .mainContainer .groupGlobalHeader td.headerTD.c2,
+.DealListView .mainContainer .dealList td.headerTD.c2,
 .DealListView .mainContainer .dealList .body td.cell.c2 {
-  width: 12%
+  width: 82px;
+  min-width: 82px;
 }
 
 .DealListView .mainContainer .groupGlobalHeader td.headerTD.c3,
+.DealListView .mainContainer .dealList td.headerTD.c3,
 .DealListView .mainContainer .dealList .body td.cell.c3 {
-  width: 17%
+  width: 15%;
+  min-width: 120px;
 }
 
 .DealListView .mainContainer .groupGlobalHeader td.headerTD.c4,
+.DealListView .mainContainer .dealList td.headerTD.c4,
 .DealListView .mainContainer .dealList .body td.cell.c4 {
-  width: 12%
+  width: 82px;
+  min-width: 82px;
 }
 
 .DealListView .mainContainer .groupGlobalHeader td.headerTD.c5,
+.DealListView .mainContainer .dealList td.headerTD.c5,
 .DealListView .mainContainer .dealList .body td.cell.c5 {
-  width: 15%
+  width: 82px;
+  min-width: 82px;
 }
 
 .DealListView .mainContainer .groupGlobalHeader td.headerTD.c6,
+.DealListView .mainContainer .dealList td.headerTD.c6,
 .DealListView .mainContainer .dealList .body td.cell.c6 {
-  width: 9%
+  width: 62px;
+  min-width: 62px;
 }
 
-.DealListView .mainContainer .dealList .c1.taist-custom-cell,
-.DealListView .mainContainer .dealList .c1.taist-custom-header,
-.DealListView .mainContainer .groupGlobalHeader .c1.taist-custom-header {
+.DealListView .mainContainer .dealList .body td.cell.c1.taist-custom-cell,
+.DealListView .mainContainer .dealList td.headerTD.c1.taist-custom-header,
+.DealListView .mainContainer .groupGlobalHeader td.headerTD.c1.taist-custom-header {
   width: 120px;
   min-width: 120px;
-  max-width: 120px;
   overflow: hidden;
   box-sizing: border-box;
 }
