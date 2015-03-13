@@ -5,6 +5,6 @@
   "siteRegexp": "*.nimble.com",
   "siteName":"Nimble",
   "title":"Custom fields for Deals",
-  "shortDescription":"Enables to add new custom fields to deals",
+  "shortDescription":"Adds new custom fields to deals",
   "description": "./addon_description.md"
 }
