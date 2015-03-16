@@ -30,21 +30,7 @@ module.exports = thisModule =
     unless deal
       deal = app.repositories.deals.getEntity @_getDealIdFromUrl()
 
-    app.repositories.customFields.getAllEntities().map (customField) =>
-      id = customField.id
-
-      switch customField.type
-        when 'select'
-          customFieldEntity = app.repositories[id]?.getEntity(deal[id])
-          value = customFieldEntity?.value or 'Not specified'
-        when 'text'
-          value = deal[id] or ''
-
-      return {
-        id: customFieldEntity?.id or 0
-        name: customField.name
-        value: value
-      }
+    app.repositories.deals.getFieldsArray deal
 
   _renderInEditor: (parent, reactFieldsEditorClass) ->
 

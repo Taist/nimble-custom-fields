@@ -35,6 +35,36 @@ module.exports = addonEntry =
       )
     .then () ->
       app.repositories.deals.load()
+
+    .then () ->
+      app.repositories.deals.getFieldsArray = (deal) ->
+        app.repositories.customFields.getAllEntities().map (customField) =>
+
+          id = customField.id
+
+          switch customField.type
+            when 'select'
+              customFieldEntity = app.repositories[id]?.getEntity(deal?[id])
+              value = customFieldEntity?.value or 'Not specified'
+            when 'text'
+              value = deal?[id] or ''
+
+          result =
+            fieldId: id
+            id: customFieldEntity?.id or 0
+            name: customField.name
+            value: value
+
+          console.log deal, customField, result
+          return result
+
+
+      app.repositories.deals.getFieldsMap = (deal) ->
+        result = {}
+        app.repositories.deals.getFieldsArray(deal).forEach (field) ->
+          result[field.fieldId] = field
+        return result
+
     .then () ->
       setRoutes()
       customFieldsHandler.renderInNewDealDialog()

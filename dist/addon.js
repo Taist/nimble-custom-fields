@@ -63,25 +63,7 @@ module.exports = thisModule = {
     if (!deal) {
       deal = app.repositories.deals.getEntity(this._getDealIdFromUrl());
     }
-    return app.repositories.customFields.getAllEntities().map((function(_this) {
-      return function(customField) {
-        var customFieldEntity, id, value, _ref;
-        id = customField.id;
-        switch (customField.type) {
-          case 'select':
-            customFieldEntity = (_ref = app.repositories[id]) != null ? _ref.getEntity(deal[id]) : void 0;
-            value = (customFieldEntity != null ? customFieldEntity.value : void 0) || 'Not specified';
-            break;
-          case 'text':
-            value = deal[id] || '';
-        }
-        return {
-          id: (customFieldEntity != null ? customFieldEntity.id : void 0) || 0,
-          name: customField.name,
-          value: value
-        };
-      };
-    })(this));
+    return app.repositories.deals.getFieldsArray(deal);
   },
   _renderInEditor: function(parent, reactFieldsEditorClass) {},
   editedDeals: [],
@@ -446,18 +428,22 @@ addCustomColumnsHeader = function() {
 
 addCustomColumnsContents = function() {
   return app.api.wait.elementRender('.DealListView .dealList .body tr td a.deal_subject', function(linkToDealInPreviousCell) {
-    var dealId, dealIdIndex, dealIdPrefix, dealUrl, previousCell;
+    var deal, dealFields, dealId, dealIdIndex, dealIdPrefix, dealUrl, previousCell;
     previousCell = linkToDealInPreviousCell.parent();
     (previousCell.siblings('.taist-custom-cell')).remove();
     dealUrl = linkToDealInPreviousCell.attr('href');
     dealIdPrefix = '?id=';
     dealIdIndex = (dealUrl.indexOf(dealIdPrefix)) + dealIdPrefix.length;
     dealId = dealUrl.substring(dealIdIndex);
+    dealFields = {};
+    deal = app.repositories.deals.getEntity(dealId);
+    if (deal) {
+      dealFields = app.repositories.deals.getFieldsMap(deal);
+    }
     return customFields.forEach(function(field) {
-      var customFieldValueId, value, _ref, _ref1, _ref2;
+      var value, _ref;
       if (isFieldVisible(field)) {
-        customFieldValueId = (_ref = app.repositories.deals.getEntity(dealId)) != null ? _ref[field.id] : void 0;
-        value = (_ref1 = (_ref2 = app.repositories[field.id].getEntity(customFieldValueId)) != null ? _ref2.value : void 0) != null ? _ref1 : '-';
+        value = ((_ref = dealFields[field.id]) != null ? _ref.value : void 0) || '-';
         return previousCell.after($("<td class=\"cell c1 taist-custom-cell\" title=\"" + value + "\">" + value + "</td>"));
       }
     });
@@ -22441,6 +22427,39 @@ module.exports = addonEntry = {
       }));
     }).then(function() {
       return app.repositories.deals.load();
+    }).then(function() {
+      app.repositories.deals.getFieldsArray = function(deal) {
+        return app.repositories.customFields.getAllEntities().map((function(_this) {
+          return function(customField) {
+            var customFieldEntity, id, result, value, _ref;
+            id = customField.id;
+            switch (customField.type) {
+              case 'select':
+                customFieldEntity = (_ref = app.repositories[id]) != null ? _ref.getEntity(deal != null ? deal[id] : void 0) : void 0;
+                value = (customFieldEntity != null ? customFieldEntity.value : void 0) || 'Not specified';
+                break;
+              case 'text':
+                value = (deal != null ? deal[id] : void 0) || '';
+            }
+            result = {
+              fieldId: id,
+              id: (customFieldEntity != null ? customFieldEntity.id : void 0) || 0,
+              name: customField.name,
+              value: value
+            };
+            console.log(deal, customField, result);
+            return result;
+          };
+        })(this));
+      };
+      return app.repositories.deals.getFieldsMap = function(deal) {
+        var result;
+        result = {};
+        app.repositories.deals.getFieldsArray(deal).forEach(function(field) {
+          return result[field.fieldId] = field;
+        });
+        return result;
+      };
     }).then(function() {
       setRoutes();
       return customFieldsHandler.renderInNewDealDialog();
