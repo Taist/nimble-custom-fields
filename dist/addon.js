@@ -337,13 +337,15 @@ addGroupingByCustomFields = function() {
     currentGroupingFieldName = getCurrentGroupingFieldName();
     return customFields.forEach(function(field) {
       var capitalizedFieldName, fieldName;
-      fieldName = field.name;
-      if (!$("option[value=\"" + fieldName + "\"]", groupingSelect).size()) {
-        capitalizedFieldName = fieldName[0].toUpperCase() + (fieldName.slice(1));
-        groupingSelect.append($("<option value=\"" + fieldName + "\">" + capitalizedFieldName + "</option>"));
-      }
-      if (currentGroupingFieldName === fieldName) {
-        return groupingSelect.val(fieldName);
+      if (field.type === 'select') {
+        fieldName = field.name;
+        if (!$("option[value=\"" + fieldName + "\"]", groupingSelect).size()) {
+          capitalizedFieldName = fieldName[0].toUpperCase() + (fieldName.slice(1));
+          groupingSelect.append($("<option value=\"" + fieldName + "\">" + capitalizedFieldName + "</option>"));
+        }
+        if (currentGroupingFieldName === fieldName) {
+          return groupingSelect.val(fieldName);
+        }
       }
     });
   });

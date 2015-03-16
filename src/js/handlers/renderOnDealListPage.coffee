@@ -59,13 +59,14 @@ addGroupingByCustomFields = () ->
   app.api.wait.elementRender selector, (groupingSelect) ->
     currentGroupingFieldName = getCurrentGroupingFieldName()
     customFields.forEach (field) ->
-      fieldName = field.name
-      unless $("option[value=\"#{fieldName}\"]", groupingSelect).size()
-        capitalizedFieldName = fieldName[0].toUpperCase() + (fieldName.slice 1)
-        groupingSelect.append $ """<option value="#{fieldName}">#{capitalizedFieldName}</option>"""
+      if field.type is 'select'
+        fieldName = field.name
+        unless $("option[value=\"#{fieldName}\"]", groupingSelect).size()
+          capitalizedFieldName = fieldName[0].toUpperCase() + (fieldName.slice 1)
+          groupingSelect.append $ """<option value="#{fieldName}">#{capitalizedFieldName}</option>"""
 
-      if currentGroupingFieldName is fieldName
-        groupingSelect.val fieldName
+        if currentGroupingFieldName is fieldName
+          groupingSelect.val fieldName
 
 renderCustomDealsList = (deals) ->
   customDealsList = replaceOriginalListWithCustom()
