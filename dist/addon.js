@@ -104,8 +104,8 @@ module.exports = thisModule = {
     }
     fields = this._getCustomFieldsValues(deal);
     onChange = (function(_this) {
-      return function(dictId, optionId) {
-        deal[dictId] = optionId;
+      return function(dictId, value) {
+        deal[dictId] = value;
         fields = thisModule._getCustomFieldsValues(deal);
         React.render(CustomFieldDealEditor({
           dicts: dicts,
@@ -238,7 +238,7 @@ module.exports = thisModule = {
   }
 };
 
-},{"../app":1,"../objectsApi/entityRepository":5,"../react/customFields/CustomFieldsEditor":6,"../react/customFields/CustomFieldsViewer":8,"../react/customFields/customFieldsInDealEditor":9,"../react/customFields/customFieldsInNewDealDialog":10,"react":177}],3:[function(require,module,exports){
+},{"../app":1,"../objectsApi/entityRepository":5,"../react/customFields/CustomFieldsEditor":6,"../react/customFields/CustomFieldsViewer":7,"../react/customFields/customFieldsInDealEditor":9,"../react/customFields/customFieldsInNewDealDialog":10,"react":177}],3:[function(require,module,exports){
 var React, addCustomColumnsContents, addCustomColumnsHeader, addCustomColumnsToOriginalList, addCustomFieldToDeals, addCustomFieldsControl, addGroupingByCustomFields, app, currentlyGroupingByCustomField, customDealsListClass, customFieldControlContainer, customFields, findCustomDealsList, getCurrentGroupingField, getCurrentGroupingFieldName, groupDealsByCustomField, isFieldVisible, loadDealsData, notSpecifiedValue, onChangeCustomFieldSelection, renderCustomDealsList, renderCustomFieldsControl, replaceOriginalListWithCustom, selectedFields;
 
 app = require('../app');
@@ -758,6 +758,166 @@ CustomFieldsEditor = React.createFactory(React.createClass({
 module.exports = CustomFieldsEditor;
 
 },{"../dictionaryEditor/dictEditor":14,"../dictionaryEditor/dictHeader":16,"react":177}],7:[function(require,module,exports){
+var CustomFieldsViewer, React, div;
+
+React = require('react');
+
+div = React.DOM.div;
+
+CustomFieldsViewer = React.createFactory(React.createClass({
+  render: function() {
+    return div({}, this.props.fields.map((function(_this) {
+      return function(field) {
+        return div({
+          key: field.name
+        }, div({
+          className: 'dealMainField',
+          style: {
+            marginBottom: 2
+          }
+        }, field.name, ':', div({
+          style: {
+            paddingLeft: 5
+          }
+        }, field.value)));
+      };
+    })(this)));
+  }
+}));
+
+module.exports = CustomFieldsViewer;
+
+},{"react":177}],8:[function(require,module,exports){
+var CustomFieldsInNewDealDialog, CustomFieldsSelect, CustomFieldsText, React, editors;
+
+React = require('react');
+
+CustomFieldsSelect = require('./customFieldsSelect');
+
+CustomFieldsText = require('./customFieldsText');
+
+editors = {
+  select: CustomFieldsSelect,
+  text: CustomFieldsText
+};
+
+CustomFieldsInNewDealDialog = React.createFactory(React.createClass({
+  render: function() {
+    var currentFieldValue, value, _ref, _ref1, _ref2;
+    currentFieldValue = (_ref = this.props.fields) != null ? _ref.filter((function(_this) {
+      return function(field) {
+        return field.name === _this.props.dict.name;
+      };
+    })(this)) : void 0;
+    switch (this.props.dict.type) {
+      case 'select':
+        value = ((_ref1 = currentFieldValue[0]) != null ? _ref1.id : void 0) || 0;
+        break;
+      case 'text':
+        value = ((_ref2 = currentFieldValue[0]) != null ? _ref2.value : void 0) || '';
+    }
+    return editors[this.props.dict.type]({
+      dict: this.props.dict,
+      fields: this.props.fields,
+      onChange: this.props.onChange,
+      elemStyle: this.props.elemStyle
+    });
+  }
+}));
+
+module.exports = CustomFieldsInNewDealDialog;
+
+},{"./customFieldsSelect":11,"./customFieldsText":12,"react":177}],9:[function(require,module,exports){
+var CustomFieldsControl, CustomFieldsInDealEditor, React, div;
+
+React = require('react');
+
+div = React.DOM.div;
+
+CustomFieldsControl = require('./customFieldsControl');
+
+CustomFieldsInDealEditor = React.createFactory(React.createClass({
+  render: function() {
+    return div({}, this.props.dicts.map((function(_this) {
+      return function(dict) {
+        return div({
+          key: dict.id
+        }, div({
+          className: 'ContactFieldWidget'
+        }, div({
+          className: 'label'
+        }, dict.name), div({
+          className: 'inputField taist-selectWrapper'
+        }, CustomFieldsControl({
+          dict: dict,
+          fields: _this.props.fields,
+          onChange: _this.props.onChange
+        })), div({
+          style: {
+            clear: 'both'
+          }
+        }, '')));
+      };
+    })(this)));
+  }
+}));
+
+module.exports = CustomFieldsInDealEditor;
+
+},{"./customFieldsControl":8,"react":177}],10:[function(require,module,exports){
+var CustomFieldsControl, CustomFieldsInNewDealDialog, CustomFieldsSelect, CustomFieldsText, React, div, editors, table, td, tr, _ref;
+
+React = require('react');
+
+_ref = React.DOM, div = _ref.div, table = _ref.table, tr = _ref.tr, td = _ref.td;
+
+CustomFieldsControl = require('./customFieldsControl');
+
+CustomFieldsSelect = require('./customFieldsSelect');
+
+CustomFieldsText = require('./customFieldsText');
+
+editors = {
+  select: CustomFieldsSelect,
+  text: CustomFieldsText
+};
+
+CustomFieldsInNewDealDialog = React.createFactory(React.createClass({
+  render: function() {
+    return td({}, this.props.dicts.map((function(_this) {
+      return function(dict) {
+        return table({
+          key: dict.id,
+          style: {
+            width: '100%'
+          }
+        }, tr({}, td({
+          className: 'labelCell'
+        }, dict.name, ':')), tr({}, td({
+          className: 'fieldCell',
+          style: {
+            paddingRight: 5
+          }
+        }, div({
+          className: 'nmbl-FormListBox'
+        }, div({
+          className: 'taist-selectWrapper'
+        }, CustomFieldsControl({
+          dict: dict,
+          fields: _this.props.fields,
+          onChange: _this.props.onChange,
+          elemStyle: {
+            width: '100%'
+          }
+        }))))));
+      };
+    })(this)));
+  }
+}));
+
+module.exports = CustomFieldsInNewDealDialog;
+
+},{"./customFieldsControl":8,"./customFieldsSelect":11,"./customFieldsText":12,"react":177}],11:[function(require,module,exports){
 var CustomFieldsSelect, React, defaultSelectValue, option, select, _ref;
 
 React = require('react');
@@ -800,127 +960,7 @@ CustomFieldsSelect = React.createFactory(React.createClass({
 
 module.exports = CustomFieldsSelect;
 
-},{"react":177}],8:[function(require,module,exports){
-var CustomFieldsViewer, React, div;
-
-React = require('react');
-
-div = React.DOM.div;
-
-CustomFieldsViewer = React.createFactory(React.createClass({
-  render: function() {
-    return div({}, this.props.fields.map((function(_this) {
-      return function(field) {
-        return div({
-          key: field.name
-        }, div({
-          className: 'dealMainField',
-          style: {
-            marginBottom: 2
-          }
-        }, field.name, ':', div({
-          style: {
-            paddingLeft: 5
-          }
-        }, field.value)));
-      };
-    })(this)));
-  }
-}));
-
-module.exports = CustomFieldsViewer;
-
-},{"react":177}],9:[function(require,module,exports){
-var CustomFieldsInDealEditor, CustomFieldsSelect, React, div;
-
-React = require('react');
-
-div = React.DOM.div;
-
-CustomFieldsSelect = require('./CustomFieldsSelect');
-
-CustomFieldsInDealEditor = React.createFactory(React.createClass({
-  render: function() {
-    return div({}, this.props.dicts.map((function(_this) {
-      return function(dict) {
-        return div({
-          key: dict.id
-        }, div({
-          className: 'ContactFieldWidget'
-        }, div({
-          className: 'label'
-        }, dict.name), div({
-          className: 'inputField taist-selectWrapper'
-        }, CustomFieldsSelect({
-          dict: dict,
-          fields: _this.props.fields,
-          onChange: _this.props.onChange
-        })), div({
-          style: {
-            clear: 'both'
-          }
-        }, '')));
-      };
-    })(this)));
-  }
-}));
-
-module.exports = CustomFieldsInDealEditor;
-
-},{"./CustomFieldsSelect":7,"react":177}],10:[function(require,module,exports){
-var CustomFieldsInNewDealDialog, CustomFieldsSelect, CustomFieldsText, React, div, editors, table, td, tr, _ref;
-
-React = require('react');
-
-_ref = React.DOM, div = _ref.div, table = _ref.table, tr = _ref.tr, td = _ref.td;
-
-CustomFieldsSelect = require('./customFieldsSelect');
-
-CustomFieldsText = require('./customFieldsText');
-
-editors = {
-  select: CustomFieldsSelect,
-  text: CustomFieldsText
-};
-
-CustomFieldsInNewDealDialog = React.createFactory(React.createClass({
-  render: function() {
-    return td({}, this.props.dicts.map((function(_this) {
-      return function(dict) {
-        return table({
-          key: dict.id,
-          style: {
-            width: '100%'
-          }
-        }, tr({}, td({
-          className: 'labelCell'
-        }, dict.name, ':')), tr({}, td({
-          className: 'fieldCell',
-          style: {
-            paddingRight: 5
-          }
-        }, div({
-          className: 'nmbl-FormListBox'
-        }, div({
-          className: 'taist-selectWrapper'
-        }, console.log(dict), editors[dict.type]({
-          dict: dict,
-          fields: _this.props.fields,
-          onChange: _this.props.onChange,
-          elemStyle: {
-            width: '100%'
-          }
-        }))))));
-      };
-    })(this)));
-  }
-}));
-
-module.exports = CustomFieldsInNewDealDialog;
-
-},{"./customFieldsSelect":11,"./customFieldsText":12,"react":177}],11:[function(require,module,exports){
-module.exports=require(7)
-},{"/Users/vladimir/dev/nimble-custom-fields/build/js/react/customFields/CustomFieldsSelect.js":7,"react":177}],12:[function(require,module,exports){
+},{"react":177}],12:[function(require,module,exports){
 var CustomFieldsText, React, div, input, _ref;
 
 React = require('react');
@@ -928,12 +968,19 @@ React = require('react');
 _ref = React.DOM, div = _ref.div, input = _ref.input;
 
 CustomFieldsText = React.createFactory(React.createClass({
-  onChange: function() {},
+  onChange: function() {
+    var newValue;
+    newValue = this.refs.editor.getDOMNode().value;
+    return this.props.onChange(this.props.dict.id, newValue);
+  },
   render: function() {
+    console.log(this.props);
     return div({}, input({
+      ref: 'editor',
       type: 'text',
       className: 'nmbl-AdvancedTextBox',
-      placeholder: this.props.dict.name
+      placeholder: this.props.dict.name,
+      onChange: this.onChange
     }));
   }
 }));

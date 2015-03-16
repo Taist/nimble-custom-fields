@@ -59,9 +59,9 @@ module.exports = thisModule =
 
     fields = @_getCustomFieldsValues deal
 
-    onChange = (dictId, optionId) =>
-      #The function is called with select as a context because of React
-      deal[dictId] = optionId
+    onChange = (dictId, value) =>
+      #The function is called with editor as a context because of React
+      deal[dictId] = value
 
       fields = thisModule._getCustomFieldsValues deal
       React.render ( CustomFieldDealEditor { dicts, fields, onChange } ), container

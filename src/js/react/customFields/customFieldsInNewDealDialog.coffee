@@ -2,6 +2,8 @@ React = require 'react'
 
 { div, table, tr, td } = React.DOM
 
+CustomFieldsControl = require './customFieldsControl'
+
 CustomFieldsSelect = require './customFieldsSelect'
 CustomFieldsText = require './customFieldsText'
 
@@ -20,8 +22,7 @@ CustomFieldsInNewDealDialog = React.createFactory React.createClass
             td { className: 'fieldCell', style: paddingRight: 5 },
               div { className: 'nmbl-FormListBox' },
                 div { className: 'taist-selectWrapper' },
-                  console.log dict
-                  editors[dict.type] {
+                  CustomFieldsControl {
                     dict: dict
                     fields: @props.fields
                     onChange: @props.onChange

@@ -2,7 +2,7 @@ React = require 'react'
 
 { div } = React.DOM
 
-CustomFieldsSelect = require './CustomFieldsSelect'
+CustomFieldsControl = require './customFieldsControl'
 
 CustomFieldsInDealEditor = React.createFactory React.createClass
   render: ->
@@ -12,7 +12,7 @@ CustomFieldsInDealEditor = React.createFactory React.createClass
           div { className: 'ContactFieldWidget' },
             div { className: 'label' }, dict.name
             div { className: 'inputField taist-selectWrapper' },
-              CustomFieldsSelect {
+              CustomFieldsControl {
                 dict: dict,
                 fields: @props.fields,
                 onChange: @props.onChange

@@ -4,14 +4,18 @@ React = require 'react'
 
 CustomFieldsText = React.createFactory React.createClass
   onChange: ->
+    newValue = @refs.editor.getDOMNode().value
+    @props.onChange @props.dict.id, newValue
 
   render: ->
     console.log @props
     div {},
       input {
-        type:'text'
+        ref: 'editor'
+        type: 'text'
         className: 'nmbl-AdvancedTextBox'
         placeholder: @props.dict.name
+        onChange: @onChange
       }
 
 module.exports = CustomFieldsText
