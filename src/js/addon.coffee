@@ -28,9 +28,8 @@ module.exports = addonEntry =
       whenjs.all(
         app.repositories.customFields.getAllEntities().map (customField) ->
           id = customField.id
-          unless customField.type
-            customField.type = if customField.name is 'Text field' then 'text' else 'select'
-          app.repositories[id] = new entityRepository(app.api, id)
+          customField.type = 'select' unless customField.type
+          app.repositories[id] = new entityRepository app.api, id
           app.repositories[id].load()
       )
     .then () ->

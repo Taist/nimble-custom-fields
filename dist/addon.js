@@ -22479,7 +22479,7 @@ module.exports = addonEntry = {
         var id;
         id = customField.id;
         if (!customField.type) {
-          customField.type = customField.name === 'Text field' ? 'text' : 'select';
+          customField.type = 'select';
         }
         app.repositories[id] = new entityRepository(app.api, id);
         return app.repositories[id].load();
