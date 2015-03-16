@@ -2,7 +2,12 @@ React = require 'react'
 
 { div, table, tr, td } = React.DOM
 
-CustomFieldsSelect = require './CustomFieldsSelect'
+CustomFieldsSelect = require './customFieldsSelect'
+CustomFieldsText = require './customFieldsText'
+
+editors =
+  select: CustomFieldsSelect
+  text: CustomFieldsText
 
 CustomFieldsInNewDealDialog = React.createFactory React.createClass
   render: ->
@@ -15,11 +20,12 @@ CustomFieldsInNewDealDialog = React.createFactory React.createClass
             td { className: 'fieldCell', style: paddingRight: 5 },
               div { className: 'nmbl-FormListBox' },
                 div { className: 'taist-selectWrapper' },
-                  CustomFieldsSelect {
+                  console.log dict
+                  editors[dict.type] {
                     dict: dict
                     fields: @props.fields
                     onChange: @props.onChange
-                    selectStyle: width: '100%'
+                    elemStyle: width: '100%'
                   }
 
 module.exports = CustomFieldsInNewDealDialog

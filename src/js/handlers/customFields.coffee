@@ -19,6 +19,7 @@ module.exports = thisModule =
       id: repository.id
       name: repository.name
       entities: app.repositories[repository.id].getDictionary()
+      type: repository.type
 
   _getCustomFieldsValues: (deal) ->
     unless deal

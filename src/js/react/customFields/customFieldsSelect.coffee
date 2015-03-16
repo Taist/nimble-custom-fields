@@ -17,7 +17,7 @@ CustomFieldsSelect = React.createFactory React.createClass
       ref: 'select'
       onChange: @onChange
       value: currentFieldValue[0]?.id or 0
-      style: @props.selectStyle
+      style: @props.elemStyle
     },
       [defaultSelectValue].concat(@props.dict.entities).map (entity) =>
         option { key: entity.id, value: entity.id }, entity.value

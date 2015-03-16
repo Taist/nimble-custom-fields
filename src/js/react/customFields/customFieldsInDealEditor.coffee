@@ -12,7 +12,11 @@ CustomFieldsInDealEditor = React.createFactory React.createClass
           div { className: 'ContactFieldWidget' },
             div { className: 'label' }, dict.name
             div { className: 'inputField taist-selectWrapper' },
-              CustomFieldsSelect { dict, fields: @props.fields, onChange: @props.onChange }
+              CustomFieldsSelect {
+                dict: dict,
+                fields: @props.fields,
+                onChange: @props.onChange
+              }
             div { style: clear: 'both' }, ''
 
 module.exports = CustomFieldsInDealEditor
