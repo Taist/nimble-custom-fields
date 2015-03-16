@@ -23,6 +23,7 @@ CustomFieldsInNewDealDialog = React.createFactory React.createClass
       fields: @props.fields
       onChange: @props.onChange
       elemStyle: @props.elemStyle
+      value
     }
 
 module.exports = CustomFieldsInNewDealDialog

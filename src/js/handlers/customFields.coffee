@@ -15,23 +15,35 @@ module.exports = thisModule =
     container[0]
 
   _getCustomFieldsDicts: ->
-    app.repositories.customFields.getAllEntities().map (repository) =>
-      id: repository.id
-      name: repository.name
-      entities: app.repositories[repository.id].getDictionary()
-      type: repository.type
+    app.repositories.customFields.getAllEntities().map (customField) =>
+      entities = []
+      entities = app.repositories[customField.id].getDictionary() if customField.type is 'select'
+
+      return {
+        id: customField.id
+        name: customField.name
+        entities: entities
+        type: customField.type
+      }
 
   _getCustomFieldsValues: (deal) ->
     unless deal
       deal = app.repositories.deals.getEntity @_getDealIdFromUrl()
 
-    app.repositories.customFields.getAllEntities().map (repository) =>
-      id = repository.id
-      customFieldEntity = app.repositories[id]?.getEntity(deal?[id])
+    app.repositories.customFields.getAllEntities().map (customField) =>
+      id = customField.id
+
+      switch customField.type
+        when 'select'
+          customFieldEntity = app.repositories[id]?.getEntity(deal[id])
+          value = customFieldEntity?.value or 'Not specified'
+        when 'text'
+          value = deal[id] or ''
+
       return {
         id: customFieldEntity?.id or 0
-        name: repository.name
-        value: customFieldEntity?.value or 'Not specified'
+        name: customField.name
+        value: value
       }
 
   _renderInEditor: (parent, reactFieldsEditorClass) ->

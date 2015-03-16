@@ -8,11 +8,11 @@ CustomFieldsText = React.createFactory React.createClass
     @props.onChange @props.dict.id, newValue
 
   render: ->
-    console.log @props
     div {},
       input {
         ref: 'editor'
         type: 'text'
+        value: @props.value
         className: 'nmbl-AdvancedTextBox'
         placeholder: @props.dict.name
         onChange: @onChange

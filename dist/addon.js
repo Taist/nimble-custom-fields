@@ -44,12 +44,17 @@ module.exports = thisModule = {
   },
   _getCustomFieldsDicts: function() {
     return app.repositories.customFields.getAllEntities().map((function(_this) {
-      return function(repository) {
+      return function(customField) {
+        var entities;
+        entities = [];
+        if (customField.type === 'select') {
+          entities = app.repositories[customField.id].getDictionary();
+        }
         return {
-          id: repository.id,
-          name: repository.name,
-          entities: app.repositories[repository.id].getDictionary(),
-          type: repository.type
+          id: customField.id,
+          name: customField.name,
+          entities: entities,
+          type: customField.type
         };
       };
     })(this));
@@ -59,14 +64,21 @@ module.exports = thisModule = {
       deal = app.repositories.deals.getEntity(this._getDealIdFromUrl());
     }
     return app.repositories.customFields.getAllEntities().map((function(_this) {
-      return function(repository) {
-        var customFieldEntity, id, _ref;
-        id = repository.id;
-        customFieldEntity = (_ref = app.repositories[id]) != null ? _ref.getEntity(deal != null ? deal[id] : void 0) : void 0;
+      return function(customField) {
+        var customFieldEntity, id, value, _ref;
+        id = customField.id;
+        switch (customField.type) {
+          case 'select':
+            customFieldEntity = (_ref = app.repositories[id]) != null ? _ref.getEntity(deal[id]) : void 0;
+            value = (customFieldEntity != null ? customFieldEntity.value : void 0) || 'Not specified';
+            break;
+          case 'text':
+            value = deal[id] || '';
+        }
         return {
           id: (customFieldEntity != null ? customFieldEntity.id : void 0) || 0,
-          name: repository.name,
-          value: (customFieldEntity != null ? customFieldEntity.value : void 0) || 'Not specified'
+          name: customField.name,
+          value: value
         };
       };
     })(this));
@@ -768,18 +780,20 @@ CustomFieldsViewer = React.createFactory(React.createClass({
   render: function() {
     return div({}, this.props.fields.map((function(_this) {
       return function(field) {
-        return div({
-          key: field.name
-        }, div({
-          className: 'dealMainField',
-          style: {
-            marginBottom: 2
-          }
-        }, field.name, ':', div({
-          style: {
-            paddingLeft: 5
-          }
-        }, field.value)));
+        if (field.value !== '') {
+          return div({
+            key: field.name
+          }, div({
+            className: 'dealMainField',
+            style: {
+              marginBottom: 2
+            }
+          }, field.name, ':', div({
+            style: {
+              paddingLeft: 5
+            }
+          }, field.value)));
+        }
       };
     })(this)));
   }
@@ -820,7 +834,8 @@ CustomFieldsInNewDealDialog = React.createFactory(React.createClass({
       dict: this.props.dict,
       fields: this.props.fields,
       onChange: this.props.onChange,
-      elemStyle: this.props.elemStyle
+      elemStyle: this.props.elemStyle,
+      value: value
     });
   }
 }));
@@ -936,16 +951,10 @@ CustomFieldsSelect = React.createFactory(React.createClass({
     return this.props.onChange(this.props.dict.id, newValue);
   },
   render: function() {
-    var currentFieldValue, _ref1, _ref2;
-    currentFieldValue = (_ref1 = this.props.fields) != null ? _ref1.filter((function(_this) {
-      return function(field) {
-        return field.name === _this.props.dict.name;
-      };
-    })(this)) : void 0;
     return select({
       ref: 'select',
       onChange: this.onChange,
-      value: ((_ref2 = currentFieldValue[0]) != null ? _ref2.id : void 0) || 0,
+      value: this.props.value,
       style: this.props.elemStyle
     }, [defaultSelectValue].concat(this.props.dict.entities).map((function(_this) {
       return function(entity) {
@@ -974,10 +983,10 @@ CustomFieldsText = React.createFactory(React.createClass({
     return this.props.onChange(this.props.dict.id, newValue);
   },
   render: function() {
-    console.log(this.props);
     return div({}, input({
       ref: 'editor',
       type: 'text',
+      value: this.props.value,
       className: 'nmbl-AdvancedTextBox',
       placeholder: this.props.dict.name,
       onChange: this.onChange
