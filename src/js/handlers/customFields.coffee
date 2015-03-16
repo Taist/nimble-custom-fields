@@ -142,8 +142,8 @@ module.exports = thisModule =
           @onUpdate @entities.filter (entity) ->
             entity.id isnt deletedEntity.id
 
-      onCreateNewCustomField = (name) ->
-        app.repositories.customFields._saveEntity { name }, (dict) ->
+      onCreateNewCustomField = (name, type) ->
+        app.repositories.customFields._saveEntity { name, type }, (dict) ->
           app.repositories[dict.id] = new entityRepository(app.api, dict.id)
 
           dict.entities = []

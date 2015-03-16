@@ -54,10 +54,7 @@ module.exports = addonEntry =
             id: customFieldEntity?.id or 0
             name: customField.name
             value: value
-
-          console.log deal, customField, result
           return result
-
 
       app.repositories.deals.getFieldsMap = (deal) ->
         result = {}

@@ -3,7 +3,7 @@ React = require 'react'
 { div, h3, a } = React.DOM
 
 DictEditor = require '../dictionaryEditor/dictEditor'
-DictHeader = require '../dictionaryEditor/dictHeader'
+CustomFieldHeader = require './customFieldHeader'
 
 CustomFieldsEditor = React.createFactory React.createClass
   getInitialState: ->
@@ -14,15 +14,15 @@ CustomFieldsEditor = React.createFactory React.createClass
     @setState {
       mode: 'edit'
       newDict:
-        mode: 'edit'
+        mode: 'new'
         name: ''
         onRename: @onCreateNewCustomField
         onCancel: => @setState mode: 'view'
     }
 
-  onCreateNewCustomField: (fieldName) ->
+  onCreateNewCustomField: (fieldName, type) ->
     if fieldName.length > 0
-      @props.onCreateNewCustomField?(fieldName)
+      @props.onCreateNewCustomField?(fieldName, type)
 
   onCloseAlert: ->
      @setState alertMessage: ''
@@ -54,12 +54,15 @@ CustomFieldsEditor = React.createFactory React.createClass
           div { style: paddingLeft: 9, paddingTop: 5 },
             a { onClick: @onEditMode }, 'Add new custom field'
         else
-          DictHeader @state.newDict
-        div { style: { clear: 'both', height: '1px' }, dangerouslySetInnerHTML: __html: '&nbsp;' }
+          CustomFieldHeader @state.newDict
+        div { style: { clear: 'both', height: 1 }, dangerouslySetInnerHTML: __html: '&nbsp;' }
 
       @props.dicts.map (dict) =>
-        div { key: dict.id },
-          DictHeader dict
-          DictEditor dict
+        div { key: dict.id, style: marginTop: 32 },
+          CustomFieldHeader dict
+          if dict.type is 'select'
+            DictEditor dict
+          else
+            div { style: clear: 'both', height: 8 }, ''
 
 module.exports = CustomFieldsEditor

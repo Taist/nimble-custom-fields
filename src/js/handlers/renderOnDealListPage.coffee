@@ -3,7 +3,7 @@ React = require 'react'
 
 customFields = []
 selectedFields = {}
-notSpecifiedValue = 'Not Specified'
+notSpecifiedValue = 'Not specified'
 
 customFieldControlContainer = null
 
@@ -151,6 +151,7 @@ addCustomColumnsContents = ->
     customFields.forEach (field) ->
       if isFieldVisible field
         value = dealFields[field.id]?.value or '-'
+        value = '-' if value is notSpecifiedValue
         previousCell.after $ """<td class="cell c1 taist-custom-cell" title="#{value}">#{value}</td>"""
 
 loadDealsData = (callback, loadedDeals = [], page = 1) ->

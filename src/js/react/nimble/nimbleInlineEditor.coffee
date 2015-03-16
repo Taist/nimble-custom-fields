@@ -20,7 +20,7 @@ NimbleInlineEditor = React.createFactory React.createClass
     @props.closeEditor()
 
   render: ->
-    div { className: 'nmbl-FormTextBox nmbl-FormTextBox-name' },
+    div { className: 'nmbl-FormTextBox nmbl-FormTextBox-name', style: display: 'inline-block' },
       input
         ref: 'valueEditor'
         className: 'nmbl-AdvancedTextBox'

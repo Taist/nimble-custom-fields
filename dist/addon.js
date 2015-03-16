@@ -207,9 +207,10 @@ module.exports = thisModule = {
             }));
           }
         };
-        onCreateNewCustomField = function(name) {
+        onCreateNewCustomField = function(name, type) {
           return app.repositories.customFields._saveEntity({
-            name: name
+            name: name,
+            type: type
           }, function(dict) {
             app.repositories[dict.id] = new entityRepository(app.api, dict.id);
             dict.entities = [];
@@ -232,7 +233,7 @@ module.exports = thisModule = {
   }
 };
 
-},{"../app":1,"../objectsApi/entityRepository":5,"../react/customFields/CustomFieldsEditor":6,"../react/customFields/CustomFieldsViewer":7,"../react/customFields/customFieldsInDealEditor":9,"../react/customFields/customFieldsInNewDealDialog":10,"react":177}],3:[function(require,module,exports){
+},{"../app":1,"../objectsApi/entityRepository":5,"../react/customFields/CustomFieldsEditor":6,"../react/customFields/CustomFieldsViewer":7,"../react/customFields/customFieldsInDealEditor":10,"../react/customFields/customFieldsInNewDealDialog":11,"react":177}],3:[function(require,module,exports){
 var React, addCustomColumnsContents, addCustomColumnsHeader, addCustomColumnsToOriginalList, addCustomFieldToDeals, addCustomFieldsControl, addGroupingByCustomFields, app, currentlyGroupingByCustomField, customDealsListClass, customFieldControlContainer, customFields, findCustomDealsList, getCurrentGroupingField, getCurrentGroupingFieldName, groupDealsByCustomField, isFieldVisible, loadDealsData, notSpecifiedValue, onChangeCustomFieldSelection, renderCustomDealsList, renderCustomFieldsControl, replaceOriginalListWithCustom, selectedFields;
 
 app = require('../app');
@@ -243,7 +244,7 @@ customFields = [];
 
 selectedFields = {};
 
-notSpecifiedValue = 'Not Specified';
+notSpecifiedValue = 'Not specified';
 
 customFieldControlContainer = null;
 
@@ -444,6 +445,9 @@ addCustomColumnsContents = function() {
       var value, _ref;
       if (isFieldVisible(field)) {
         value = ((_ref = dealFields[field.id]) != null ? _ref.value : void 0) || '-';
+        if (value === notSpecifiedValue) {
+          value = '-';
+        }
         return previousCell.after($("<td class=\"cell c1 taist-custom-cell\" title=\"" + value + "\">" + value + "</td>"));
       }
     });
@@ -515,7 +519,7 @@ module.exports = function() {
   });
 };
 
-},{"../app":1,"../react/dealList/customFieldsSelector":13,"../react/groupedDealList/groupedDealList":22,"react":177}],4:[function(require,module,exports){
+},{"../app":1,"../react/dealList/customFieldsSelector":14,"../react/groupedDealList/groupedDealList":22,"react":177}],4:[function(require,module,exports){
 var Entity;
 
 module.exports = Entity = (function() {
@@ -658,7 +662,7 @@ module.exports = EntityRepository = (function() {
 })();
 
 },{"./entity":4,"when":195}],6:[function(require,module,exports){
-var CustomFieldsEditor, DictEditor, DictHeader, React, a, div, h3, _ref;
+var CustomFieldHeader, CustomFieldsEditor, DictEditor, React, a, div, h3, _ref;
 
 React = require('react');
 
@@ -666,7 +670,7 @@ _ref = React.DOM, div = _ref.div, h3 = _ref.h3, a = _ref.a;
 
 DictEditor = require('../dictionaryEditor/dictEditor');
 
-DictHeader = require('../dictionaryEditor/dictHeader');
+CustomFieldHeader = require('./customFieldHeader');
 
 CustomFieldsEditor = React.createFactory(React.createClass({
   getInitialState: function() {
@@ -679,7 +683,7 @@ CustomFieldsEditor = React.createFactory(React.createClass({
     return this.setState({
       mode: 'edit',
       newDict: {
-        mode: 'edit',
+        mode: 'new',
         name: '',
         onRename: this.onCreateNewCustomField,
         onCancel: (function(_this) {
@@ -692,10 +696,10 @@ CustomFieldsEditor = React.createFactory(React.createClass({
       }
     });
   },
-  onCreateNewCustomField: function(fieldName) {
+  onCreateNewCustomField: function(fieldName, type) {
     var _base;
     if (fieldName.length > 0) {
-      return typeof (_base = this.props).onCreateNewCustomField === "function" ? _base.onCreateNewCustomField(fieldName) : void 0;
+      return typeof (_base = this.props).onCreateNewCustomField === "function" ? _base.onCreateNewCustomField(fieldName, type) : void 0;
     }
   },
   onCloseAlert: function() {
@@ -737,10 +741,10 @@ CustomFieldsEditor = React.createFactory(React.createClass({
       }
     }, a({
       onClick: this.onEditMode
-    }, 'Add new custom field')) : DictHeader(this.state.newDict), div({
+    }, 'Add new custom field')) : CustomFieldHeader(this.state.newDict), div({
       style: {
         clear: 'both',
-        height: '1px'
+        height: 1
       },
       dangerouslySetInnerHTML: {
         __html: '&nbsp;'
@@ -748,8 +752,16 @@ CustomFieldsEditor = React.createFactory(React.createClass({
     })), this.props.dicts.map((function(_this) {
       return function(dict) {
         return div({
-          key: dict.id
-        }, DictHeader(dict), DictEditor(dict));
+          key: dict.id,
+          style: {
+            marginTop: 32
+          }
+        }, CustomFieldHeader(dict), dict.type === 'select' ? DictEditor(dict) : div({
+          style: {
+            clear: 'both',
+            height: 8
+          }
+        }, ''));
       };
     })(this)));
   }
@@ -757,7 +769,7 @@ CustomFieldsEditor = React.createFactory(React.createClass({
 
 module.exports = CustomFieldsEditor;
 
-},{"../dictionaryEditor/dictEditor":14,"../dictionaryEditor/dictHeader":16,"react":177}],7:[function(require,module,exports){
+},{"../dictionaryEditor/dictEditor":15,"./customFieldHeader":8,"react":177}],7:[function(require,module,exports){
 var CustomFieldsViewer, React, div;
 
 React = require('react');
@@ -790,6 +802,122 @@ CustomFieldsViewer = React.createFactory(React.createClass({
 module.exports = CustomFieldsViewer;
 
 },{"react":177}],8:[function(require,module,exports){
+var CustomFieldHeader, NimbleInlineEditor, React, a, div, option, select, _ref;
+
+React = require('react');
+
+_ref = React.DOM, div = _ref.div, a = _ref.a, select = _ref.select, option = _ref.option;
+
+NimbleInlineEditor = require('../nimble/nimbleInlineEditor');
+
+CustomFieldHeader = React.createFactory(React.createClass({
+  getInitialState: function() {
+    return {
+      mode: 'view'
+    };
+  },
+  componentDidMount: function() {
+    return this.setState({
+      mode: this.props.mode || 'view'
+    });
+  },
+  fixedBlockStyle: function(width, style) {
+    if (width == null) {
+      width = 200;
+    }
+    if (style == null) {
+      style = {};
+    }
+    style.display = 'inline-block';
+    style.width = width;
+    return style;
+  },
+  onEdit: function() {
+    return this.setState({
+      mode: 'edit'
+    });
+  },
+  closeEditor: function() {
+    var _base;
+    this.setState({
+      mode: 'view'
+    });
+    return typeof (_base = this.props).onCancel === "function" ? _base.onCancel() : void 0;
+  },
+  onSave: function(newName) {
+    var type;
+    if (this.props.mode === 'new') {
+      type = this.refs.fieldType.getDOMNode().value;
+      return this.props.onRename(newName, type);
+    } else {
+      return this.props.onRename(newName);
+    }
+  },
+  render: function() {
+    return div({
+      className: 'subHeader'
+    }, this.state.mode === 'view' ? div({}, div({
+      style: this.fixedBlockStyle()
+    }, this.props.name), div({
+      style: this.fixedBlockStyle(100)
+    }, div({
+      style: {
+        padding: '2px 4px',
+        border: '1px solid silver',
+        borderRadius: 4,
+        fontWeight: 'normal',
+        display: 'inline-block'
+      }
+    }, this.props.type)), div({
+      style: this.fixedBlockStyle(100)
+    }, a({
+      onClick: this.onEdit
+    }, 'Rename field'))) : div({
+      style: {
+        marginTop: -8,
+        marginBottom: -6
+      }
+    }, this.state.mode === 'new' ? div({
+      style: {
+        display: 'inline-block'
+      }
+    }, div({
+      style: {
+        display: 'inline-block',
+        marginRight: 4
+      }
+    }, 'Type:'), div({
+      style: this.fixedBlockStyle(100)
+    }, select({
+      ref: 'fieldType',
+      style: {
+        width: '100%'
+      }
+    }, ['select', 'text'].map(function(type) {
+      return option({
+        key: type,
+        value: type
+      }, type);
+    }))), div({
+      style: {
+        display: 'inline-block',
+        marginRight: 4,
+        marginLeft: 12
+      }
+    }, 'Name:')) : void 0, NimbleInlineEditor({
+      value: this.props.name,
+      actions: {
+        onCancel: function() {},
+        onSave: this.onSave
+      },
+      closeEditor: this.closeEditor
+    })));
+  }
+}));
+
+module.exports = CustomFieldHeader;
+
+},{"../nimble/nimbleInlineEditor":28,"react":177}],9:[function(require,module,exports){
 var CustomFieldsInNewDealDialog, CustomFieldsSelect, CustomFieldsText, React, editors;
 
 React = require('react');
@@ -830,7 +958,7 @@ CustomFieldsInNewDealDialog = React.createFactory(React.createClass({
 
 module.exports = CustomFieldsInNewDealDialog;
 
-},{"./customFieldsSelect":11,"./customFieldsText":12,"react":177}],9:[function(require,module,exports){
+},{"./customFieldsSelect":12,"./customFieldsText":13,"react":177}],10:[function(require,module,exports){
 var CustomFieldsControl, CustomFieldsInDealEditor, React, div;
 
 React = require('react');
@@ -867,7 +995,7 @@ CustomFieldsInDealEditor = React.createFactory(React.createClass({
 
 module.exports = CustomFieldsInDealEditor;
 
-},{"./customFieldsControl":8,"react":177}],10:[function(require,module,exports){
+},{"./customFieldsControl":9,"react":177}],11:[function(require,module,exports){
 var CustomFieldsControl, CustomFieldsInNewDealDialog, CustomFieldsSelect, CustomFieldsText, React, div, editors, table, td, tr, _ref;
 
 React = require('react');
@@ -920,7 +1048,7 @@ CustomFieldsInNewDealDialog = React.createFactory(React.createClass({
 
 module.exports = CustomFieldsInNewDealDialog;
 
-},{"./customFieldsControl":8,"./customFieldsSelect":11,"./customFieldsText":12,"react":177}],11:[function(require,module,exports){
+},{"./customFieldsControl":9,"./customFieldsSelect":12,"./customFieldsText":13,"react":177}],12:[function(require,module,exports){
 var CustomFieldsSelect, React, defaultSelectValue, option, select, _ref;
 
 React = require('react');
@@ -957,7 +1085,7 @@ CustomFieldsSelect = React.createFactory(React.createClass({
 
 module.exports = CustomFieldsSelect;
 
-},{"react":177}],12:[function(require,module,exports){
+},{"react":177}],13:[function(require,module,exports){
 var CustomFieldsText, React, div, input, _ref;
 
 React = require('react');
@@ -984,7 +1112,7 @@ CustomFieldsText = React.createFactory(React.createClass({
 
 module.exports = CustomFieldsText;
 
-},{"react":177}],13:[function(require,module,exports){
+},{"react":177}],14:[function(require,module,exports){
 var AwesomeIcons, CustomFieldsSelector, React, div, input, label, span, _ref;
 
 React = require('react');
@@ -1068,7 +1196,7 @@ CustomFieldsSelector = React.createFactory(React.createClass({
 
 module.exports = CustomFieldsSelector;
 
-},{"../taist/awesomeIcons":29,"react":177}],14:[function(require,module,exports){
+},{"../taist/awesomeIcons":29,"react":177}],15:[function(require,module,exports){
 var DictEditor, DictEntity, React, a, div, _ref;
 
 React = require('react');
@@ -1121,7 +1249,6 @@ DictEditor = React.createFactory(React.createClass({
   render: function() {
     return div({
       style: {
-        marginTop: 32,
         width: 565
       }
     }, div({
@@ -1166,7 +1293,7 @@ DictEditor = React.createFactory(React.createClass({
 
 module.exports = DictEditor;
 
-},{"./dictEntity":15,"react":177}],15:[function(require,module,exports){
+},{"./dictEntity":16,"react":177}],16:[function(require,module,exports){
 var DictEntity, NimbleAlert, NimbleInlineEditor, React, a, div, input, _ref;
 
 React = require('react');
@@ -1264,78 +1391,7 @@ DictEntity = React.createFactory(React.createClass({
 
 module.exports = DictEntity;
 
-},{"../nimble/nimbleAlert":27,"../nimble/nimbleInlineEditor":28,"react":177}],16:[function(require,module,exports){
-var DictHeader, NimbleInlineEditor, React, a, div, _ref;
-
-React = require('react');
-
-_ref = React.DOM, div = _ref.div, a = _ref.a;
-
-NimbleInlineEditor = require('../nimble/nimbleInlineEditor');
-
-DictHeader = React.createFactory(React.createClass({
-  getInitialState: function() {
-    return {
-      mode: 'view'
-    };
-  },
-  componentDidMount: function() {
-    return this.setState({
-      mode: this.props.mode || 'view'
-    });
-  },
-  fixedBlockStyle: function(width) {
-    if (width == null) {
-      width = 200;
-    }
-    return {
-      display: 'inline-block',
-      width: width
-    };
-  },
-  onEdit: function() {
-    return this.setState({
-      mode: 'edit'
-    });
-  },
-  closeEditor: function() {
-    var _base;
-    this.setState({
-      mode: 'view'
-    });
-    return typeof (_base = this.props).onCancel === "function" ? _base.onCancel() : void 0;
-  },
-  onSave: function(newName) {
-    return this.props.onRename(newName);
-  },
-  render: function() {
-    return div({
-      className: 'subHeader'
-    }, this.state.mode === 'view' ? div({}, div({
-      style: this.fixedBlockStyle()
-    }, this.props.name), div({
-      style: this.fixedBlockStyle(100)
-    }, a({
-      onClick: this.onEdit
-    }, 'Rename field'))) : div({
-      style: {
-        marginTop: -8,
-        marginBottom: -6
-      }
-    }, NimbleInlineEditor({
-      value: this.props.name,
-      actions: {
-        onCancel: function() {},
-        onSave: this.onSave
-      },
-      closeEditor: this.closeEditor
-    })));
-  }
-}));
-
-module.exports = DictHeader;
-
-},{"../nimble/nimbleInlineEditor":28,"react":177}],17:[function(require,module,exports){
+},{"../nimble/nimbleAlert":27,"../nimble/nimbleInlineEditor":28,"react":177}],17:[function(require,module,exports){
 var Deal, React, div, formatAmount;
 
 React = require('react');
@@ -1686,7 +1742,10 @@ NimbleInlineEditor = React.createFactory(React.createClass({
   },
   render: function() {
     return div({
-      className: 'nmbl-FormTextBox nmbl-FormTextBox-name'
+      className: 'nmbl-FormTextBox nmbl-FormTextBox-name',
+      style: {
+        display: 'inline-block'
+      }
     }, input({
       ref: 'valueEditor',
       className: 'nmbl-AdvancedTextBox',
@@ -22447,7 +22506,6 @@ module.exports = addonEntry = {
               name: customField.name,
               value: value
             };
-            console.log(deal, customField, result);
             return result;
           };
         })(this));
