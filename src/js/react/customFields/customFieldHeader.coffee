@@ -1,6 +1,6 @@
 React = require 'react'
 
-{ div, a, select, option } = React.DOM
+{ div, span, a, select, option } = React.DOM
 
 NimbleInlineEditor = require '../nimble/nimbleInlineEditor'
 
@@ -34,16 +34,10 @@ CustomFieldHeader = React.createFactory React.createClass
     div { className: 'subHeader' },
       if @state.mode is 'view'
         div {},
-          div { style: @fixedBlockStyle() }, @props.name
-          div { style: @fixedBlockStyle(100) },
-            div {
-              style:
-                padding: '2px 4px'
-                border: '1px solid silver'
-                borderRadius: 4
-                fontWeight: 'normal'
-                display: 'inline-block'
-            }, @props.type
+          div { style: @fixedBlockStyle() },
+            @props.name,
+            span { style: fontWeight: 'normal' }, 
+              ' (' + (if @props.type is 'select' then 'list' else @props.type) + ')'
           div { style: @fixedBlockStyle(100) },
             a { onClick: @onEdit }, 'Rename field'
       else
@@ -54,7 +48,7 @@ CustomFieldHeader = React.createFactory React.createClass
               div { style: @fixedBlockStyle(100) },
                 select { ref: 'fieldType', style: width: '100%' },
                   ['select', 'text'].map (type) ->
-                    option { key: type, value: type }, type
+                    option { key: type, value: type }, if type is 'select' then 'list' else type
               div { style: display: 'inline-block', marginRight: 4, marginLeft: 12 }, 'Name:'
           NimbleInlineEditor {
             value: @props.name

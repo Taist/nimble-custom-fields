@@ -802,11 +802,11 @@ CustomFieldsViewer = React.createFactory(React.createClass({
 module.exports = CustomFieldsViewer;
 
 },{"react":177}],8:[function(require,module,exports){
-var CustomFieldHeader, NimbleInlineEditor, React, a, div, option, select, _ref;
+var CustomFieldHeader, NimbleInlineEditor, React, a, div, option, select, span, _ref;
 
 React = require('react');
 
-_ref = React.DOM, div = _ref.div, a = _ref.a, select = _ref.select, option = _ref.option;
+_ref = React.DOM, div = _ref.div, span = _ref.span, a = _ref.a, select = _ref.select, option = _ref.option;
 
 NimbleInlineEditor = require('../nimble/nimbleInlineEditor');
 
@@ -858,17 +858,11 @@ CustomFieldHeader = React.createFactory(React.createClass({
       className: 'subHeader'
     }, this.state.mode === 'view' ? div({}, div({
       style: this.fixedBlockStyle()
-    }, this.props.name), div({
-      style: this.fixedBlockStyle(100)
-    }, div({
+    }, this.props.name, span({
       style: {
-        padding: '2px 4px',
-        border: '1px solid silver',
-        borderRadius: 4,
-        fontWeight: 'normal',
-        display: 'inline-block'
+        fontWeight: 'normal'
       }
-    }, this.props.type)), div({
+    }, ' (' + (this.props.type === 'select' ? 'list' : this.props.type) + ')')), div({
       style: this.fixedBlockStyle(100)
     }, a({
       onClick: this.onEdit
@@ -897,7 +891,7 @@ CustomFieldHeader = React.createFactory(React.createClass({
       return option({
         key: type,
         value: type
-      }, type);
+      }, type === 'select' ? 'list' : type);
     }))), div({
       style: {
         display: 'inline-block',
