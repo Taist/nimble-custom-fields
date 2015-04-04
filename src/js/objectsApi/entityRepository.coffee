@@ -41,6 +41,10 @@ module.exports = class EntityRepository
       @_updateEntities(entities)
       callback()
 
+  remove: (entityId, callback) ->
+    delete @_entities[entityId]
+    @save @_entities, callback
+
   getEntity: (entityId) ->
     @_entities[entityId]
 

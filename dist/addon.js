@@ -152,7 +152,7 @@ module.exports = thisModule = {
   renderInSettings: function() {
     return app.api.wait.elementRender('.SettingsDealsView', (function(_this) {
       return function(parent) {
-        var CustomFieldsEditor, container, dicts, onChangeDictionaryName, onCreateNewCustomField, onDeleteDictionaryEntity, onUpdateDictionary, reactRender;
+        var CustomFieldsEditor, container, dicts, onChangeDictionaryName, onCreateNewCustomField, onDeleteDictionary, onDeleteDictionaryEntity, onUpdateDictionary, reactRender;
         container = _this._getAddonContainer(parent);
         CustomFieldsEditor = require('../react/customFields/CustomFieldsEditor');
         reactRender = function(alertMessage) {
@@ -207,6 +207,24 @@ module.exports = thisModule = {
             }));
           }
         };
+        onDeleteDictionary = function() {
+          var dictIndex;
+          dictIndex = 0;
+          dicts.every((function(_this) {
+            return function(dict, idx) {
+              if (dict.id === _this.id) {
+                dictIndex = idx;
+                return false;
+              } else {
+                return true;
+              }
+            };
+          })(this));
+          return app.repositories.customFields.remove(this.id, function() {
+            dicts.splice(dictIndex, 1);
+            return reactRender();
+          });
+        };
         onCreateNewCustomField = function(name, type) {
           return app.repositories.customFields._saveEntity({
             name: name,
@@ -217,6 +235,7 @@ module.exports = thisModule = {
             dict.onUpdate = onUpdateDictionary;
             dict.onRename = onChangeDictionaryName;
             dict.onDelete = onDeleteDictionaryEntity;
+            dict.onRemoveField = onDeleteDictionary;
             dicts.push(dict);
             return reactRender();
           });
@@ -225,7 +244,8 @@ module.exports = thisModule = {
         dicts.forEach(function(dict) {
           dict.onUpdate = onUpdateDictionary;
           dict.onRename = onChangeDictionaryName;
-          return dict.onDelete = onDeleteDictionaryEntity;
+          dict.onDelete = onDeleteDictionaryEntity;
+          return dict.onRemoveField = onDeleteDictionary;
         });
         return reactRender();
       };
@@ -618,6 +638,11 @@ module.exports = EntityRepository = (function() {
     })(this));
   };
 
+  EntityRepository.prototype.remove = function(entityId, callback) {
+    delete this._entities[entityId];
+    return this.save(this._entities, callback);
+  };
+
   EntityRepository.prototype.getEntity = function(entityId) {
     return this._entities[entityId];
   };
@@ -802,11 +827,13 @@ CustomFieldsViewer = React.createFactory(React.createClass({
 module.exports = CustomFieldsViewer;
 
 },{"react":177}],8:[function(require,module,exports){
-var CustomFieldHeader, NimbleInlineEditor, React, a, div, option, select, span, _ref;
+var CustomFieldHeader, NimbleAlert, NimbleInlineEditor, React, a, div, option, select, span, _ref;
 
 React = require('react');
 
 _ref = React.DOM, div = _ref.div, span = _ref.span, a = _ref.a, select = _ref.select, option = _ref.option;
+
+NimbleAlert = require('../nimble/nimbleAlert');
 
 NimbleInlineEditor = require('../nimble/nimbleInlineEditor');
 
@@ -853,10 +880,32 @@ CustomFieldHeader = React.createFactory(React.createClass({
       return this.props.onRename(newName);
     }
   },
+  onDeleteAlert: function() {
+    return this.setState({
+      mode: 'deleteAlert'
+    });
+  },
+  onCancelAlert: function() {
+    return this.setState({
+      mode: 'view'
+    });
+  },
+  onDelete: function() {
+    this.setState({
+      mode: 'view'
+    });
+    return this.props.onRemoveField();
+  },
   render: function() {
     return div({
       className: 'subHeader'
-    }, this.state.mode === 'view' ? div({}, div({
+    }, this.state.mode === 'deleteAlert' ? NimbleAlert({
+      title: 'Confirm deletion',
+      message: "Are you sure, you want to delete '" + this.props.name + "'?",
+      actionName: 'Delete',
+      onAction: this.onDelete,
+      onCancel: this.onCancelAlert
+    }) : void 0, this.state.mode === 'view' || this.state.mode === 'deleteAlert' ? div({}, div({
       style: this.fixedBlockStyle()
     }, this.props.name, span({
       style: {
@@ -866,7 +915,14 @@ CustomFieldHeader = React.createFactory(React.createClass({
       style: this.fixedBlockStyle(100)
     }, a({
       onClick: this.onEdit
-    }, 'Rename field'))) : div({
+    }, 'Rename')), div({
+      style: this.fixedBlockStyle(100)
+    }, a({
+      onClick: this.onDeleteAlert,
+      style: {
+        color: 'red'
+      }
+    }, 'Delete'))) : div({
       style: {
         marginTop: -8,
         marginBottom: -6
@@ -911,7 +967,7 @@ CustomFieldHeader = React.createFactory(React.createClass({
 
 module.exports = CustomFieldHeader;
 
-},{"../nimble/nimbleInlineEditor":28,"react":177}],9:[function(require,module,exports){
+},{"../nimble/nimbleAlert":27,"../nimble/nimbleInlineEditor":28,"react":177}],9:[function(require,module,exports){
 var CustomFieldsInNewDealDialog, CustomFieldsSelect, CustomFieldsText, React, editors;
 
 React = require('react');

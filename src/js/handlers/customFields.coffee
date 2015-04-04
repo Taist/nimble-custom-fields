@@ -142,6 +142,20 @@ module.exports = thisModule =
           @onUpdate @entities.filter (entity) ->
             entity.id isnt deletedEntity.id
 
+      onDeleteDictionary = () ->
+        #The function is called with dict as a context because of React
+        dictIndex = 0
+        dicts.every (dict, idx) =>
+          if dict.id is @id
+            dictIndex = idx
+            false
+          else
+            true
+
+        app.repositories.customFields.remove @id, ->
+          dicts.splice dictIndex, 1
+          reactRender()
+
       onCreateNewCustomField = (name, type) ->
         app.repositories.customFields._saveEntity { name, type }, (dict) ->
           app.repositories[dict.id] = new entityRepository(app.api, dict.id)
@@ -150,6 +164,7 @@ module.exports = thisModule =
           dict.onUpdate = onUpdateDictionary
           dict.onRename = onChangeDictionaryName
           dict.onDelete = onDeleteDictionaryEntity
+          dict.onRemoveField = onDeleteDictionary
 
           dicts.push dict
           reactRender()
@@ -159,5 +174,6 @@ module.exports = thisModule =
         dict.onUpdate = onUpdateDictionary
         dict.onRename = onChangeDictionaryName
         dict.onDelete = onDeleteDictionaryEntity
+        dict.onRemoveField = onDeleteDictionary
 
       reactRender()

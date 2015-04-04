@@ -2,6 +2,7 @@ React = require 'react'
 
 { div, span, a, select, option } = React.DOM
 
+NimbleAlert = require '../nimble/nimbleAlert'
 NimbleInlineEditor = require '../nimble/nimbleInlineEditor'
 
 CustomFieldHeader = React.createFactory React.createClass
@@ -30,16 +31,37 @@ CustomFieldHeader = React.createFactory React.createClass
     else
       @props.onRename newName
 
+  onDeleteAlert: () ->
+    @setState { mode: 'deleteAlert' }
+
+  onCancelAlert: () ->
+    @setState { mode: 'view' }
+
+  onDelete: () ->
+    @setState { mode: 'view' }
+    @props.onRemoveField()
+
   render: ->
     div { className: 'subHeader' },
-      if @state.mode is 'view'
+      if @state.mode is 'deleteAlert'
+        NimbleAlert {
+          title: 'Confirm deletion'
+          message: "Are you sure, you want to delete '#{@props.name}'?"
+          actionName: 'Delete'
+          onAction: @onDelete
+          onCancel: @onCancelAlert
+        }
+
+      if @state.mode is 'view' or @state.mode is 'deleteAlert'
         div {},
           div { style: @fixedBlockStyle() },
             @props.name,
-            span { style: fontWeight: 'normal' }, 
+            span { style: fontWeight: 'normal' },
               ' (' + (if @props.type is 'select' then 'list' else @props.type) + ')'
           div { style: @fixedBlockStyle(100) },
-            a { onClick: @onEdit }, 'Rename field'
+            a { onClick: @onEdit }, 'Rename'
+          div { style: @fixedBlockStyle(100) },
+            a { onClick: @onDeleteAlert, style: color: 'red' }, 'Delete'
       else
         div { style: marginTop: -8, marginBottom: -6 },
           if @state.mode is 'new'
