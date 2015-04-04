@@ -901,7 +901,7 @@ CustomFieldHeader = React.createFactory(React.createClass({
       className: 'subHeader'
     }, this.state.mode === 'deleteAlert' ? NimbleAlert({
       title: 'Confirm deletion',
-      message: "Are you sure, you want to delete '" + this.props.name + "'?",
+      message: "Are you sure you want to delete '" + this.props.name + "' field? All its data will be deleted",
       actionName: 'Delete',
       onAction: this.onDelete,
       onCancel: this.onCancelAlert
@@ -1419,7 +1419,7 @@ DictEntity = React.createFactory(React.createClass({
       }
     }, this.state.mode === 'view' && this.props.entity.id ? this.showDictEntity() : this.state.mode === 'onDelete' ? div({}, this.showDictEntity(), NimbleAlert({
       title: 'Confirm deletion',
-      message: "Are you sure, you want to delete '" + this.props.entity.value + "'?",
+      message: "Are you sure you want to delete '" + this.props.entity.value + "'?",
       actionName: 'Delete',
       onAction: this.onDelete,
       onCancel: this.closeEditor

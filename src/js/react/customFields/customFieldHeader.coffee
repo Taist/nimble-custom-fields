@@ -46,7 +46,7 @@ CustomFieldHeader = React.createFactory React.createClass
       if @state.mode is 'deleteAlert'
         NimbleAlert {
           title: 'Confirm deletion'
-          message: "Are you sure, you want to delete '#{@props.name}'?"
+          message: "Are you sure you want to delete '#{@props.name}' field? All its data will be deleted"
           actionName: 'Delete'
           onAction: @onDelete
           onCancel: @onCancelAlert
